@@ -2,38 +2,44 @@
 
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-import Image from "next/image";
+import { api } from "~/trpc/react";
 
 // Interface pour les messages
 interface ChatMessage {
 	id: number;
 	sender: "user" | "bot";
 	text: string;
-	avatar?: string; // Avatar optionnel pour le bot
-	senderName?: string; // Nom de l'expéditeur optionnel pour le bot
-	isTyping?: boolean; // Nouveau champ pour gérer l'effet de frappe
-	hasAudio?: boolean; // Nouveau champ pour indiquer si le message contient un audio
+	avatar?: string;
+	senderName?: string;
+	isTyping?: boolean;
+	hasAudio?: boolean;
+	audioUrl?: string;
 }
+
+// Interface pour le lecteur audio
+interface AudioPlayerProps {
+	audioUrl: string;
+	onClose: () => void;
+}
+
+// Interface pour le popup d'email
+// Plus nécessaire car intégré à l'input
 
 export default function ChatPreview() {
 	const [message, setMessage] = useState("");
-	// Initialiser SANS message pour afficher l'accueil
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
 	const messagesEndRef = useRef<null | HTMLDivElement>(null);
-	// État pour savoir si la conversation a commencé
 	const [chatStarted, setChatStarted] = useState(false);
 	const [displayedText, setDisplayedText] = useState<{ [key: number]: string }>(
 		{},
 	);
-	const [isPlaying, setIsPlaying] = useState(false);
-	const [currentTime, setCurrentTime] = useState(0);
-	const [duration, setDuration] = useState(0);
-	const audioRef = useRef<HTMLAudioElement | null>(null);
-	const progressRef = useRef<HTMLInputElement | null>(null);
-	const mediaSourceRef = useRef<MediaSource | null>(null);
-	const sourceBufferRef = useRef<SourceBuffer | null>(null);
+	const [currentAudioUrl, setCurrentAudioUrl] = useState<string>("");
+	const [userMessageCount, setUserMessageCount] = useState(0);
+	const [showEmailPopup, setShowEmailPopup] = useState(false);
+	const [email, setEmail] = useState("");
+	const [emailError, setEmailError] = useState(""); // Ajouté pour les erreurs d'email
 
+	const botAvatar = "/logo-neiji-full.png";
 	const ppBot = "/logo.png";
 
 	// Défilement auto
@@ -45,11 +51,19 @@ export default function ChatPreview() {
 		if (chatStarted) {
 			scrollToBottom();
 		}
-	}, [chatStarted, scrollToBottom]);
+	}, [scrollToBottom, chatStarted]);
+
+	const mapToOpenAI = (history: ChatMessage[]) =>
+		history.map(({ sender, text }) => ({
+			role: sender === "user" ? "user" : "assistant",
+			content: text,
+		}));
 
 	// Fonction pour simuler l'effet de frappe
 	const typeMessage = (messageId: number, fullText: string) => {
 		let currentText = "";
+		setDisplayedText((prev) => ({ ...prev, [messageId]: "" }));
+
 		const interval = setInterval(() => {
 			if (currentText.length < fullText.length) {
 				currentText = fullText.substring(0, currentText.length + 1);
@@ -62,12 +76,67 @@ export default function ChatPreview() {
 					),
 				);
 			}
-		}, 50); // Vitesse de frappe plus lente
+		}, 50);
+	};
+
+	// Function to handle the transition to chat mode
+	const handleStartChat = () => {
+		if (chatStarted) return;
+
+		setChatStarted(true);
+
+		setTimeout(() => {
+			const welcomeMessage: ChatMessage = {
+				id: Date.now(),
+				sender: "bot",
+				text: "Hey, I'm Neiji, how can I help you today?",
+				avatar: ppBot,
+				senderName: "Neiji",
+				isTyping: true,
+			};
+			setMessages([welcomeMessage]);
+			typeMessage(welcomeMessage.id, welcomeMessage.text);
+		}, 300);
+	};
+
+	// Check if we should prompt for email
+	const checkForEmailPrompt = (newMessages: ChatMessage[]) => {
+		if (userMessageCount % 3 === 0 && userMessageCount > 0 && !showEmailPopup) {
+			setShowEmailPopup(true);
+		}
+	};
+
+	const { mutateAsync } = api.chat.chat.useMutation();
+	const { mutateAsync: saveEmail, error } = api.newsletter.create.useMutation();
+
+	// Handle email submission
+	const handleEmailSubmit = async (email: string) => {
+		try {
+			await saveEmail({ email });
+
+			setShowEmailPopup(false);
+			setEmailError("");
+			setMessage("");
+		} catch (error) {
+			console.error("Error saving email to Supabase:", error);
+			setEmailError("Could not save email. Please try again.");
+		}
 	};
 
 	// Gérer l'envoi de message
-	const handleSendMessage = () => {
+	const handleSendMessage = async () => {
 		if (message.trim() === "") return;
+
+		if (showEmailPopup) {
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			if (!emailRegex.test(message.trim())) {
+				setEmailError("Please enter a valid email address"); // Définir l'erreur
+				return;
+			}
+			setEmailError(""); // Effacer l'erreur si valide
+			handleEmailSubmit(message.trim());
+			return;
+		}
 
 		const userMessage: ChatMessage = {
 			id: Date.now(),
@@ -77,241 +146,73 @@ export default function ChatPreview() {
 		};
 
 		const newMessages: ChatMessage[] = [...messages, userMessage];
-
-		if (!chatStarted) {
-			setChatStarted(true);
-		}
-
 		setMessages(newMessages);
 		setMessage("");
+		setUserMessageCount((prev) => prev + 1);
 
-		// Appel à l'API de méditation
-		generateMeditation(message);
-	};
+		// placeholder bubble
+		const botId = Date.now() + 1;
 
-	// Nouvelle fonction pour générer la méditation
-	const generateMeditation = async (prompt: string) => {
 		try {
-			// Initialiser le MediaSource si nécessaire
-			if (!audioRef.current) {
-				initializeMediaSource();
+			const data = await mutateAsync(mapToOpenAI([...newMessages]));
+
+			let message = "";
+
+			for await (const token of data) {
+				message += token;
 			}
 
-			// Envoyer la requête à l'API
-			const response = await fetch(
-				"https://api.neiji.zenenv.cloud/api/meditation/generate",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
+			setMessages((prev) => {
+				return [
+					...prev,
+					{
+						id: botId,
+						sender: "bot",
+						text: message,
+						avatar: ppBot,
+						senderName: "Neiji",
 					},
-					body: JSON.stringify({
-						prompt: prompt,
-						duration: 5, // Durée par défaut de 5 minutes
-					}),
-				},
-			);
-
-			if (!response.ok) {
-				throw new Error("Failed to generate meditation");
-			}
-
-			if (!response.body) {
-				throw new Error("No response body");
-			}
-
-			// Simuler la réponse du bot avec l'audio
-			const botResponse: ChatMessage = {
-				id: Date.now() + 1,
-				sender: "bot",
-				text: "Voici votre méditation personnalisée. Vous pouvez l'écouter ou la télécharger.",
-				avatar: ppBot,
-				senderName: "Neiji",
-				isTyping: true,
-				hasAudio: true,
-			};
-			setMessages((prev) => [...prev, botResponse]);
-			typeMessage(botResponse.id, botResponse.text);
-
-			// Gérer le stream audio
-			const reader = response.body.getReader();
-			let isStreaming = true;
-
-			while (isStreaming) {
-				const { done, value } = await reader.read();
-
-				if (done) {
-					isStreaming = false;
-					break;
-				}
-
-				if (sourceBufferRef.current && !sourceBufferRef.current.updating) {
-					sourceBufferRef.current.appendBuffer(value);
-				}
-			}
-
-			console.log("Streaming finished successfuly");
-		} catch (error) {
-			console.error("Error generating meditation:", error);
-			// Ajouter un message d'erreur dans le chat
-			const errorMessage: ChatMessage = {
-				id: Date.now() + 1,
-				sender: "bot",
-				text: "Désolé, une erreur est survenue lors de la génération de votre méditation.",
-				avatar: ppBot,
-				senderName: "Neiji",
-				isTyping: false,
-			};
-			setMessages((prev) => [...prev, errorMessage]);
-		}
-	};
-
-	// Fonction pour initialiser le MediaSource
-	const initializeMediaSource = () => {
-		if (!audioRef.current) {
-			audioRef.current = new Audio();
-		}
-
-		if (!mediaSourceRef.current) {
-			mediaSourceRef.current = new MediaSource();
-			audioRef.current.src = URL.createObjectURL(mediaSourceRef.current);
-		}
-
-		mediaSourceRef.current.addEventListener("sourceopen", () => {
-			if (!sourceBufferRef.current) {
-				sourceBufferRef.current =
-					// biome-ignore lint/style/noNonNullAssertion: <explanation>
-					mediaSourceRef.current!.addSourceBuffer("audio/mpeg");
-				sourceBufferRef.current.addEventListener("updateend", () => {
-					if (
-						// biome-ignore lint/style/noNonNullAssertion: <explanation>
-						!sourceBufferRef.current!.updating &&
-						// biome-ignore lint/style/noNonNullAssertion: <explanation>
-						mediaSourceRef.current!.readyState === "open"
-					) {
-						// biome-ignore lint/style/noNonNullAssertion: <explanation>
-						mediaSourceRef.current!.endOfStream();
-					}
-				});
-			}
-		});
-	};
-
-	// Fonction pour streamer l'audio depuis l'API
-	const streamAudio = async () => {
-		try {
-			const response = await fetch("YOUR_API_ENDPOINT", {
-				method: "GET",
-				headers: {
-					Accept: "audio/mpeg",
-				},
+				];
 			});
 
-			if (!response.ok) {
-				throw new Error("Failed to fetch audio stream");
-			}
-
-			// biome-ignore lint/style/noNonNullAssertion: <explanation>
-			const reader = response.body!.getReader();
-			let isStreaming = true;
-
-			while (isStreaming) {
-				const { done, value } = await reader.read();
-
-				if (done) {
-					isStreaming = false;
-					break;
-				}
-
-				if (sourceBufferRef.current && !sourceBufferRef.current.updating) {
-					sourceBufferRef.current.appendBuffer(value);
-				}
-			}
-		} catch (error) {
-			console.error("Error streaming audio:", error);
+			checkForEmailPrompt(newMessages);
+		} catch (err) {
+			console.error(err);
+			setMessages((prev) =>
+				prev.map((m) =>
+					m.id === botId ? { ...m, text: "Oops, something went wrong." } : m,
+				),
+			);
 		}
 	};
 
-	const handlePlayAudio = async () => {
-		if (!audioRef.current) {
-			initializeMediaSource();
-		}
-
-		if (isPlaying && audioRef.current) {
-			audioRef.current.pause();
-		} else if (audioRef.current) {
-			if (mediaSourceRef.current?.readyState === "ended") {
-				// Réinitialiser le MediaSource si nécessaire
-				initializeMediaSource();
-			}
-			await streamAudio();
-			audioRef.current.play();
-		}
-		setIsPlaying(!isPlaying);
-	};
-
-	// Mise à jour des gestionnaires d'événements audio
-	useEffect(() => {
-		if (audioRef.current) {
-			audioRef.current.onended = () => setIsPlaying(false);
-			audioRef.current.ontimeupdate = () => {
-				if (audioRef.current) {
-					setCurrentTime(audioRef.current.currentTime);
-					setDuration(audioRef.current.duration);
-				}
-			};
-		}
-
-		return () => {
-			if (mediaSourceRef.current) {
-				mediaSourceRef.current.endOfStream();
-			}
-		};
-	}, []);
-
-	const handleTimeUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const newTime = Number.parseFloat(e.target.value);
-		setCurrentTime(newTime);
-		if (audioRef.current) {
-			audioRef.current.currentTime = newTime;
-		}
-	};
-
-	const formatTime = (time: number) => {
-		const minutes = Math.floor(time / 60);
-		const seconds = Math.floor(time % 60);
-		return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-	};
-
-	const handleDownloadAudio = async () => {
-		try {
-			const response = await fetch("YOUR_API_ENDPOINT");
-			const blob = await response.blob();
-			const url = window.URL.createObjectURL(blob);
-			const link = document.createElement("a");
-			link.href = url;
-			link.download = "meditation.mp3";
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-			window.URL.revokeObjectURL(url);
-		} catch (error) {
-			console.error("Error downloading audio:", error);
-		}
-	};
-
-	// Gérer l'envoi avec Entrée
 	const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
 		if (event.key === "Enter") {
 			handleSendMessage();
 		}
 	};
 
+	const handleAudioButtonClick = () => {
+		const audioUrl = "src/assets/audio/1.1.5.2.mp3";
+		setCurrentAudioUrl(audioUrl);
+
+		const audioMessage: ChatMessage = {
+			id: Date.now(),
+			sender: "bot",
+			text: "Here's a guided meditation to help you relax:",
+			hasAudio: true,
+			audioUrl: audioUrl,
+			avatar: ppBot,
+			senderName: "Neiji",
+		};
+		setMessages((prev) => [...prev, audioMessage]);
+	};
+
 	return (
 		<div className="relative flex min-h-screen flex-col bg-gradient-to-br from-white via-orange-100 to-orange-200 p-4">
 			{/* --- En-tête (commun aux deux vues) --- */}
 			<div
-				className={`mb-4 flex items-center ${chatStarted ? "-ml-4 sticky top-0 z-10 w-full bg-gradient-to-br from-white via-orange-100 to-orange-100 px-4 pt-4 pb-2" : "absolute top-4 left-4 z-10"}`}
+				className={`mb-4 flex items-center transition-all duration-300 ease-in-out ${chatStarted ? "-ml-4 sticky top-0 z-10 w-full bg-gradient-to-br from-white via-orange-100 to-orange-100 px-4 pt-4 pb-2" : "absolute top-4 left-4 z-10"}`}
 			>
 				<button
 					type="button"
@@ -335,11 +236,9 @@ export default function ChatPreview() {
 				</button>
 				{chatStarted && (
 					<>
-						<Image
-							src="/logo.png"
+						<img
+							src={botAvatar}
 							alt="Logo"
-							width={64}
-							height={64}
 							className="mr-2 h-10 w-10 rounded-full object-contain"
 						/>
 						<h1 className="font-semibold text-gray-800 text-xl">Neiji</h1>
@@ -351,15 +250,11 @@ export default function ChatPreview() {
 			<div className="flex w-full flex-grow flex-col items-center overflow-hidden">
 				{!chatStarted ? (
 					/* --- Vue Accueil (avant le premier message) --- */
-					<div className="mt-16 flex w-full flex-grow flex-col items-center justify-center px-4">
-						{" "}
-						{/* Ajout de marge top pour compenser header absolu */}
+					<div className="mt-16 flex w-full flex-grow flex-col items-center justify-center px-4 transition-opacity duration-300 ease-in-out">
 						{/* Image mascotte */}
 						<div className="mb-6 h-40 w-40">
-							<Image
-								src="/logo.png"
-								width={64}
-								height={64}
+							<img
+								src={botAvatar}
 								alt="Neiji Mascotte"
 								className="h-full w-full rounded-full object-contain"
 							/>
@@ -367,56 +262,14 @@ export default function ChatPreview() {
 						{/* Texte de présentation */}
 						<div className="mb-8 max-w-sm text-center">
 							<p className="font-medium text-gray-800 text-lg">
-								Neiji est une IA spécialisée en meditation, conçue pour offrir
-								des programmes personnalisé et accessible à tous
+								Neiji is your AI coach for self development, it can also
+								generate tailored mindfulness.
 							</p>
 						</div>
-						{/* Bouton de connexion */}
-						<button
-							type="button"
-							className="mb-5 flex items-center gap-2 rounded-full bg-orange-500 px-8 py-3 font-semibold text-lg text-white shadow-md transition-colors hover:bg-orange-600"
-						>
-							Connecter ou créer toi un compte
-							{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								className="h-6 w-6"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M9 5l7 7-7 7"
-								/>
-							</svg>
-						</button>
-						{/* Section "J'ai des pensées négatives" */}
-						<button
-							type="button"
-							className="mb-10 flex items-center gap-2 rounded-full bg-orange-200 px-6 py-2 font-medium text-orange-800 shadow-sm transition-colors hover:bg-orange-300"
-						>
-							J'ai besoin de méditer
-							{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								className="h-5 w-5 text-orange-600"
-								viewBox="0 0 20 20"
-								fill="currentColor"
-							>
-								<path
-									fillRule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v4a1 1 0 102 0V7zm-1 6a1 1 0 100 2 1 1 0 000-2z"
-									clipRule="evenodd"
-								/>
-							</svg>
-						</button>
 					</div>
 				) : (
 					/* --- Vue Chat (après le premier message) --- */
-					<div className="mb-4 w-full max-w-2xl flex-grow space-y-4 overflow-y-auto overflow-x-hidden px-2 py-4">
+					<div className="mb-4 w-full max-w-2xl flex-grow animate-fade-in space-y-4 overflow-y-auto overflow-x-hidden px-2 py-4">
 						{messages.map((msg) => (
 							<div
 								key={msg.id}
@@ -440,118 +293,49 @@ export default function ChatPreview() {
 											{msg.senderName}
 										</span>
 									)}
-									{/* Bulle de message */}
-									<div
-										className={`max-w-xs rounded-lg px-4 py-2 shadow lg:max-w-md ${msg.sender === "user" ? "relative rounded-br-none bg-white text-gray-800" : "rounded-bl-none bg-orange-500 text-white"}`}
-									>
-										{msg.sender === "bot" && msg.isTyping ? (
-											<span className="typing-text">
-												{displayedText[msg.id] || ""}
-											</span>
-										) : (
-											msg.text
-										)}
-										{/* Icône utilisateur à côté de la bulle utilisateur */}
-										{msg.sender === "user" && (
-											<div className="-right-10 absolute top-0 rounded-full bg-orange-500 p-1.5">
-												{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													className="h-5 w-5 text-white"
-													viewBox="0 0 20 20"
-													fill="currentColor"
-												>
-													<path
-														fillRule="evenodd"
-														d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-														clipRule="evenodd"
-													/>
-												</svg>
+									{/* Bulle de message ou lecteur audio */}
+									{msg.hasAudio ? (
+										<div className="flex flex-col gap-2">
+											<div className="max-w-xs rounded-lg rounded-bl-none bg-orange-500 px-4 py-2 text-white shadow lg:max-w-md">
+												{msg.text}
 											</div>
-										)}
-									</div>
-									{msg.hasAudio && (
-										<div className="mt-2 flex w-full flex-col gap-2">
-											<div className="flex items-center gap-2">
-												<button
-													type="button"
-													onClick={handlePlayAudio}
-													className="flex items-center gap-1 rounded-full bg-orange-600 px-3 py-1 text-white transition-colors hover:bg-orange-700"
-												>
-													{isPlaying ? (
-														<>
-															{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
-															<svg
-																xmlns="http://www.w3.org/2000/svg"
-																className="h-4 w-4"
-																viewBox="0 0 20 20"
-																fill="currentColor"
-															>
-																<path
-																	fillRule="evenodd"
-																	d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
-																	clipRule="evenodd"
-																/>
-															</svg>
-															Pause
-														</>
-													) : (
-														<>
-															{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
-															<svg
-																xmlns="http://www.w3.org/2000/svg"
-																className="h-4 w-4"
-																viewBox="0 0 20 20"
-																fill="currentColor"
-															>
-																<path
-																	fillRule="evenodd"
-																	d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-																	clipRule="evenodd"
-																/>
-															</svg>
-															Écouter
-														</>
-													)}
-												</button>
-												<button
-													type="button"
-													onClick={handleDownloadAudio}
-													className="flex items-center gap-1 rounded-full bg-orange-600 px-3 py-1 text-white transition-colors hover:bg-orange-700"
-												>
+											<div className="flex items-center gap-2 rounded-lg rounded-bl-none bg-orange-100 p-2">
+												{/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
+												<audio controls className="w-64">
+													<source src={msg.audioUrl} type="audio/mpeg" />
+													Your browser does not support the audio element.
+												</audio>
+											</div>
+										</div>
+									) : (
+										<div
+											className={`max-w-xs rounded-lg px-4 py-2 shadow lg:max-w-md ${msg.sender === "user" ? "relative rounded-br-none bg-white text-gray-800" : "rounded-bl-none bg-orange-500 text-white"}`}
+										>
+											{msg.sender === "bot" && msg.isTyping ? (
+												<span className="typing-text">
+													{displayedText[msg.id] || "..."}
+												</span>
+											) : (
+												msg.text
+											)}
+											{/* Icône utilisateur à côté de la bulle utilisateur */}
+											{msg.sender === "user" && (
+												<div className="-right-10 absolute top-0 rounded-full bg-orange-500 p-1.5">
 													{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
 													<svg
 														xmlns="http://www.w3.org/2000/svg"
-														className="h-4 w-4"
+														className="h-5 w-5 text-white"
 														viewBox="0 0 20 20"
 														fill="currentColor"
 													>
 														<path
 															fillRule="evenodd"
-															d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+															d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
 															clipRule="evenodd"
 														/>
 													</svg>
-													Télécharger
-												</button>
-											</div>
-											<div className="flex w-full items-center gap-2">
-												<span className="text-gray-600 text-xs">
-													{formatTime(currentTime)}
-												</span>
-												<input
-													type="range"
-													min="0"
-													max={duration}
-													value={currentTime}
-													onChange={handleTimeUpdate}
-													className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-orange-200"
-													ref={progressRef}
-												/>
-												<span className="text-gray-600 text-xs">
-													{formatTime(duration)}
-												</span>
-											</div>
+												</div>
+											)}
 										</div>
 									)}
 								</div>
@@ -563,33 +347,73 @@ export default function ChatPreview() {
 				)}
 			</div>
 
-			{/* --- Champ de message (commun aux deux vues, style ajusté pour chat) --- */}
+			{/* --- Champ de message --- */}
 			<div
-				className={`sticky bottom-0 w-full max-w-xl self-center p-4 ${chatStarted ? "bg-gradient-to-t from-orange-200 via-orange-100 to-transparent" : "bg-transparent"}`}
+				className={`sticky bottom-0 w-full max-w-xl self-center p-4 transition-all duration-300 ease-in-out ${showEmailPopup ? "rounded-t-2xl bg-orange-200 pb-6" : ""}`}
 			>
-				<div className="relative">
+				{showEmailPopup && (
+					<div className="mb-2 px-4 text-center">
+						<h3 className="font-semibold text-gray-800 text-lg">
+							What is your email?
+						</h3>
+						{emailError && (
+							<p className="mt-1 text-red-600 text-sm">{emailError}</p>
+						)}
+					</div>
+				)}
+				<div className="relative flex items-center gap-2">
+					{!showEmailPopup && (
+						<button
+							type="button"
+							onClick={handleAudioButtonClick}
+							className="rounded-full bg-orange-500 p-3 text-white transition-colors hover:bg-orange-600"
+						>
+							{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								className="h-5 w-5"
+								viewBox="0 0 20 20"
+								fill="currentColor"
+							>
+								<path
+									fillRule="evenodd"
+									d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
+									clipRule="evenodd"
+								/>
+							</svg>
+						</button>
+					)}
 					<input
-						type="text"
+						type={showEmailPopup ? "email" : "text"}
 						value={message}
-						onChange={(e) => setMessage(e.target.value)}
+						onChange={(e) => {
+							setMessage(e.target.value);
+							if (showEmailPopup) setEmailError(""); // Effacer l'erreur en tapant
+						}}
+						onClick={!chatStarted ? handleStartChat : undefined}
 						onKeyPress={handleKeyPress}
-						placeholder="Message"
-						className="w-full rounded-full bg-white px-6 py-3 text-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+						placeholder={
+							showEmailPopup
+								? "Email"
+								: chatStarted
+									? "Message"
+									: "Click here to start chatting with Neiji"
+						}
+						className={`flex-1 cursor-pointer rounded-full bg-white px-6 py-3 text-lg shadow-lg transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-orange-500 ${showEmailPopup ? "bg-white" : ""}`}
 					/>
 					<button
 						type="button"
-						onClick={handleSendMessage}
+						onClick={chatStarted ? handleSendMessage : handleStartChat}
 						className="-translate-y-1/2 absolute top-1/2 right-2 transform rounded-full bg-orange-500 p-2 text-white transition-colors hover:bg-orange-600"
 					>
 						{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
-							className="h-6 w-6"
+							className="h-6 w-6 translate-x-[1px] rotate-90 transform"
 							fill="none"
 							viewBox="0 0 24 24"
 							stroke="currentColor"
 						>
-							{/* Icône Avion/Envoyer */}
 							<path
 								strokeLinecap="round"
 								strokeLinejoin="round"
@@ -600,6 +424,21 @@ export default function ChatPreview() {
 					</button>
 				</div>
 			</div>
+
+			{/* Optional: Add CSS for animations */}
+			<style>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fade-in {
+                    animation: fadeIn 0.3s ease-in-out;
+                }
+                .fade-in {
+                    animation: fadeIn 0.3s ease-in-out forwards;
+                    opacity: 0;
+                }
+            `}</style>
 		</div>
 	);
 }
