@@ -3,6 +3,8 @@
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import Image from "next/image";
+
 // Interface pour les messages
 interface ChatMessage {
 	id: number;
@@ -14,7 +16,7 @@ interface ChatMessage {
 	hasAudio?: boolean; // Nouveau champ pour indiquer si le message contient un audio
 }
 
-export const ChatPreview: React.FC = () => {
+export default function ChatPreview() {
 	const [message, setMessage] = useState("");
 	// Initialiser SANS message pour afficher l'accueil
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -32,8 +34,7 @@ export const ChatPreview: React.FC = () => {
 	const mediaSourceRef = useRef<MediaSource | null>(null);
 	const sourceBufferRef = useRef<SourceBuffer | null>(null);
 
-	const botAvatar = "src/assets/logoneiji11.png"; // Chemin vers l'avatar du bot
-	const ppBot = "src/assets/NeijiHeadLogo.png";
+	const ppBot = "/logo.png";
 
 	// Défilement auto
 	const scrollToBottom = useCallback(() => {
@@ -334,9 +335,11 @@ export const ChatPreview: React.FC = () => {
 				</button>
 				{chatStarted && (
 					<>
-						<img
-							src={botAvatar}
+						<Image
+							src="/logo.png"
 							alt="Logo"
+							width={64}
+							height={64}
 							className="mr-2 h-10 w-10 rounded-full object-contain"
 						/>
 						<h1 className="font-semibold text-gray-800 text-xl">Neiji</h1>
@@ -353,8 +356,10 @@ export const ChatPreview: React.FC = () => {
 						{/* Ajout de marge top pour compenser header absolu */}
 						{/* Image mascotte */}
 						<div className="mb-6 h-40 w-40">
-							<img
-								src={botAvatar}
+							<Image
+								src="/logo.png"
+								width={64}
+								height={64}
 								alt="Neiji Mascotte"
 								className="h-full w-full rounded-full object-contain"
 							/>
@@ -597,4 +602,4 @@ export const ChatPreview: React.FC = () => {
 			</div>
 		</div>
 	);
-};
+}
