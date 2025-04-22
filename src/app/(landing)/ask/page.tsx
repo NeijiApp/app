@@ -193,7 +193,7 @@ export default function ChatPreview() {
 	};
 
 	const handleAudioButtonClick = () => {
-		const audioUrl = "src/assets/audio/1.1.5.2.mp3";
+		const audioUrl = "/1.1.5.2.mp3"; 
 		setCurrentAudioUrl(audioUrl);
 
 		const audioMessage: ChatMessage = {
@@ -211,40 +211,7 @@ export default function ChatPreview() {
 	return (
 		<div className="relative flex min-h-screen flex-col bg-gradient-to-br from-white via-orange-100 to-orange-200 p-4">
 			{/* --- En-tête (commun aux deux vues) --- */}
-			<div
-				className={`mb-4 flex items-center transition-all duration-300 ease-in-out ${chatStarted ? "-ml-4 sticky top-0 z-10 w-full bg-gradient-to-br from-white via-orange-100 to-orange-100 px-4 pt-4 pb-2" : "absolute top-4 left-4 z-10"}`}
-			>
-				<button
-					type="button"
-					className="mr-4 text-orange-600 hover:text-orange-800"
-				>
-					{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						className="h-8 w-8"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							strokeWidth={2}
-							d="M15 19l-7-7 7-7"
-						/>
-					</svg>
-				</button>
-				{chatStarted && (
-					<>
-						<img
-							src={botAvatar}
-							alt="Logo"
-							className="mr-2 h-10 w-10 rounded-full object-contain"
-						/>
-						<h1 className="font-semibold text-gray-800 text-xl">Neiji</h1>
-					</>
-				)}
-			</div>
+
 
 			{/* --- Contenu Principal (Conditionnel) --- */}
 			<div className="flex w-full flex-grow flex-col items-center overflow-hidden">
@@ -376,9 +343,8 @@ export default function ChatPreview() {
 								fill="currentColor"
 							>
 								<path
+									d="M6.3 3.75c-.9-.52-2 .12-2 1.15v10.2c0 1.03 1.1 1.67 2 1.15l9.38-5.1c.88-.5.88-1.8 0-2.3L6.3 3.75z"
 									fillRule="evenodd"
-									d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
-									clipRule="evenodd"
 								/>
 							</svg>
 						</button>
