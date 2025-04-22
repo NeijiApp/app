@@ -10,11 +10,11 @@ export function NewsletterSection() {
 	>("idle");
 
 	return (
-		<section id="newsletter" className="py-20 bg-orange-50">
+		<section id="newsletter" className="bg-orange-50 py-20">
 			<div className="container mx-auto px-6">
-				<div className="max-w-md mx-auto text-center">
-					<h2 className="text-3xl font-bold mb-6">Stay Connected with Neiji</h2>
-					<p className="text-gray-600 mb-8">
+				<div className="mx-auto max-w-md text-center">
+					<h2 className="mb-6 font-bold text-3xl">Stay Connected with Neiji</h2>
+					<p className="mb-8 text-gray-600">
 						Be the first to experience Neiji's App
 					</p>
 
@@ -24,13 +24,13 @@ export function NewsletterSection() {
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							placeholder="Enter your email"
-							className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+							className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-orange-500"
 							required
 						/>
 						<button
 							type="submit"
 							disabled={status === "loading"}
-							className="w-full px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition disabled:opacity-50"
+							className="w-full rounded-lg bg-orange-500 px-6 py-3 text-white transition hover:bg-orange-600 disabled:opacity-50"
 						>
 							{status === "loading" ? "Subscribing..." : "Subscribe"}
 						</button>
