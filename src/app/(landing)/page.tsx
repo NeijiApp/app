@@ -7,7 +7,6 @@ import { NewsletterSection } from "./_components/newsletter-section";
 export default function Homepage() {
 	return (
 		<div className="min-h-screen">
-			<h1>Coucou Emeric</h1>
 			<main>
 				<section id="manga">
 					<Hero />
