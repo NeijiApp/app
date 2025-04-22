@@ -14,7 +14,7 @@ export default function LandingLayout({
 	return (
 		<div className="min-h-screen">
 			<Header />
-			{children}
+			<div className="pt-20">{children}</div>
 		</div>
 	);
 }

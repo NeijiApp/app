@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import axios from "axios";
-import { Star, Send } from "lucide-react";
+import { Send, Star } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Feedback() {
 	const [rating, setRating] = useState<number>(0);
@@ -53,74 +53,70 @@ export default function Feedback() {
 	}, [submitted]);
 
 	return (
-		<div className="min-h-screen bg-[#FDF8F4] pt-20">
-			<main className="max-w-3xl mx-auto px-6 py-12 pt-20">
-				<div className="text-center mb-12">
-					<h1 className="text-4xl font-bold text-[#1A1E2C] mb-4">
-						Comment était votre expérience ?
-					</h1>
-					<p className="text-gray-600">
-						Votre feedback nous aide à améliorer l'expérience méditative avec
-						notre IA.
-					</p>
+		<main className="mx-auto max-w-3xl px-6 py-12 pt-20">
+			<div className="mb-12 text-center">
+				<h1 className="mb-4 font-bold text-4xl text-[#1A1E2C]">
+					Comment était votre expérience ?
+				</h1>
+				<p className="text-gray-600">
+					Votre feedback nous aide à améliorer l'expérience méditative avec
+					notre IA.
+				</p>
+			</div>
+			<div className="mb-8 rounded-2xl bg-white p-8 shadow-sm">
+				<div className="mb-8 flex justify-center gap-4">
+					{[1, 2, 3, 4, 5].map((star) => (
+						<button
+							type="button"
+							key={star}
+							onClick={() => setRating(star)}
+							className={`transition-all ${
+								star <= rating ? "text-[#FF6B2C]" : "text-gray-300"
+							} hover:scale-110`}
+						>
+							<Star size={40} fill={star <= rating ? "#FF6B2C" : "none"} />
+						</button>
+					))}
 				</div>
-				<div className="bg-white rounded-2xl p-8 shadow-sm mb-8">
-					<div className="flex justify-center gap-4 mb-8">
-						{[1, 2, 3, 4, 5].map((star) => (
-							<button
-								type="button"
-								key={star}
-								onClick={() => setRating(star)}
-								className={`transition-all ${
-									star <= rating ? "text-[#FF6B2C]" : "text-gray-300"
-								} hover:scale-110`}
-							>
-								<Star size={40} fill={star <= rating ? "#FF6B2C" : "none"} />
-							</button>
-						))}
-					</div>
-					<div className="mb-6">
-						<textarea
-							value={feedback}
-							onChange={(e) => setFeedback(e.target.value)}
-							placeholder="Partagez votre expérience avec nous..."
-							className="w-full h-32 p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF6B2C] focus:border-transparent resize-none"
-						/>
-					</div>
-					<button
-						type="button"
-						onClick={handleSubmit}
-						className="w-full bg-[#FF6B2C] text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-[#e55b20] transition-colors"
-					>
-						<Send size={20} />
-						Envoyer mon feedback
-					</button>
+				<div className="mb-6">
+					<textarea
+						value={feedback}
+						onChange={(e) => setFeedback(e.target.value)}
+						placeholder="Partagez votre expérience avec nous..."
+						className="h-32 w-full resize-none rounded-xl border border-gray-200 p-4 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#FF6B2C]"
+					/>
 				</div>
+				<button
+					type="button"
+					onClick={handleSubmit}
+					className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF6B2C] py-4 font-semibold text-white transition-colors hover:bg-[#e55b20]"
+				>
+					<Send size={20} />
+					Envoyer mon feedback
+				</button>
+			</div>
 
-				{/* Liste des feedbacks */}
-				<div className="bg-white rounded-2xl p-8 shadow-sm">
-					<h2 className="text-2xl font-bold text-[#1A1E2C] mb-4">
-						Vos Feedbacks
-					</h2>
-					{feedbacks.length > 0 ? (
-						<ul className="space-y-4">
-							{feedbacks.map(({ id, rating, feedback }) => (
-								<li
-									key={id}
-									className="border border-gray-200 p-4 rounded-lg shadow-sm"
-								>
-									<p className="font-bold text-[#FF6B2C]">
-										Note : {rating} / 5
-									</p>
-									<p>{feedback}</p>
-								</li>
-							))}
-						</ul>
-					) : (
-						<p className="text-gray-600">Aucun feedback pour le moment.</p>
-					)}
-				</div>
-			</main>
-		</div>
+			{/* Liste des feedbacks */}
+			<div className="rounded-2xl bg-white p-8 shadow-sm">
+				<h2 className="mb-4 font-bold text-2xl text-[#1A1E2C]">
+					Vos Feedbacks
+				</h2>
+				{feedbacks.length > 0 ? (
+					<ul className="space-y-4">
+						{feedbacks.map(({ id, rating, feedback }) => (
+							<li
+								key={id}
+								className="rounded-lg border border-gray-200 p-4 shadow-sm"
+							>
+								<p className="font-bold text-[#FF6B2C]">Note : {rating} / 5</p>
+								<p>{feedback}</p>
+							</li>
+						))}
+					</ul>
+				) : (
+					<p className="text-gray-600">Aucun feedback pour le moment.</p>
+				)}
+			</div>
+		</main>
 	);
 }
