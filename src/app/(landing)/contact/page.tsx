@@ -1,14 +1,14 @@
 "use client";
 
-import type React from "react";
-import { useState } from "react";
 import {
 	Instagram,
-	Twitter,
+	Linkedin,
 	Mail,
 	MessagesSquare,
-	Linkedin,
+	Twitter,
 } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
 
 export default function Contact() {
 	const [formData, setFormData] = useState({
@@ -68,31 +68,31 @@ export default function Contact() {
 				{" "}
 				{/* Increased top padding to prevent header overlap */}
 				<div className="container mx-auto px-6">
-					<div className="max-w-4xl mx-auto">
-						<h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">
+					<div className="mx-auto max-w-4xl">
+						<h2 className="mb-8 text-center font-bold text-4xl text-gray-900">
 							Connect With Neiji
 						</h2>
 
 						{/* Social Media Links */}
-						<div className="bg-white rounded-2xl p-8 shadow-sm mb-12">
-							<h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+						<div className="mb-12 rounded-2xl bg-white p-8 shadow-sm">
+							<h3 className="mb-8 text-center font-bold text-2xl text-gray-900">
 								Follow Us
 							</h3>
-							<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+							<div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-5">
 								{socialLinks.map((social) => (
 									<a
 										key={social.name}
 										href={social.href}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="flex flex-col items-center gap-3 group"
+										className="group flex flex-col items-center gap-3"
 									>
 										<div
-											className={`p-4 rounded-full bg-gray-50 transition-all duration-300 group-hover:shadow-lg ${social.color}`}
+											className={`rounded-full bg-gray-50 p-4 transition-all duration-300 group-hover:shadow-lg ${social.color}`}
 										>
-											<social.icon className="w-8 h-8" />
+											<social.icon className="h-8 w-8" />
 										</div>
-										<span className="text-sm font-medium text-gray-600 group-hover:text-gray-900 text-center">
+										<span className="text-center font-medium text-gray-600 text-sm group-hover:text-gray-900">
 											{social.name}
 										</span>
 									</a>
@@ -101,15 +101,15 @@ export default function Contact() {
 						</div>
 
 						{/* Contact Form */}
-						<div className="bg-white rounded-2xl p-8 shadow-sm">
-							<h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+						<div className="rounded-2xl bg-white p-8 shadow-sm">
+							<h3 className="mb-8 text-center font-bold text-2xl text-gray-900">
 								Send Us a Message
 							</h3>
-							<form className="max-w-2xl mx-auto space-y-6">
+							<form className="mx-auto max-w-2xl space-y-6">
 								<div>
 									<label
 										htmlFor="name"
-										className="block text-sm font-medium text-gray-700 mb-1"
+										className="mb-1 block font-medium text-gray-700 text-sm"
 									>
 										Name
 									</label>
@@ -120,7 +120,7 @@ export default function Contact() {
 										value={formData.name}
 										onChange={handleChange}
 										required
-										className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+										className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-orange-500"
 										placeholder="Your full name"
 									/>
 								</div>
@@ -128,7 +128,7 @@ export default function Contact() {
 								<div>
 									<label
 										htmlFor="email"
-										className="block text-sm font-medium text-gray-700 mb-1"
+										className="mb-1 block font-medium text-gray-700 text-sm"
 									>
 										Email
 									</label>
@@ -139,7 +139,7 @@ export default function Contact() {
 										value={formData.email}
 										onChange={handleChange}
 										required
-										className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+										className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-orange-500"
 										placeholder="your.email@example.com"
 									/>
 								</div>
@@ -147,7 +147,7 @@ export default function Contact() {
 								<div>
 									<label
 										htmlFor="message"
-										className="block text-sm font-medium text-gray-700 mb-1"
+										className="mb-1 block font-medium text-gray-700 text-sm"
 									>
 										Message
 									</label>
@@ -158,7 +158,7 @@ export default function Contact() {
 										onChange={handleChange}
 										required
 										rows={6}
-										className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+										className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-orange-500"
 										placeholder="Type your message here..."
 									/>
 								</div>
@@ -166,18 +166,18 @@ export default function Contact() {
 								<button
 									type="submit"
 									disabled={status === "loading"}
-									className="w-full px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition duration-300 disabled:opacity-50"
+									className="w-full rounded-lg bg-orange-500 px-6 py-3 text-white transition duration-300 hover:bg-orange-600 disabled:opacity-50"
 								>
 									{status === "loading" ? "Sending..." : "Send Message"}
 								</button>
 
 								{status === "success" && (
-									<div className="p-4 bg-green-50 text-green-600 rounded-lg text-center">
+									<div className="rounded-lg bg-green-50 p-4 text-center text-green-600">
 										Thank you for your message! We'll get back to you soon.
 									</div>
 								)}
 								{status === "error" && (
-									<div className="p-4 bg-red-50 text-red-600 rounded-lg text-center">
+									<div className="rounded-lg bg-red-50 p-4 text-center text-red-600">
 										We couldn't send your message. Please try again or email us
 										directly.
 									</div>
