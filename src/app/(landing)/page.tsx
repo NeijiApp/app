@@ -17,9 +17,6 @@ export default function Homepage() {
 				<section id="news">
 					<NewsSection />
 				</section>
-				<section id="contact">
-					<ContactSection />
-				</section>
 				<section id="newsletter">
 					<NewsletterSection />
 				</section>
