@@ -2,12 +2,15 @@
 
 import type React from "react";
 import { useState } from "react";
+import { api } from "~/trpc/react";
 
 export function NewsletterSection() {
 	const [email, setEmail] = useState("");
 	const [status, setStatus] = useState<
 		"idle" | "loading" | "success" | "error"
 	>("idle");
+
+	const { mutate, error } = api.newsletter.create.useMutation();
 
 	return (
 		<section id="newsletter" className="bg-orange-50 py-20">
@@ -18,8 +21,15 @@ export function NewsletterSection() {
 						Be the first to experience Neiji's App
 					</p>
 
-					<form className="space-y-4">
+					<form
+						className="space-y-4"
+						onSubmit={(e) => {
+							e.preventDefault();
+							mutate({ email });
+						}}
+					>
 						<input
+							id="email"
 							type="email"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
