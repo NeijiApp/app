@@ -39,7 +39,7 @@ export default function ChatPreview() {
 	const [email, setEmail] = useState("");
 	const [emailError, setEmailError] = useState(""); // Ajouté pour les erreurs d'email
 
-	const botAvatar = "src/assets/logoneiji11.png";
+	const botAvatar = "/logo-neiji-full.png";
 	const ppBot = "/logo.png";
 
 	// Défilement auto
@@ -107,10 +107,13 @@ export default function ChatPreview() {
 	};
 
 	const { mutateAsync } = api.chat.chat.useMutation();
+	const { mutateAsync: saveEmail, error } = api.newsletter.create.useMutation();
 
 	// Handle email submission
 	const handleEmailSubmit = async (email: string) => {
 		try {
+			await saveEmail({ email });
+
 			setShowEmailPopup(false);
 			setEmailError("");
 			setMessage("");
