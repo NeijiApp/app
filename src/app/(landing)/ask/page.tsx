@@ -263,9 +263,9 @@ export default function ChatPreview() {
 			<div className="flex w-full flex-grow flex-col items-center overflow-hidden">
 				{!chatStarted ? (
 					/* --- Vue Accueil (avant le premier message) --- */
-					<div className="mt-16 flex w-full flex-grow flex-col items-center justify-center px-4 transition-opacity duration-300 ease-in-out">
+					<div className="mt- flex w-full flex-grow flex-col items-center justify-center px-4 transition-opacity duration-300 ease-in-out">
 						{/* Image mascotte */}
-						<div className="mb-6 h-40 w-40">
+						<div className="mb-0 h-40 w-40">
 							<img
 								src={botAvatar}
 								alt="Neiji Mascotte"
@@ -273,7 +273,7 @@ export default function ChatPreview() {
 							/>
 						</div>
 						{/* Texte de présentation */}
-						<div className="mb-8 max-w-sm text-center">
+						<div className="mb-10 max-w-sm text-center">
 							<p className="font-medium text-gray-800 text-lg">
 								Neiji is your AI coach for self development, it can also
 								generate tailored mindfulness.
@@ -282,7 +282,7 @@ export default function ChatPreview() {
 					</div>
 				) : (
 					/* --- Vue Chat (après le premier message) --- */
-					<div className="mb-4 w-full max-w-2xl flex-grow animate-fade-in space-y-4 overflow-y-auto overflow-x-hidden px-2 py-4 pt-20">
+					<div className="mb-10 w-full max-w-2xl flex-grow animate-fade-in space-y-4 overflow-y-auto overflow-x-hidden px-2 py-4 pt-60 md:pt-26">
 						{messages.map((msg) => (
 							<div
 								key={msg.id}
@@ -415,7 +415,7 @@ export default function ChatPreview() {
 								? "Email"
 								: chatStarted
 									? "Message"
-									: "Click here to start chatting with Neiji"
+									: "Ask Neiji"
 						}
 						className={`flex-1 cursor-pointer rounded-full bg-white px-6 py-3 text-lg shadow-lg transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-orange-500 ${showEmailPopup ? "bg-white" : ""}`}
 					/>

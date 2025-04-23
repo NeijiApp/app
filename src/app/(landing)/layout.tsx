@@ -33,7 +33,7 @@ function Header() {
 	};
 
 	return (
-		<header className="fixed z-50 w-full bg-white/90 backdrop-blur-sm">
+		<header className="fixed z-50 w-full bg-white/90 backdrop-blur-md">
 			<nav className="container mx-auto px-2 py-2">
 				<div className="flex items-center justify-between">
 					{/* Desktop Version */}
@@ -101,10 +101,10 @@ function Header() {
 						{/* <Link to="/#news" className="text-gray-600 hover:text-orange-500">News</Link> */}
 						{/* <Link to="/#manganeiji" className="text-gray-600 hover:text-orange-500">Testing Manga</Link> */}
 						<Link
-							href="/feedback"
+							href="/ask"
 							className="text-gray-600 hover:text-orange-500"
 						>
-							Feedback
+							Chat
 						</Link>
 						<Link
 							href="/contact"
@@ -137,10 +137,10 @@ function Header() {
 							href="/feedback"
 							className="block text-gray-600 hover:text-orange-500"
 						>
-							Feedback
+							Chat
 						</Link>
 						<Link
-							href="/contact"
+							href="/chat"
 							className="block text-gray-600 hover:text-orange-500"
 						>
 							Contact
