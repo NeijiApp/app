@@ -271,7 +271,7 @@ export default function ChatPreview() {
 					/* --- Vue Accueil (avant le premier message) --- */
 					<div className="mt-10 flex w-full flex-grow flex-col items-center justify-center px-4 transition-opacity duration-300 ease-in-out">
 						{/* Image mascotte */}
-						<div className="mb-0 h-40 w-40 md:mb-0 ">
+						<div className="mt-0 h-40 w-40 md:mb-0 ">
 							<img
 								src={botAvatar}
 								alt="Neiji Mascotte"
@@ -284,9 +284,12 @@ export default function ChatPreview() {
 						{/* Texte de présentation */}
 						<div className="mb-20 max-w-sm text-center">
 							<p className="font-medium text-gray-800 text-lg">
-								Neiji is your AI coach for self development, it can also
-								generate tailored mindfulness.
+							<div className="mb-20 max-w-sm text-center">
+							<p className="font-medium text-gray-800 text-lg">
+								Neiji is your AI coach for self development,<br />
+								It will soon share tailored mindfulness.
 							</p>
+							</div>							</p>
 						</div>
 					</div>
 				) : (
@@ -295,7 +298,7 @@ export default function ChatPreview() {
 						  className={`mb-40 w-full max-w-2xl flex-grow animate-fade-in space-y-4 overflow-y-auto overflow-x-hidden px-2 py-4 ${
 						    isFirstBotMessageOnly 
 						      ? "pt-90 sm:pt-26" // First bot message (welcome) - higher on mobile
-						      : "pt-22 sm:pt-26" // After user has sent a message - normal height
+						      : "pt-26 sm:pt-26" // After user has sent a message - normal height
 						  }`}
 						>
 						  {messages.map((msg) => (
