@@ -104,7 +104,7 @@ export default function ChatPreview() {
 
 	// Check if we should prompt for email
 	const shouldShowEmailPrompt = (count: number) => {
-		return count % 3 === 0 && count > 0;
+		return count === 3 && count > 0;
 	};
 
 	const { mutateAsync } = api.chat.chat.useMutation();
@@ -206,7 +206,7 @@ export default function ChatPreview() {
 					},
 				]);
 
-				typeMessage(promptId, "Before we pursue the conversation, I would love to stay in touch.");
+				typeMessage(promptId, "Before we pursue the conversation, wouldn't you like to know when my app version is ready ?");
 				setTimeout(() => {
 					setShowEmailPopup(true);
 				}, 1500);
@@ -283,13 +283,13 @@ export default function ChatPreview() {
 						</div>
 						{/* Texte de présentation */}
 						<div className="mb-20 max-w-sm text-center">
-							<p className="font-medium text-gray-800 text-lg">
 							<div className="mb-20 max-w-sm text-center">
 							<p className="font-medium text-gray-800 text-lg">
 								Neiji is your AI coach for self development,<br />
 								It will soon share tailored mindfulness.
 							</p>
-							</div>							</p>
+
+							</div>			
 						</div>
 					</div>
 				) : (
@@ -328,16 +328,26 @@ export default function ChatPreview() {
 									)}
 									{/* Bulle de message ou lecteur audio */}
 									{msg.hasAudio ? (
-										<div className="flex flex-col gap-2">
+										<div className="flex flex-col gap-2 max-w-xs lg:max-w-md">
 											<div className="max-w-xs rounded-lg rounded-bl-none bg-orange-500 px-4 py-2 text-white shadow lg:max-w-md">
 												{msg.text}
 											</div>
-											<div className="flex items-center gap-2 rounded-lg rounded-bl-none bg-orange-100 p-2">
-												{/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
-												<audio controls className="w-64">
-													<source src={msg.audioUrl} type="audio/mpeg" />
-													Your browser does not support the audio element.
-												</audio>
+											
+											{/* Custom audio player */}
+											<div className="overflow-hidden rounded-lg bg-white shadow-md">
+												{/* Orange header with icon */}
+												<div className="flex items-center gap-2 bg-orange-500 px-4 py-2 text-white">
+												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+  <path fillRule="evenodd" d="M19 10.5a8.5 8.5 0 00-17 0v5.25a.75.75 0 001.5 0v-5.25a7 7 0 1114 0v5.25a.75.75 0 001.5 0v-5.25zm-4.5 0a.75.75 0 00-.75.75v5.25c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75v-5.25a.75.75 0 00-.75-.75h-1.5zm-9 0a.75.75 0 00-.75.75v5.25c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75v-5.25a.75.75 0 00-.75-.75h-1.5z" clipRule="evenodd" />
+</svg>
+													<span className="font-medium">First Exercise</span>
+												</div>
+												
+												{/* Audio controls */}
+												<div className="flex items-center gap-3 p-3">
+													{/* Play/Pause button */}
+													<AudioPlayer audioUrl={msg.audioUrl || ""} />
+												</div>
 											</div>
 										</div>
 									) : (
@@ -386,95 +396,221 @@ export default function ChatPreview() {
 
 			{/* --- Champ de message --- */}
 			<div
-				className={`sticky bottom-0 w-full max-w-xl self-center p-4 transition-all duration-300 ease-in-out ${showEmailPopup ? "rounded-t-2xl bg-orange-200 pb-6" : ""}`}
+			  className={`message-container sticky bottom-0 w-full max-w-xl self-center p-4 transition-all duration-500 ease-in-out ${
+			    showEmailPopup ? "message-container-expanded" : ""
+			  }`}
 			>
-				{showEmailPopup && (
-					<div className="mb-2 px-4 text-center">
-						<h3 className="font-semibold text-gray-800 text-lg">
-							Want to know when app is available ?
-						</h3>
-						{emailError && (
-							<p className="mt-1 text-red-600 text-sm">{emailError}</p>
-						)}
-					</div>
-				)}
-				<div className="relative flex items-center gap-2">
-					{!showEmailPopup && (
-						<button
-							type="button"
-							onClick={handleAudioButtonClick}
-							className="rounded-full bg-orange-500 p-3 text-white transition-colors hover:bg-orange-600"
-						>
-							{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								className="h-5 w-5"
-								viewBox="0 0 20 20"
-								fill="currentColor"
-							>
-								<path
-									d="M6.3 3.75c-.9-.52-2 .12-2 1.15v10.2c0 1.03 1.1 1.67 2 1.15l9.38-5.1c.88-.5.88-1.8 0-2.3L6.3 3.75z"
-									fillRule="evenodd"
-								/>
-							</svg>
-						</button>
-					)}
-					<input
-						type={showEmailPopup ? "email" : "text"}
-						value={message}
-						onChange={(e) => {
-							setMessage(e.target.value);
-							if (showEmailPopup) setEmailError(""); // Effacer l'erreur en tapant
-						}}
-						onClick={!chatStarted ? handleStartChat : undefined}
-						onKeyPress={handleKeyPress}
-						placeholder={
-							showEmailPopup
-								? "Email"
-								: chatStarted
-									? "Message"
-									: "Ask Neiji"
-						}
-						className={`flex-1 cursor-pointer rounded-full bg-white px-6 py-3 text-lg shadow-lg transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-orange-500 ${showEmailPopup ? "bg-white" : ""}`}
-					/>
-					<button
-						type="button"
-						onClick={chatStarted ? handleSendMessage : handleStartChat}
-						className="-translate-y-1/2 absolute top-1/2 right-2 transform rounded-full bg-orange-500 p-2 text-white transition-colors hover:bg-orange-600"
-					>
-						{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							className="h-6 w-6 translate-x-[1px] rotate-90 transform"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth={2}
-								d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-							/>
-						</svg>
-					</button>
-				</div>
+			  {showEmailPopup && (
+			    <div className="animate-fade-in-up mb-3 px-4 text-center">
+			      <h3 className="font-semibold text-gray-800 text-lg">
+			        Be the first to try our app!
+			      </h3>
+			      {emailError && (
+			        <p className=" mt-1 text-red-600 text-sm">{emailError}</p>
+			      )}
+			    </div>
+			  )}
+			  <div className="relative flex items-center gap-2">
+			    {!showEmailPopup && (
+			      <button
+			        type="button"
+			        onClick={handleAudioButtonClick}
+			        className="input-button-pop rounded-full bg-orange-500 p-3 text-white transition-all hover:bg-orange-600 hover:shadow-lg"
+			      >
+			        <svg
+			          xmlns="http://www.w3.org/2000/svg"
+			          className="h-5 w-5"
+			          viewBox="0 0 20 20"
+			          fill="currentColor"
+			        >
+			          <path
+			            d="M6.3 3.75c-.9-.52-2 .12-2 1.15v10.2c0 1.03 1.1 1.67 2 1.15l9.38-5.1c.88-.5.88-1.8 0-2.3L6.3 3.75z"
+			            fillRule="evenodd"
+			          />
+			        </svg>
+			      </button>
+			    )}
+			    <input
+			      type={showEmailPopup ? "email" : "text"}
+			      value={message}
+			      onChange={(e) => {
+			        setMessage(e.target.value);
+			        if (showEmailPopup) setEmailError("");
+			      }}
+			      onClick={!chatStarted ? handleStartChat : undefined}
+			      onKeyPress={handleKeyPress}
+			      placeholder={
+			        showEmailPopup
+			          ? "Email"
+			          : chatStarted
+			            ? "Message"
+			            : "Ask Neiji"
+			      }
+			      className="message-input flex-1 cursor-pointer rounded-full bg-white px-6 py-3 text-lg shadow-lg transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+			    />
+			    <button
+			      type="button"
+			      onClick={chatStarted ? handleSendMessage : handleStartChat}
+			      className="send-button -translate-y-1/2 absolute top-1/2 right-2 transform rounded-full bg-orange-500 p-2 text-white transition-all hover:bg-orange-600 hover:shadow-lg"
+			    >
+			      <svg
+			        xmlns="http://www.w3.org/2000/svg"
+			        className="h-6 w-6 translate-x-[1px] rotate-90 transform"
+			        fill="none"
+			        viewBox="0 0 24 24"
+			        stroke="currentColor"
+			      >
+			        <path
+			          strokeLinecap="round"
+			          strokeLinejoin="round"
+			          strokeWidth={2}
+			          d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+			        />
+			      </svg>
+			    </button>
+			  </div>
 			</div>
 
-			{/* Optional: Add CSS for animations */}
-			<style>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .animate-fade-in {
-                    animation: fadeIn 0.3s ease-in-out;
-                }
-                .fade-in {
-                    animation: fadeIn 0.3s ease-in-out forwards;
-                    opacity: 0;
-                }
-            `}</style>
+			{/* Enhanced CSS for animations */}
+			<style jsx global>{`
+			  @keyframes fadeIn {
+			    from { opacity: 0; transform: translateY(10px); }
+			    to { opacity: 1; transform: translateY(0); }
+			  }
+			  
+			  @keyframes fadeInUp {
+			    from { opacity: 0; transform: translateY(20px); }
+			    to { opacity: 1; transform: translateY(0); }
+			  }
+			  
+			  @keyframes popIn {
+			    0% { transform: scale(0.8); opacity: 0; }
+			    70% { transform: scale(1.05); opacity: 1; }
+			    100% { transform: scale(1); opacity: 1; }
+			  }
+			  
+			  @keyframes gradientShift {
+			    0% { background-position: 0% 50%; }
+			    50% { background-position: 100% 50%; }
+			    100% { background-position: 0% 50%; }
+			  }
+			  
+			  .message-container {
+			    background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,237,213,0.9) 100%);
+			    backdrop-filter: blur(8px);
+			    transform-origin: bottom center;
+			    box-shadow: 0 -5px 20px rgba(251, 146, 60, 0.1);
+			    border-radius: 20px 20px 0 0;
+			    animation: popIn 0.5s ease-out;
+			  }
+			  
+			  .message-container-expanded {
+			    background: linear-gradient(135deg, rgba(255, 102, 0, 0.25) 0%, rgba(255, 153, 51, 0.35) 100%);
+
+				border-radius: 24px 24px 0 0;
+			    box-shadow: 0 10px 30px rgba(255, 122, 0, 0.3);
+			    transform: translateY(10px);
+			  }
+			  
+			  .input-button-pop {
+			    animation: popIn 0.4s ease-out;
+			  }
+			  
+			  .send-button {
+			    animation: popIn 0.4s ease-out 0.1s both;
+			    box-shadow: 0 2px 8px rgba(251, 146, 60, 0.3);
+			  }
+			  
+			  .message-input {
+			    animation: fadeIn 0.4s ease-out;
+			    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+			    transition: all 0.3s ease;
+			  }
+			  
+			  .message-input:focus {
+			    box-shadow: 0 4px 12px rgba(251, 146, 60, 0.25);
+			    transform: translateY(-1px);
+			  }
+			  
+			  .animate-fade-in-up {
+			    animation: fadeInUp 0.5s ease-out;
+			  }
+			  
+			  .animate-fade-in {
+			    animation: fadeIn 0.3s ease-in-out;
+			  }
+			  
+			  .fade-in {
+			    animation: fadeIn 0.3s ease-in-out forwards;
+			    opacity: 0;
+			  }
+			`}</style>
+		</div>
+	);
+}
+
+// Define this component separately in your file
+function AudioPlayer({ audioUrl }: { audioUrl: string }) {
+	const [isPlaying, setIsPlaying] = useState(false);
+	const [progress, setProgress] = useState(0);
+	const audioRef = useRef<HTMLAudioElement>(null);
+
+	const togglePlayPause = () => {
+		if (audioRef.current) {
+			if (isPlaying) {
+				audioRef.current.pause();
+			} else {
+				audioRef.current.play();
+			}
+			setIsPlaying(!isPlaying);
+		}
+	};
+
+	const handleTimeUpdate = () => {
+		if (audioRef.current) {
+			const progress = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+			setProgress(progress);
+		}
+	};
+
+	const handleEnded = () => {
+		setIsPlaying(false);
+		setProgress(0);
+	};
+
+	return (
+		<div className="flex w-full items-center">
+			<button 
+				onClick={togglePlayPause}
+				className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white shadow-sm transition-colors hover:bg-orange-600"
+			>
+				{isPlaying ? (
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+						<path fillRule="evenodd" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75-.75H15a.75.75 0 01-.75-.75V5.25z" clipRule="evenodd" />
+					</svg>
+				) : (
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 ml-0.5">
+						<path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
+					</svg>
+				)}
+			</button>
+			
+			<div className="ml-3 flex-1">
+				<div className="h-1.5 w-full rounded-full bg-gray-200">
+					<div 
+						className="h-1.5 rounded-full bg-orange-500 transition-all duration-100 ease-linear"
+						style={{ width: `${progress}%` }}
+					></div>
+				</div>
+			</div>
+			
+			<audio 
+				ref={audioRef}
+				src={audioUrl}
+				onTimeUpdate={handleTimeUpdate}
+				onEnded={handleEnded}
+				className="hidden"
+			/>
 		</div>
 	);
 }
