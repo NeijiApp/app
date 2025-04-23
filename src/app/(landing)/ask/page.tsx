@@ -38,9 +38,10 @@ export default function ChatPreview() {
 	const [showEmailPopup, setShowEmailPopup] = useState(false);
 	const [email, setEmail] = useState("");
 	const [emailError, setEmailError] = useState(""); // Ajouté pour les erreurs d'email
+	const [pendingBotResponse, setPendingBotResponse] = useState<string | null>(null);
 
 	const botAvatar = "/logo-neiji-full.png";
-	const ppBot = "/logo.png";
+	const ppBot = "/NeijiHeadLogo1.4.png";
 
 	// Défilement auto
 	const scrollToBottom = useCallback(() => {
@@ -79,6 +80,37 @@ export default function ChatPreview() {
 		}, 50);
 	};
 
+	// helper to type word-by-word
+	const typeByWord = (
+		messageId: number,
+		fullText: string,
+		speed = 300 // ms per word
+	) => {
+		const words = fullText.split(" ");
+		let idx = 0;
+		// initialize displayed text
+		setDisplayedText((d) => ({ ...d, [messageId]: "" }));
+		const timer = setInterval(() => {
+			if (idx < words.length) {
+				setDisplayedText((d) => {
+					const cur = d[messageId] || "";
+					return { ...d, [messageId]: cur + (cur ? " " : "") + words[idx] };
+				});
+				idx++;
+			} else {
+				clearInterval(timer);
+				// flip off isTyping and set real text
+				setMessages((m) =>
+					m.map((msg) =>
+						msg.id === messageId
+							? { ...msg, isTyping: false, text: fullText }
+							: msg
+					)
+				);
+			}
+		}, speed);
+	};
+
 	// Function to handle the transition to chat mode
 	const handleStartChat = () => {
 		if (chatStarted) return;
@@ -100,10 +132,8 @@ export default function ChatPreview() {
 	};
 
 	// Check if we should prompt for email
-	const checkForEmailPrompt = (newMessages: ChatMessage[]) => {
-		if (userMessageCount % 3 === 0 && userMessageCount > 0 && !showEmailPopup) {
-			setShowEmailPopup(true);
-		}
+	const shouldShowEmailPrompt = (count: number) => {
+		return count % 3 === 0 && count > 0;
 	};
 
 	const { mutateAsync } = api.chat.chat.useMutation();
@@ -113,10 +143,28 @@ export default function ChatPreview() {
 	const handleEmailSubmit = async (email: string) => {
 		try {
 			await saveEmail({ email });
-
 			setShowEmailPopup(false);
 			setEmailError("");
 			setMessage("");
+
+			// If we have a pending bot response, show it now
+			if (pendingBotResponse) {
+				const botId = Date.now() + 1;
+				setMessages((prev) => [
+					...prev,
+					{
+						id: botId,
+						sender: "bot",
+						text: "",
+						avatar: ppBot,
+						senderName: "Neiji",
+						isTyping: true,
+					},
+				]);
+
+				typeByWord(botId, pendingBotResponse, 100);
+				setPendingBotResponse(null); // Clear pending response
+			}
 		} catch (error) {
 			console.error("Error saving email to Supabase:", error);
 			setEmailError("Could not save email. Please try again.");
@@ -150,32 +198,61 @@ export default function ChatPreview() {
 		setMessage("");
 		setUserMessageCount((prev) => prev + 1);
 
-		// placeholder bubble
-		const botId = Date.now() + 1;
+		 // Check if we should show email prompt after this message
+		const newCount = userMessageCount + 1;
+		const shouldPromptEmail = shouldShowEmailPrompt(newCount);
 
+		let botId: number;
+		
 		try {
+			// First, collect the entire response
 			const data = await mutateAsync(mapToOpenAI([...newMessages]));
 
-			let message = "";
-
+			let fullMessage = "";
 			for await (const token of data) {
-				message += token;
+				fullMessage += token;
 			}
 
-			setMessages((prev) => {
-				return [
+			if (shouldPromptEmail) {
+				// Store the response for later
+				setPendingBotResponse(fullMessage);
+
+				// Send the email prompt message first
+				const promptId = Date.now() + 1;
+				setMessages((prev) => [
+					...prev,
+					{
+						id: promptId,
+						sender: "bot",
+						text: "",
+						avatar: ppBot,
+						senderName: "Neiji",
+						isTyping: true,
+					},
+				]);
+
+				typeByWord(promptId, "Before we pursue the conversation, I would love to stay in touch.", 100);
+				setTimeout(() => {
+					setShowEmailPopup(true);
+				}, 1500);
+
+			} else {
+				// Normal flow - show the bot response
+				botId = Date.now() + 1;
+				setMessages((prev) => [
 					...prev,
 					{
 						id: botId,
 						sender: "bot",
-						text: message,
+						text: "",
 						avatar: ppBot,
 						senderName: "Neiji",
+						isTyping: true,
 					},
-				];
-			});
+				]);
 
-			checkForEmailPrompt(newMessages);
+				typeByWord(botId, fullMessage, 100);
+			}
 		} catch (err) {
 			console.error(err);
 			setMessages((prev) =>
@@ -236,7 +313,7 @@ export default function ChatPreview() {
 					</div>
 				) : (
 					/* --- Vue Chat (après le premier message) --- */
-					<div className="mb-4 w-full max-w-2xl flex-grow animate-fade-in space-y-4 overflow-y-auto overflow-x-hidden px-2 py-4 pt-18">
+					<div className="mb-4 w-full max-w-2xl flex-grow animate-fade-in space-y-4 overflow-y-auto overflow-x-hidden px-2 py-4 pt-20">
 						{messages.map((msg) => (
 							<div
 								key={msg.id}
@@ -248,15 +325,17 @@ export default function ChatPreview() {
 									<img
 										src={msg.avatar}
 										alt={msg.senderName || "Bot"}
-										className="mb-1 h-8 w-8 flex-shrink-0 rounded-full"
-									/>
+										className="absolute -left-0 top-2 h-12 w-12 -translate-y-1/2"
+										/>
 								)}
 								<div
 									className={`flex flex-col ${msg.sender === "user" ? "relative items-end" : "items-start"}`}
 								>
 									{/* Nom de l'expéditeur pour le bot */}
 									{msg.sender === "bot" && msg.senderName && (
-										<span className="mb-0.5 ml-1 text-gray-600 text-xs">
+										<span     className="mb-0 text-gray-800 font-semibold text-xs relative"
+											    style={{ left: "44px" }}>
+
 											{msg.senderName}
 										</span>
 									)}
@@ -276,7 +355,11 @@ export default function ChatPreview() {
 										</div>
 									) : (
 										<div
-											className={`max-w-xs rounded-lg px-4 py-2 shadow lg:max-w-md ${msg.sender === "user" ? "relative rounded-br-none bg-white text-gray-800" : "rounded-bl-none bg-orange-500 text-white"}`}
+											className={`max-w-xs px-4 py-2 shadow lg:max-w-md ${
+												msg.sender === "user"
+													? "bg-white text-gray-800 rounded-tl-xl rounded-tr-xl rounded-br-none rounded-bl-xl"
+													: "bg-orange-500 text-white rounded-tl-xl rounded-tr-xl rounded-bl-none rounded-br-xl"
+											}`}
 										>
 											{msg.sender === "bot" && msg.isTyping ? (
 												<span className="typing-text">
