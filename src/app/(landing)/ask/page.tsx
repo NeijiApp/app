@@ -282,7 +282,7 @@ export default function ChatPreview() {
 					</div>
 				) : (
 					/* --- Vue Chat (après le premier message) --- */
-					<div className="mb-10 w-full max-w-2xl flex-grow animate-fade-in space-y-4 overflow-y-auto overflow-x-hidden px-2 py-4 pt-60 md:pt-26">
+					<div className="mb-10 w-full max-w-2xl flex-grow animate-fade-in space-y-4 overflow-y-auto overflow-x-hidden px-2 py-4 pt-120 md:pt-26">
 						{messages.map((msg) => (
 							<div
 								key={msg.id}
