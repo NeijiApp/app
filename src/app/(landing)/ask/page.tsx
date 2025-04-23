@@ -39,6 +39,7 @@ export default function ChatPreview() {
 	const [email, setEmail] = useState("");
 	const [emailError, setEmailError] = useState(""); // Ajouté pour les erreurs d'email
 	const [pendingBotResponse, setPendingBotResponse] = useState<string | null>(null);
+	const [isFirstBotMessageOnly, setIsFirstBotMessageOnly] = useState(true);
 
 	const botAvatar = "/logo-neiji-full.png";
 	const ppBot = "/NeijiHeadLogo1.4.png";
@@ -143,6 +144,11 @@ export default function ChatPreview() {
 	// Gérer l'envoi de message
 	const handleSendMessage = async () => {
 		if (message.trim() === "") return;
+
+		// If this is the first user message, update the state
+		if (isFirstBotMessageOnly) {
+			setIsFirstBotMessageOnly(false);
+		}
 
 		if (showEmailPopup) {
 			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -285,9 +291,15 @@ export default function ChatPreview() {
 					</div>
 				) : (
 					/* --- Vue Chat (après le premier message) --- */
-					<div className="mb-40 w-full max-w-2xl flex-grow animate-fade-in space-y-4 overflow-y-auto overflow-x-hidden px-2 py-4 pt-90 md:pt-26">
-						{messages.map((msg) => (
-							<div
+						<div 
+						  className={`mb-40 w-full max-w-2xl flex-grow animate-fade-in space-y-4 overflow-y-auto overflow-x-hidden px-2 py-4 ${
+						    isFirstBotMessageOnly 
+						      ? "pt-90 sm:pt-26" // First bot message (welcome) - higher on mobile
+						      : "pt-22 sm:pt-26" // After user has sent a message - normal height
+						  }`}
+						>
+						  {messages.map((msg) => (
+						    <div
 								key={msg.id}
 								className={`flex items-end gap-2 ${msg.sender === "user" ? "justify-end" : "justify-start"} fade-in`}
 								style={{ animationDelay: `${msg.id % 1000}ms` }}
@@ -362,10 +374,10 @@ export default function ChatPreview() {
 									)}
 								</div>
 							</div>
-						))}
-						{/* Élément pour le scroll */}
-						<div ref={messagesEndRef} />
-					</div>
+						  ))}
+						  {/* Élément pour le scroll */}
+						  <div ref={messagesEndRef} />
+						</div>
 				)}
 			</div>
 
