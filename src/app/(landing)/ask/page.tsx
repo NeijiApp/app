@@ -73,43 +73,13 @@ export default function ChatPreview() {
 				clearInterval(interval);
 				setMessages((prev) =>
 					prev.map((msg) =>
-						msg.id === messageId ? { ...msg, isTyping: false } : msg,
+						msg.id === messageId ? { ...msg, isTyping: false, text: fullText } : msg,
 					),
 				);
 			}
 		}, 50);
 	};
 
-	// helper to type word-by-word
-	const typeByWord = (
-		messageId: number,
-		fullText: string,
-		speed = 300 // ms per word
-	) => {
-		const words = fullText.split(" ");
-		let idx = 0;
-		// initialize displayed text
-		setDisplayedText((d) => ({ ...d, [messageId]: "" }));
-		const timer = setInterval(() => {
-			if (idx < words.length) {
-				setDisplayedText((d) => {
-					const cur = d[messageId] || "";
-					return { ...d, [messageId]: cur + (cur ? " " : "") + words[idx] };
-				});
-				idx++;
-			} else {
-				clearInterval(timer);
-				// flip off isTyping and set real text
-				setMessages((m) =>
-					m.map((msg) =>
-						msg.id === messageId
-							? { ...msg, isTyping: false, text: fullText }
-							: msg
-					)
-				);
-			}
-		}, speed);
-	};
 
 	// Function to handle the transition to chat mode
 	const handleStartChat = () => {
@@ -162,8 +132,7 @@ export default function ChatPreview() {
 					},
 				]);
 
-				typeByWord(botId, pendingBotResponse, 100);
-				setPendingBotResponse(null); // Clear pending response
+				typeMessage(botId, pendingBotResponse);
 			}
 		} catch (error) {
 			console.error("Error saving email to Supabase:", error);
@@ -208,14 +177,14 @@ export default function ChatPreview() {
 			// First, collect the entire response
 			const data = await mutateAsync(mapToOpenAI([...newMessages]));
 
-			let fullMessage = "";
+			let message = "";
 			for await (const token of data) {
-				fullMessage += token;
+				message += token;
 			}
 
 			if (shouldPromptEmail) {
 				// Store the response for later
-				setPendingBotResponse(fullMessage);
+				setPendingBotResponse(message);
 
 				// Send the email prompt message first
 				const promptId = Date.now() + 1;
@@ -231,7 +200,7 @@ export default function ChatPreview() {
 					},
 				]);
 
-				typeByWord(promptId, "Before we pursue the conversation, I would love to stay in touch.", 100);
+				typeMessage(promptId, "Before we pursue the conversation, I would love to stay in touch.");
 				setTimeout(() => {
 					setShowEmailPopup(true);
 				}, 1500);
@@ -251,7 +220,7 @@ export default function ChatPreview() {
 					},
 				]);
 
-				typeByWord(botId, fullMessage, 100);
+				typeMessage(botId, message);
 			}
 		} catch (err) {
 			console.error(err);
@@ -404,7 +373,7 @@ export default function ChatPreview() {
 				{showEmailPopup && (
 					<div className="mb-2 px-4 text-center">
 						<h3 className="font-semibold text-gray-800 text-lg">
-							What is your email?
+							Want to know when app is available ?
 						</h3>
 						{emailError && (
 							<p className="mt-1 text-red-600 text-sm">{emailError}</p>
