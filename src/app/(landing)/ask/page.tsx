@@ -462,9 +462,9 @@ export default function ChatPreview() {
 			      <button
 			        type="button"
 			        onClick={chatStarted ? handleSendMessage : handleStartChat}
-			        className="send-button absolute bottom-1 right-1 transform rounded-xl bg-orange-500 p-3 text-white transition-all hover:bg-orange-600 hover:shadow-lg" 
+			        className="send-button absolute bottom-1.5 right-1.5 transform rounded-xl bg-orange-500 p-3 text-white transition-all hover:bg-orange-600 hover:shadow-lg" 
 			      >
-			        <Send className="h-5 w-5" />
+			        <Send className="h-4 w-4" />
 			      </button>
 			    </div>
 			  </div>
