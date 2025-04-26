@@ -93,7 +93,11 @@ export default function ChatPreview() {
 			const welcomeMessage: ChatMessage = {
 				id: Date.now(),
 				sender: "bot",
-				text: "Hey, I'm Neiji, how can I help you today?",
+				text: "Hey chief, looks like you need to meditate.",
+				//Hey chief, you seem closer to the caterpillar than the butterfly. Let's change that.
+				// 
+				//
+
 				avatar: ppBot,
 				senderName: "Neiji",
 				isTyping: true,
@@ -286,8 +290,8 @@ export default function ChatPreview() {
 						<div className="mb-20 max-w-sm text-center">
 							<div className="mb-20 max-w-sm text-center">
 							<p className="font-medium text-gray-800 text-lg">
-								Neiji is your AI coach for self development,<br />
-								It will soon share tailored mindfulness.
+								I'm your coach for self development,<br />
+								Soonly sharing tailored mindfulness.
 							</p>
 
 							</div>			
@@ -313,7 +317,7 @@ export default function ChatPreview() {
 									<img
 										src={msg.avatar}
 										alt={msg.senderName || "Bot"}
-										className="absolute -left-0 top-2 h-12 w-12 -translate-y-1/2"
+										className="absolute left-0 top-2 h-12 w-12 -translate-y-1/2"
 										/>
 								)}
 								<div
