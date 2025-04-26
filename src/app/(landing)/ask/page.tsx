@@ -3,7 +3,6 @@
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "~/trpc/react";
-import { Send } from "lucide-react";
 
 // Interface pour les messages
 interface ChatMessage {
@@ -96,8 +95,8 @@ export default function ChatPreview() {
 				text: "Hey chief, looks like you need to meditate.",
 				//Hey chief, you seem closer to the caterpillar than the butterfly. Let's change that.
 				// 
-				//
-
+				//				
+				// 
 				avatar: ppBot,
 				senderName: "Neiji",
 				isTyping: true,
@@ -290,9 +289,8 @@ export default function ChatPreview() {
 						<div className="mb-20 max-w-sm text-center">
 							<div className="mb-20 max-w-sm text-center">
 							<p className="font-medium text-gray-800 text-lg">
-								I'm your coach for self development,<br />
-								Soonly sharing tailored mindfulness.
-							</p>
+							I'm your coach for self development,<br />
+							Soonly sharing tailored mindfulness.							</p>
 
 							</div>			
 						</div>
@@ -317,7 +315,7 @@ export default function ChatPreview() {
 									<img
 										src={msg.avatar}
 										alt={msg.senderName || "Bot"}
-										className="absolute left-0 top-2 h-12 w-12 -translate-y-1/2"
+										className="absolute -left-0 top-2 h-12 w-12 -translate-y-1/2"
 										/>
 								)}
 								<div
@@ -401,8 +399,7 @@ export default function ChatPreview() {
 
 			{/* --- Champ de message --- */}
 			<div
-			  // Changed sticky to fixed to ensure it's always at the viewport bottom
-			  className={`message-container fixed bottom-0 left-0 right-0 mx-auto w-full max-w-xl p-4 transition-all duration-500 ease-in-out ${
+			  className={`message-container sticky bottom-0 w-full max-w-xl self-center p-4 transition-all duration-500 ease-in-out ${
 			    showEmailPopup ? "message-container-expanded" : ""
 			  }`}
 			>
@@ -436,41 +433,44 @@ export default function ChatPreview() {
 			        </svg>
 			      </button>
 			    )}
-			    <div className="flex-1 relative">
-			      <textarea
-			        rows={1}
-			        value={message}
-			        onChange={(e) => {
-			          setMessage(e.target.value);
-			          if (showEmailPopup) setEmailError("");
-			          // Auto-resize
-			          e.target.style.height = "auto";
-			          e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
-			        }}
-			        onClick={!chatStarted ? handleStartChat : undefined}
-			        onKeyDown={(e) => {
-			          if (e.key === "Enter" && !e.shiftKey) {
-			            e.preventDefault();
-			            handleSendMessage();
-			          }
-			        }}
-			        placeholder={
-			          showEmailPopup
-			            ? "Email"
-			            : chatStarted
-			              ? "Message"
-			              : "Ask Neiji"
-			        }
-			        className="message-input block w-full cursor-pointer rounded-xl bg-white pl-6 pr-14 py-3 text-lg shadow-lg transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none max-h-32 min-h-[48px]" 
-			      />
-			      <button
-			        type="button"
-			        onClick={chatStarted ? handleSendMessage : handleStartChat}
-			        className="send-button absolute bottom-1.5 right-1.5 transform rounded-xl bg-orange-500 p-3 text-white transition-all hover:bg-orange-600 hover:shadow-lg" 
+			    <input
+			      type={showEmailPopup ? "email" : "text"}
+			      value={message}
+			      onChange={(e) => {
+			        setMessage(e.target.value);
+			        if (showEmailPopup) setEmailError("");
+			      }}
+			      onClick={!chatStarted ? handleStartChat : undefined}
+			      onKeyPress={handleKeyPress}
+			      placeholder={
+			        showEmailPopup
+			          ? "Email"
+			          : chatStarted
+			            ? "Message"
+			            : "Ask Neiji"
+			      }
+			      className="message-input flex-1 cursor-pointer rounded-full bg-white px-6 py-3 text-lg shadow-lg transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+			    />
+			    <button
+			      type="button"
+			      onClick={chatStarted ? handleSendMessage : handleStartChat}
+			      className="send-button -translate-y-1/2 absolute top-1/2 right-2 transform rounded-full bg-orange-500 p-2 text-white transition-all hover:bg-orange-600 hover:shadow-lg"
+			    >
+			      <svg
+			        xmlns="http://www.w3.org/2000/svg"
+			        className="h-6 w-6 translate-x-[1px] rotate-90 transform"
+			        fill="none"
+			        viewBox="0 0 24 24"
+			        stroke="currentColor"
 			      >
-			        <Send className="h-4 w-4" />
-			      </button>
-			    </div>
+			        <path
+			          strokeLinecap="round"
+			          strokeLinejoin="round"
+			          strokeWidth={2}
+			          d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+			        />
+			      </svg>
+			    </button>
 			  </div>
 			</div>
 
@@ -528,20 +528,24 @@ export default function ChatPreview() {
 			    animation: fadeIn 0.4s ease-out;
 			    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 			    transition: all 0.3s ease;
-			    overflow-y: hidden; /* Hide scrollbar */
 			  }
 			  
-			  /* For email mode, we want a single line */
-			  .message-input[type="email"] {
-			    resize: none;
-			    overflow: hidden;
-			    height: auto !important;
+			  .message-input:focus {
+			    box-shadow: 0 4px 12px rgba(251, 146, 60, 0.25);
+			    transform: translateY(-1px);
 			  }
 			  
-			  /* Adjust send button position based on textarea growth */
-			  .message-input.multi-line + .send-button {
-			    top: auto;
-			    transform: none;
+			  .animate-fade-in-up {
+			    animation: fadeInUp 0.5s ease-out;
+			  }
+			  
+			  .animate-fade-in {
+			    animation: fadeIn 0.3s ease-in-out;
+			  }
+			  
+			  .fade-in {
+			    animation: fadeIn 0.3s ease-in-out forwards;
+			    opacity: 0;
 			  }
 			`}</style>
 		</div>
