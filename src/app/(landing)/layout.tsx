@@ -100,10 +100,7 @@ function Header() {
 						</Link>
 						{/* <Link to="/#news" className="text-gray-600 hover:text-orange-500">News</Link> */}
 						{/* <Link to="/#manganeiji" className="text-gray-600 hover:text-orange-500">Testing Manga</Link> */}
-						<Link
-							href="/ask"
-							className="text-gray-600 hover:text-orange-500"
-						>
+						<Link href="/ask" className="text-gray-600 hover:text-orange-500">
 							Chat
 						</Link>
 						<Link
