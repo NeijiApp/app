@@ -41,6 +41,7 @@
 		"drizzle-zod": "^0.7.1",
 		"framer-motion": "^12.7.4",
 		"lucide-react": "^0.503.0",
+		"nanoid": "^5.1.5",
 		"next": "^15.2.3",
 		"openai": "^4.95.1",
 		"postgres": "^3.4.4",

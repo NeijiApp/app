@@ -65,7 +65,7 @@ function ChatLogic() {
 							);
 						}
 
-						return <BotMessage key={message.id}>{message.content}</BotMessage>;
+						return <BotMessage key={message.id} message={message} />;
 					})
 				)}
 			</ChatMessages>
