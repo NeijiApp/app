@@ -1,6 +1,7 @@
 "use client";
 
 import { useContext, createContext } from "react";
+import Image from "next/image";
 
 import { useChat } from "@ai-sdk/react";
 
@@ -45,20 +46,36 @@ function ChatLogic() {
 	return (
 		<Chat>
 			<ChatMessages>
-				{messages.map((message) => {
-					if (message.role === "user") {
-						return (
-							<UserMessage key={message.id}>{message.content}</UserMessage>
-						);
-					}
+				{messages.length === 0 ? (
+					<div className="flex h-full flex-col items-center justify-center gap-4 pt-40">
+						<Image
+							src="/logo-neiji-full.png"
+							alt="Neiji Logo"
+							width={120}
+							height={120}
+						/>
+						<p className="text-lg text-muted-foreground">
+							I'm your coach for self development, Soonly sharing tailored
+							mindfulness.
+						</p>
+					</div>
+				) : (
+					messages.map((message) => {
+						if (message.role === "user") {
+							return (
+								<UserMessage key={message.id}>{message.content}</UserMessage>
+							);
+						}
 
-					return <BotMessage key={message.id}>{message.content}</BotMessage>;
-				})}
+						return <BotMessage key={message.id}>{message.content}</BotMessage>;
+					})
+				)}
 			</ChatMessages>
 			<ChatInput
 				message={input}
 				setMessage={setInput}
 				handleSubmit={handleSubmit}
+				placeholder={messages.length === 0 ? "Ask Neiji" : "Message"}
 			/>
 		</Chat>
 	);
