@@ -3,15 +3,14 @@
 import type React from "react";
 import { useState } from "react";
 import { api } from "~/trpc/react";
-import PopupFeedBack from "../_components/PopupFeedBack";
+import { PopupFeedBack } from "../_components/PopupFeedBack";
 
 export function NewsletterSection() {
 	const [email, setEmail] = useState("");
 	const [status, setStatus] = useState<
-		"idle" | "loading" | "success" | "error"
-	>("idle");
+		"idle" | "loading" | "success" | "error">("idle");
 
-	const { mutate, error } = api.newsletter.create.useMutation();
+	const { mutate } = api.newsletter.create.useMutation();
 
 	const [isPopupOpen, setIsPopupOpen] = useState(false);
 
@@ -38,7 +37,21 @@ export function NewsletterSection() {
 						className="space-y-4"
 						onSubmit={(e) => {
 							e.preventDefault();
-							mutate({ email });
+							setStatus("loading");
+				mutate(
+					{ email },
+					{
+						onSuccess: () => {
+							setStatus("success");
+							handleOpenPopup();
+							setEmail("");
+						},
+						onError: () => {
+							setStatus("error");
+							handleOpenPopup();
+						}
+					}
+				);
 						}}
 					>
 						<input
@@ -52,15 +65,18 @@ export function NewsletterSection() {
 						/>
 						<button
 							type="submit"
-							onClick={handleOpenPopup}
 							disabled={status === "loading"}
 							className="w-full rounded-lg bg-orange-500 px-6 py-3 text-white transition hover:bg-orange-600 disabled:opacity-50"
 						>
-							{status === "loading" ? "Subscribing..." : "Subscribe"}
+							{status === "loading" ? "Inscription en cours..." : "S'inscrire"}
 						</button>
 						<PopupFeedBack
 							isOpen={isPopupOpen}
 							onClose={handleClosePopup}
+							type={status === "error" ? "error" : "success"}
+							message={status === "error" 
+								? "Something went wrong. Please try again."
+								: "Thank you for subscribing at the newsletter !"}
 						/>
 					</form>
 
