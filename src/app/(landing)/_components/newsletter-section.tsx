@@ -3,7 +3,7 @@
 import type React from "react";
 import { useState } from "react";
 import { api } from "~/trpc/react";
-import { PopupFeedBack } from "../_components/PopupFeedBack";
+import { StatePopup } from "./state-popup";
 
 export function NewsletterSection() {
 	const [email, setEmail] = useState("");
@@ -70,7 +70,7 @@ export function NewsletterSection() {
 						>
 							{status === "loading" ? "Inscription en cours..." : "S'inscrire"}
 						</button>
-						<PopupFeedBack
+						<StatePopup
 							isOpen={isPopupOpen}
 							onClose={handleClosePopup}
 							type={status === "error" ? "error" : "success"}
