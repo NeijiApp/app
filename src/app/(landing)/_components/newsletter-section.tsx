@@ -3,6 +3,7 @@
 import type React from "react";
 import { useState } from "react";
 import { api } from "~/trpc/react";
+import PopupFeedBack from "../_components/PopupFeedBack";
 
 export function NewsletterSection() {
 	const [email, setEmail] = useState("");
@@ -12,8 +13,20 @@ export function NewsletterSection() {
 
 	const { mutate, error } = api.newsletter.create.useMutation();
 
+	const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+	const handleOpenPopup = () => {
+		setIsPopupOpen(true);
+	};
+
+	const handleClosePopup = () => {
+		setIsPopupOpen(false);
+	};
+
+
 	return (
-		<section id="newsletter" className="bg-orange-50 py-20">
+		<div>
+			<section id="newsletter" className="bg-orange-50 py-20">
 			<div className="container mx-auto px-6">
 				<div className="mx-auto max-w-md text-center">
 					<h2 className="mb-6 font-bold text-3xl">Stay Connected with Neiji</h2>
@@ -39,11 +52,16 @@ export function NewsletterSection() {
 						/>
 						<button
 							type="submit"
+							onClick={handleOpenPopup}
 							disabled={status === "loading"}
 							className="w-full rounded-lg bg-orange-500 px-6 py-3 text-white transition hover:bg-orange-600 disabled:opacity-50"
 						>
 							{status === "loading" ? "Subscribing..." : "Subscribe"}
 						</button>
+						<PopupFeedBack
+							isOpen={isPopupOpen}
+							onClose={handleClosePopup}
+						/>
 					</form>
 
 					{status === "success" && (
@@ -57,5 +75,6 @@ export function NewsletterSection() {
 				</div>
 			</div>
 		</section>
+		</div>
 	);
 }
