@@ -1,20 +1,20 @@
 import type * as React from "react";
 
-import Image from "next/image";
 import type { JSONValue, UIMessage } from "ai";
+import Image from "next/image";
+import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import remarkGfm from "remark-gfm";
 import { z } from "zod";
 import { Input } from "~/components/ui/input";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeHighlight from "rehype-highlight";
 
-import type { ExtraProps } from "react-markdown";
 import type { ComponentProps, ElementType } from "react";
-import { cn } from "~/lib/utils";
+import type { ExtraProps } from "react-markdown";
 import type {
 	EmailInputAnnotation,
 	PossibleAnnotation,
 } from "~/app/api/chat/route";
+import { cn } from "~/lib/utils";
 
 function AnnotationInput({ annotation }: { annotation: EmailInputAnnotation }) {
 	return (

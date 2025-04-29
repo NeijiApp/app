@@ -2,9 +2,9 @@
 
 import { ArrowRight, Ban, SendHorizonal } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useChatState } from "./provider";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { useChatState } from "./provider";
 
 interface ChatInputProps {
 	onChatFocus?: (() => void) | undefined;

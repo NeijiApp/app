@@ -20,16 +20,16 @@ export const metadata: Metadata = {
 				url: "/og-image.jpg",
 				width: 1200,
 				height: 630,
-				alt: "Neiji - Meditation App"
-			}
-		]
+				alt: "Neiji - Meditation App",
+			},
+		],
 	},
 	twitter: {
 		card: "summary_large_image",
 		title: "Neiji - Meditation for Everyone",
 		description: "The first meditation avaible to everyone",
-		images: ["/og-image.jpg"]
-	}
+		images: ["/og-image.jpg"],
+	},
 };
 
 const roboto = Roboto({

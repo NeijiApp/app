@@ -1,30 +1,27 @@
 import { openai } from "@ai-sdk/openai";
 import {
+	type CoreMessage,
+	type Message,
 	createDataStreamResponse,
 	streamText,
 	tool,
-	type CoreMessage,
-	type Message,
 } from "ai";
 import { z } from "zod";
+import { SYSTEM_PROMPT, USER_INPUT_TOOL } from "./prompts";
 
 type Messages = CoreMessage[] | Omit<Message, "id">[];
 
-const EmailInput = z
-	.object({
-		type: z.literal("email"),
-		placeholder: z.string(),
-	})
-	.describe("Prompt user his email and reply the response");
+const EmailInput = z.object({
+	type: z.literal("email"),
+	placeholder: z.string(),
+});
 
 export type EmailInputAnnotation = z.infer<typeof EmailInput>;
 
-const SelectInput = z
-	.object({
-		type: z.literal("select"),
-		choices: z.array(z.string()),
-	})
-	.describe("Prompt user multiple choice and reply the response");
+const SelectInput = z.object({
+	type: z.literal("select"),
+	choices: z.array(z.string()),
+});
 
 export type SelectInputAnnotation = z.infer<typeof SelectInput>;
 
@@ -40,16 +37,13 @@ export async function POST(request: Request) {
 	return createDataStreamResponse({
 		async execute(dataStream) {
 			const result = streamText({
-				model: openai("gpt-4"),
+				model: openai("gpt-4o"),
+				system: SYSTEM_PROMPT,
 				messages,
-				onError(err) {
-					console.log(err);
-				},
 				tools: {
 					userinput: tool({
 						parameters: UserInputParameters,
-						description:
-							"Change the chat input UI for the user, enabling new type of interactions",
+						description: USER_INPUT_TOOL,
 						async execute(args, options) {
 							dataStream.writeMessageAnnotation(args);
 							return "done";

@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
 import Image from "next/image";
+import { useEffect } from "react";
 
-
-import { UserMessage } from "./_components/user-message";
 import { BotMessage } from "./_components/bot-message";
 import { Chat } from "./_components/chat";
 import { ChatInput } from "./_components/chat-input";
 import { GradientBackground } from "./_components/gradient-background";
+import { UserMessage } from "./_components/user-message";
 
 import { ChatStateProvider, useChatState } from "./_components/provider";
 
