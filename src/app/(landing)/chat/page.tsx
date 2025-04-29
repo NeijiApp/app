@@ -1,15 +1,16 @@
 "use client";
 
-import { useContext, createContext } from "react";
+import { useContext, createContext, useEffect, useMemo } from "react";
 import Image from "next/image";
 
 import { useChat } from "@ai-sdk/react";
 
 import { UserMessage } from "./_components/user-message";
 import { BotMessage } from "./_components/bot-message";
-import { Chat, ChatMessages } from "./_components/chat";
+import { Chat } from "./_components/chat";
 import { ChatInput } from "./_components/chat-input";
 import { GradientBackground } from "./_components/gradient-background";
+import type { UIMessage } from "ai";
 
 type ChatContext = {
 	chat: ReturnType<typeof useChat>;
@@ -38,12 +39,39 @@ function useChatState() {
 
 function ChatLogic() {
 	const {
-		chat: { messages, input, setInput, handleSubmit },
+		chat: { messages, input, setInput, handleSubmit, status },
 	} = useChatState();
+
+	// Auto-scroll interval effect
+	useEffect(() => {
+		let intervalId: NodeJS.Timeout | null = null;
+
+		const scrollToBottom = () => {
+			window.scrollTo({
+				top: document.documentElement.scrollHeight,
+				behavior: "smooth",
+			});
+		};
+
+		// Start auto-scrolling when status is "submitted" or "streaming"
+		if (status === "submitted" || status === "streaming") {
+			// Initial scroll
+			scrollToBottom();
+			// Set up interval for continuous scrolling
+			intervalId = setInterval(scrollToBottom, 100);
+		}
+
+		// Cleanup function
+		return () => {
+			if (intervalId) {
+				clearInterval(intervalId);
+			}
+		};
+	}, [status]);
 
 	return (
 		<Chat>
-			<ChatMessages>
+			<div className="container mx-auto space-y-4 pt-8 pb-30">
 				{messages.length === 0 ? (
 					<div className="flex h-full flex-col items-center justify-center gap-4 pt-40">
 						<Image
@@ -68,7 +96,7 @@ function ChatLogic() {
 						return <BotMessage key={message.id} message={message} />;
 					})
 				)}
-			</ChatMessages>
+			</div>
 			<ChatInput
 				message={input}
 				setMessage={setInput}
