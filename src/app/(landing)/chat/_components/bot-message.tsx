@@ -4,6 +4,19 @@ import Image from "next/image";
 import type { JSONValue, UIMessage } from "ai";
 import { z } from "zod";
 import { Input } from "~/components/ui/input";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+
+import type { ExtraProps } from "react-markdown";
+import type { ComponentProps, ElementType } from "react";
+import { cn } from "~/lib/utils";
+
+type Components = {
+	[Key in Extract<ElementType, string>]?: ElementType<
+		ComponentProps<Key> & ExtraProps
+	>;
+};
 
 function AnnotationInput({ annotation }: { annotation: JSONValue }) {
 	const data = z
@@ -62,8 +75,42 @@ export function BotMessage({ message }: { message: UIMessage }) {
 				/>
 				<span className="text-sm">Neiji</span>
 			</div>
-			<div className="w-fit max-w-xs break-all rounded-tl-xl rounded-tr-xl rounded-br-xl rounded-bl-none bg-orange-500 px-4 py-2 text-white shadow lg:max-w-md">
-				{message.content}
+			<div className="prose prose-invert w-fit max-w-xs break-all rounded-tl-xl rounded-tr-xl rounded-br-xl rounded-bl-none bg-orange-500 px-4 py-2 text-white shadow lg:max-w-md">
+				<ReactMarkdown
+					remarkPlugins={[remarkGfm]}
+					rehypePlugins={[rehypeHighlight]}
+					components={{
+						// Override default element styling
+						p: ({ children }) => <p className="my-1">{children}</p>,
+						a: ({ href, children }) => (
+							<a
+								href={href}
+								className="text-blue-200 underline hover:text-blue-300"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								{children}
+							</a>
+						),
+						code: ({
+							className,
+							children,
+							...props
+						}: ComponentProps<"code"> & ExtraProps) => (
+							<code
+								className={cn(
+									"block overflow-x-auto rounded-md bg-gray-800 p-2",
+									className,
+								)}
+								{...props}
+							>
+								{children}
+							</code>
+						),
+					}}
+				>
+					{message.content}
+				</ReactMarkdown>
 			</div>
 			<div className="max-w-xs pt-4 lg:max-w-md">
 				<Annotations annotations={message.annotations} />
