@@ -11,36 +11,19 @@ import rehypeHighlight from "rehype-highlight";
 import type { ExtraProps } from "react-markdown";
 import type { ComponentProps, ElementType } from "react";
 import { cn } from "~/lib/utils";
+import type {
+	EmailInputAnnotation,
+	PossibleAnnotation,
+} from "~/app/api/chat/route";
 
-type Components = {
-	[Key in Extract<ElementType, string>]?: ElementType<
-		ComponentProps<Key> & ExtraProps
-	>;
-};
-
-function AnnotationInput({ annotation }: { annotation: JSONValue }) {
-	const data = z
-		.object({ prompt: z.object({ type: z.string(), placeholder: z.string() }) })
-		.safeParse(annotation);
-
-	if (!data.success) return null;
-
+function AnnotationInput({ annotation }: { annotation: EmailInputAnnotation }) {
 	return (
-		<Input
-			className="bg-background"
-			placeholder={data.data.prompt.placeholder}
-		/>
+		<Input className="bg-background" placeholder={annotation.placeholder} />
 	);
 }
 
-function Annotation({ annotation }: { annotation: JSONValue }) {
-	const ui_annotation = z
-		.object({ prompt: z.object({ type: z.string() }) })
-		.safeParse(annotation);
-
-	if (!ui_annotation.success) return null;
-
-	if (ui_annotation.data.prompt.type === "input")
+function Annotation({ annotation }: { annotation: PossibleAnnotation }) {
+	if (annotation.type === "email")
 		return <AnnotationInput annotation={annotation} />;
 
 	return null;
@@ -55,7 +38,7 @@ function Annotations({
 
 	return (
 		<div className="flex flex-col gap-1">
-			{annotations.map((annotation, i) => (
+			{(annotations as PossibleAnnotation[]).map((annotation, i) => (
 				// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 				<Annotation key={i} annotation={annotation} />
 			))}
@@ -64,6 +47,8 @@ function Annotations({
 }
 
 export function BotMessage({ message }: { message: UIMessage }) {
+	if (message.content.trim().length === 0) return null;
+
 	return (
 		<div className="relative pt-10">
 			<div className="absolute top-1 flex items-center gap-1">
