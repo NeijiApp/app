@@ -18,9 +18,7 @@ type ChatContext = {
 const ChatContext = createContext<ChatContext | null>(null);
 
 function ChatStateProvider({ children }: { children: React.ReactNode }) {
-	const chat = useChat({
-		streamProtocol: "text",
-	});
+	const chat = useChat();
 
 	return (
 		<ChatContext.Provider value={{ chat }}>{children}</ChatContext.Provider>
