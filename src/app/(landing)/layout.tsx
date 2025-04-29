@@ -14,7 +14,7 @@ export default function LandingLayout({
 	return (
 		<div className="min-h-screen">
 			<Header />
-			<div className="pt-20">{children}</div>
+			<div className="pt-30">{children}</div>
 		</div>
 	);
 }
@@ -34,88 +34,83 @@ function Header() {
 
 	return (
 		<header className="fixed z-50 w-full bg-white/90 backdrop-blur-md">
-			<nav className="container mx-auto px-2 py-2">
-				<div className="flex items-center justify-between">
-					{/* Desktop Version */}
-					<div className="hidden items-center space-x-8 md:flex">
-						<a
-							href="/"
-							onClick={handleLogoClick}
-							className="flex items-center transition-opacity hover:opacity-80"
-						>
-							<Image
-								src="/logo-neiji-full.png"
-								alt="Neiji Logo"
-								width={620}
-								height={403}
-								className="h-20 w-30"
-							/>
-							{/* Font display for desktop */}
-							<span className="font-bold text-4xl text-orange-500">Neiji</span>
-						</a>
-					</div>
+			<nav className="flex h-30 items-center justify-between px-10">
+				{/* Desktop Version */}
+				<div className="hidden items-center space-x-8 md:flex">
+					<a
+						href="/"
+						onClick={handleLogoClick}
+						className="flex items-center transition-opacity hover:opacity-80"
+					>
+						<Image
+							src="/logo-neiji-full.png"
+							alt="Neiji Logo"
+							width={620}
+							height={403}
+							className="h-20 w-30"
+						/>
+						{/* Font display for desktop */}
+						<span className="font-bold text-4xl text-orange-500">Neiji</span>
+					</a>
+				</div>
 
-					{/* Mobile Version */}
-					<div className="flex w-full items-center justify-between md:hidden">
-						<button
-							type="button"
-							className="p-2"
-							onClick={() => setIsMenuOpen(!isMenuOpen)}
-						>
-							{isMenuOpen ? (
-								<X className="h-6 w-6 text-orange-500" />
-							) : (
-								<Menu className="h-6 w-6 text-orange-500" />
-							)}
-						</button>
+				{/* Mobile Version */}
+				<div className="flex w-full items-center justify-between md:hidden">
+					<button
+						type="button"
+						className="p-2"
+						onClick={() => setIsMenuOpen(!isMenuOpen)}
+					>
+						{isMenuOpen ? (
+							<X className="h-6 w-6 text-orange-500" />
+						) : (
+							<Menu className="h-6 w-6 text-orange-500" />
+						)}
+					</button>
 
-						<a
-							href="/"
-							onClick={handleLogoClick}
-							className="flex flex-1 items-center justify-center transition-opacity hover:opacity-80"
-						>
-							<Image
-								src="/logo-neiji-full.png"
-								alt="Neiji Logo"
-								width={620}
-								height={403}
-								className="h-16 w-24"
-							/>
-							<span className="font-semibold text-3xl text-orange-500">
-								Neiji
-							</span>
-						</a>
+					<a
+						href="/"
+						onClick={handleLogoClick}
+						className="flex flex-1 items-center justify-center transition-opacity hover:opacity-80"
+					>
+						<Image
+							src="/logo-neiji-full.png"
+							alt="Neiji Logo"
+							width={620}
+							height={403}
+							className="h-16 w-24"
+						/>
+						<span className="font-semibold text-3xl text-orange-500">
+							Neiji
+						</span>
+					</a>
 
-						{/* Empty div to maintain spacing */}
-						<div className="w-8" />
-					</div>
+					{/* Empty div to maintain spacing */}
+					<div className="w-8" />
+				</div>
 
-					{/* Desktop Navigation Links */}
-					<div className="hidden space-x-8 md:flex">
-						<Link
-							href="/manifesto"
-							className="text-gray-600 hover:text-orange-500"
-						>
-							Manifesto
-						</Link>
-						{/* <Link to="/#news" className="text-gray-600 hover:text-orange-500">News</Link> */}
-						{/* <Link to="/#manganeiji" className="text-gray-600 hover:text-orange-500">Testing Manga</Link> */}
-						<Link href="/ask" className="text-gray-600 hover:text-orange-500">
-							Chat
-						</Link>
-						<Link
-							href="/contact"
-							className="text-gray-600 hover:text-orange-500"
-						>
-							Contact
-						</Link>
-						<Link
-							href="/#newsletter"
-							className="text-gray-600 hover:text-orange-500"
-						>
-							Newsletter
-						</Link>
-					</div>
+				{/* Desktop Navigation Links */}
+				<div className="hidden space-x-8 md:flex">
+					<Link
+						href="/manifesto"
+						className="text-gray-600 hover:text-orange-500"
+					>
+						Manifesto
+					</Link>
+					{/* <Link to="/#news" className="text-gray-600 hover:text-orange-500">News</Link> */}
+					{/* <Link to="/#manganeiji" className="text-gray-600 hover:text-orange-500">Testing Manga</Link> */}
+					<Link href="/ask" className="text-gray-600 hover:text-orange-500">
+						Chat
+					</Link>
+					<Link href="/contact" className="text-gray-600 hover:text-orange-500">
+						Contact
+					</Link>
+					<Link
+						href="/#newsletter"
+						className="text-gray-600 hover:text-orange-500"
+					>
+						Newsletter
+					</Link>
 				</div>
 
 				{/* Mobile Menu */}

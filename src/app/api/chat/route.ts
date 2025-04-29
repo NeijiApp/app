@@ -9,9 +9,5 @@ export async function POST(request: Request) {
 		messages,
 	});
 
-	for await (const chunk of result.textStream) {
-		console.log(chunk);
-	}
-
 	return result.toTextStreamResponse();
 }
