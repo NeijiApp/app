@@ -2,7 +2,7 @@
 
 import { ArrowRight, Ban, SendHorizonal } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useChatState } from "../page";
+import { useChatState } from "./provider";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 
