@@ -39,7 +39,7 @@ function useChatState() {
 
 function ChatLogic() {
 	const {
-		chat: { messages, input, setInput, handleSubmit, status },
+		chat: { messages, input, setInput, handleSubmit, status, setMessages },
 	} = useChatState();
 
 	// Auto-scroll interval effect
@@ -98,6 +98,17 @@ function ChatLogic() {
 				)}
 			</div>
 			<ChatInput
+				onChatFocus={() => {
+					if (messages.length === 0) {
+						setMessages([
+							{
+								id: "msg-originalmessage",
+								content: "Hello how can i help you today ?",
+								role: "assistant",
+							},
+						]);
+					}
+				}}
 				message={input}
 				setMessage={setInput}
 				handleSubmit={handleSubmit}
