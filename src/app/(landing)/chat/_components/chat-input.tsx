@@ -36,16 +36,26 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 					}}
 					onFocus={onChatFocus}
 					placeholder={messages.length === 0 ? "Ask Neiji" : "Message"}
-					className="h-12 flex-1 rounded-full bg-white pr-14 pl-5 text-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+					className="h-14 flex-1 rounded-full bg-white pr-14 pl-5 text-base shadow-lg focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/50 border-none md:text-md"
 				/>
 				<Button
-					disabled={input.length === 0}
+					disabled={!isLoading && input.length === 0}
 					type="submit"
-					onClick={isLoading ? stop : handleSubmit}
+					onClick={
+						isLoading
+							? () => {
+									stop();
+								}
+							: handleSubmit
+					}
 					size="icon"
-					className="-translate-y-1/2 absolute top-1/2 right-2 rounded-full p-2 text-white"
+					className="-translate-y-1/2 absolute top-1/2 right-2 size-11 rounded-full p-2 text-white z-50"
 				>
-					{isLoading ? <Ban /> : <SendHorizonal />}
+					{isLoading ? (
+						<Ban className="size-6" />
+					) : (
+						<SendHorizonal className="size-6" />
+					)}
 				</Button>
 			</div>
 		</div>
