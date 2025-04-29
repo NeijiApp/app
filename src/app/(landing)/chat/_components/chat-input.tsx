@@ -27,6 +27,12 @@ export function ChatInput({
 					onChange={(e) => {
 						if (setMessage) setMessage(e.target.value);
 					}}
+					onKeyDown={(e) => {
+						if (e.key === "Enter" && handleSubmit && !e.shiftKey) {
+							e.preventDefault();
+							handleSubmit(e as unknown as React.MouseEvent<HTMLButtonElement>);
+						}
+					}}
 					onFocus={onChatFocus}
 					placeholder={placeholder}
 					className="flex-1 animate-[fadeIn_0.4s_ease-out] cursor-pointer rounded-full bg-white px-6 py-3 text-lg shadow-lg transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-orange-500"

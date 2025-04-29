@@ -6,10 +6,10 @@
 - [x] Implement a chat bot to talk to Neiji (2025-04-22)
 - [x] Make an API to for saving emails to a newsletter (2025-04-22)
 - [x] Make Chat Bot ask for emails to users after 3 messages (2025-04-22)
+- [x] Clean the codebase to respect less than 500 lines for each files (2025-04-28)
 
 ## Upcoming Tasks
-- [ ] Make the TRPC API really send a stream of tokens for realtime chat
-- [ ] Clean the codebase to respect less than 500 lines for each files
+- [ ] Make a real chat API that send a stream of tokens for realtime chat
 - [ ] Add security measures to avoid spam attacks (auth, rates, etc...)
 
 ## Discovered During Work
