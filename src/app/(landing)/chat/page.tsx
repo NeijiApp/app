@@ -26,7 +26,7 @@ function ChatStateProvider({ children }: { children: React.ReactNode }) {
 	);
 }
 
-function useChatState() {
+export function useChatState() {
 	const state = useContext(ChatContext);
 
 	if (!state)
@@ -109,10 +109,6 @@ function ChatLogic() {
 						]);
 					}
 				}}
-				message={input}
-				setMessage={setInput}
-				handleSubmit={handleSubmit}
-				placeholder={messages.length === 0 ? "Ask Neiji" : "Message"}
 			/>
 		</Chat>
 	);
