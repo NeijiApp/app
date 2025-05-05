@@ -113,23 +113,23 @@ function Header() {
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: -10 }}
 							transition={{ duration: 0.3 }}
-							className="fixed top-24 left-0 right-0 mx-4 px-4 pb-6 bg-white shadow-md rounded-xl space-y-3 z-50 md:hidden">
-							<Link href="/manifesto" className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200">
+							className="fixed top-24 left-0 right-0 mx-4 px-4 pb-6 bg-white shadow-md rounded-xl space-y-3 z-50 md:hidden"
+						>
+							<Link href="/manifesto" onClick={() => setIsMenuOpen(false)} className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200">
 								Manifesto
 							</Link>
-							<Link href="/ask" className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200">
+							<Link href="/ask" onClick={() => setIsMenuOpen(false)} className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200">
 								Chat
 							</Link>
-							<Link href="/contact" className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200">
+							<Link href="/contact" onClick={() => setIsMenuOpen(false)} className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200">
 								Contact
 							</Link>
-							<Link href="/#newsletter" className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200">
+							<Link href="/#newsletter" onClick={() => setIsMenuOpen(false)} className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200">
 								Newsletter
 							</Link>
 						</motion.nav>
 					)}
 				</AnimatePresence>
-
 			</nav>
 		</header>
 	);
