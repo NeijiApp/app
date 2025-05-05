@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -114,37 +114,43 @@ function Header() {
 				</div>
 
 				{/* Mobile Menu */}
-				{isMenuOpen && (
-					<div className="mt-4 space-y-4 pb-4 md:hidden">
-						{/* <Link to="/#manga" className="block text-gray-600 hover:text-orange-500">Story</Link> */}
-						{/* <Link to="/#news" className="block text-gray-600 hover:text-orange-500">News</Link> */}
-						{/* <Link to="/#manganeiji" className="block text-gray-600 hover:text-orange-500">Testing Manga</Link>/ */}
-						<Link
-							href="/manifesto"
-							className="block text-gray-600 hover:text-orange-500"
+				<AnimatePresence>
+					{isMenuOpen && (
+						<motion.nav
+							initial={{ opacity: 0, y: -10 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -10 }}
+							transition={{ duration: 0.3 }}
+							className="fixed top-24 left-0 right-0 mx-4 px-4 pb-6 bg-white shadow-md rounded-xl space-y-3 z-50 md:hidden"
 						>
-							Manifesto
-						</Link>
-						<Link
-							href="/feedback"
-							className="block text-gray-600 hover:text-orange-500"
-						>
-							Chat
-						</Link>
-						<Link
-							href="/chat"
-							className="block text-gray-600 hover:text-orange-500"
-						>
-							Contact
-						</Link>
-						<Link
-							href="/#newsletter"
-							className="block text-gray-600 hover:text-orange-500"
-						>
-							Newsletter
-						</Link>
-					</div>
-				)}
+							<Link
+								href="/manifesto"
+								className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200"
+							>
+								Manifesto
+							</Link>
+							<Link
+								href="/feedback"
+								className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200"
+							>
+								Chat
+							</Link>
+							<Link
+								href="/chat"
+								className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200"
+							>
+								Contact
+							</Link>
+							<Link
+								href="/#newsletter"
+								className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200"
+							>
+								Newsletter
+							</Link>
+						</motion.nav>
+					)}
+				</AnimatePresence>
+
 			</nav>
 		</header>
 	);
