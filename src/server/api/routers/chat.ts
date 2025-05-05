@@ -1,8 +1,8 @@
+import type { ChatCompletionMessageParam } from "openai/resources";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { InsertUserSchema, usersTable } from "~/server/db/schema";
 import { openai } from "~/utils/openai";
-import type { ChatCompletionMessageParam } from "openai/resources";
 
 // System persona for Neiji – edit this string anytime
 const SYSTEM_PROMPT = `
@@ -23,10 +23,10 @@ export const chatRouter = createTRPCRouter({
 		ctx,
 		input: messages,
 	}) {
-		 // Cast the messages to the correct type
+		// Cast the messages to the correct type
 		const promptStack: ChatCompletionMessageParam[] = [
 			{ role: "system", content: SYSTEM_PROMPT },
-			...messages as unknown as ChatCompletionMessageParam[],
+			...(messages as unknown as ChatCompletionMessageParam[]),
 		];
 
 		const stream = await openai.chat.completions.create({

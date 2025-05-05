@@ -1,48 +1,59 @@
 import { openai } from "@ai-sdk/openai";
 import {
-	createDataStreamResponse,
-	streamText,
 	type CoreMessage,
 	type Message,
+	createDataStreamResponse,
+	streamText,
+	tool,
 } from "ai";
+import { z } from "zod";
+import { SYSTEM_PROMPT, USER_INPUT_TOOL } from "./prompts";
 
 type Messages = CoreMessage[] | Omit<Message, "id">[];
 
-function shouldAskSubscribe(messages: Messages) {
-	let count = 0;
-	for (const message of messages) {
-		if (message.role === "assistant") {
-			count++;
-		}
-		if (count > 3) return false;
-	}
+const EmailInput = z.object({
+	type: z.literal("email"),
+	placeholder: z.string(),
+});
 
-	return count === 2;
-}
+export type EmailInputAnnotation = z.infer<typeof EmailInput>;
+
+const SelectInput = z.object({
+	type: z.literal("select"),
+	choices: z.array(z.string()),
+});
+
+export type SelectInputAnnotation = z.infer<typeof SelectInput>;
+
+const UserInputParameters = EmailInput;
+
+export type UserInputParameters = z.infer<typeof UserInputParameters>;
+
+export type PossibleAnnotation = UserInputParameters;
 
 export async function POST(request: Request) {
 	const { messages }: { messages: Messages } = await request.json();
 
-	if (shouldAskSubscribe(messages)) {
-		return createDataStreamResponse({
-			execute(dataStream) {
-				dataStream.write(
-					`0:"Thanks you for talking with me ! You can subscribe to our newsletter for more updates."\n`,
-				);
-				dataStream.writeMessageAnnotation({
-					prompt: {
-						type: "input",
-						placeholder: "Subscribe our newsletter !",
-					},
-				});
-			},
-		});
-	}
+	return createDataStreamResponse({
+		async execute(dataStream) {
+			const result = streamText({
+				model: openai("gpt-4o"),
+				system: SYSTEM_PROMPT,
+				messages,
+				tools: {
+					userinput: tool({
+						parameters: UserInputParameters,
+						description: USER_INPUT_TOOL,
+						async execute(args, options) {
+							dataStream.writeMessageAnnotation(args);
+							return "done";
+						},
+					}),
+				},
+				maxSteps: 2,
+			});
 
-	const result = streamText({
-		model: openai("gpt-4"),
-		messages,
+			result.mergeIntoDataStream(dataStream);
+		},
 	});
-
-	return result.toDataStreamResponse();
 }

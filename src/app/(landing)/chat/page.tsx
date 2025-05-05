@@ -1,49 +1,51 @@
 "use client";
 
-import { useContext, createContext } from "react";
 import Image from "next/image";
+import { useEffect } from "react";
 
-import { useChat } from "@ai-sdk/react";
-
-import { UserMessage } from "./_components/user-message";
 import { BotMessage } from "./_components/bot-message";
-import { Chat, ChatMessages } from "./_components/chat";
+import { Chat } from "./_components/chat";
 import { ChatInput } from "./_components/chat-input";
 import { GradientBackground } from "./_components/gradient-background";
+import { UserMessage } from "./_components/user-message";
 
-type ChatContext = {
-	chat: ReturnType<typeof useChat>;
-};
-
-const ChatContext = createContext<ChatContext | null>(null);
-
-function ChatStateProvider({ children }: { children: React.ReactNode }) {
-	const chat = useChat();
-
-	return (
-		<ChatContext.Provider value={{ chat }}>{children}</ChatContext.Provider>
-	);
-}
-
-function useChatState() {
-	const state = useContext(ChatContext);
-
-	if (!state)
-		throw new Error(
-			"Invalid usage of useChatState wrap it inside ChatStateProvider",
-		);
-
-	return state;
-}
+import { ChatStateProvider, useChatState } from "./_components/provider";
 
 function ChatLogic() {
 	const {
-		chat: { messages, input, setInput, handleSubmit },
+		chat: { messages, input, setInput, handleSubmit, status, setMessages },
 	} = useChatState();
+
+	// Auto-scroll interval effect
+	useEffect(() => {
+		let intervalId: NodeJS.Timeout | null = null;
+
+		const scrollToBottom = () => {
+			window.scrollTo({
+				top: document.documentElement.scrollHeight,
+				behavior: "smooth",
+			});
+		};
+
+		// Start auto-scrolling when status is "submitted" or "streaming"
+		if (status === "submitted" || status === "streaming") {
+			// Initial scroll
+			scrollToBottom();
+			// Set up interval for continuous scrolling
+			intervalId = setInterval(scrollToBottom, 100);
+		}
+
+		// Cleanup function
+		return () => {
+			if (intervalId) {
+				clearInterval(intervalId);
+			}
+		};
+	}, [status]);
 
 	return (
 		<Chat>
-			<ChatMessages>
+			<div className="container mx-auto space-y-4 pt-8 pb-30">
 				{messages.length === 0 ? (
 					<div className="flex h-full flex-col items-center justify-center gap-4 pt-40">
 						<Image
@@ -68,12 +70,20 @@ function ChatLogic() {
 						return <BotMessage key={message.id} message={message} />;
 					})
 				)}
-			</ChatMessages>
+			</div>
 			<ChatInput
-				message={input}
-				setMessage={setInput}
-				handleSubmit={handleSubmit}
-				placeholder={messages.length === 0 ? "Ask Neiji" : "Message"}
+				onChatFocus={() => {
+					if (messages.length === 0) {
+						setMessages([
+							{
+								id: "msg-originalmessage",
+								content:
+									"Hello! How can I assist you with your meditation practice today? Whether you're looking to learn about different techniques, understand the benefits, or need some tips to enhance your practice, I'm here to help.",
+								role: "assistant",
+							},
+						]);
+					}
+				}}
 			/>
 		</Chat>
 	);
