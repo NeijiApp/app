@@ -41,7 +41,7 @@ export default function Manifesto() {
 				className={`${isMobile ? "px-4 pt-16" : "px-6 pt-32"} mx-auto max-w-5xl text-center`}
 			>
 				<h1
-					className={`${isMobile ? "text-4xl" : "text-6xl"} mb-4 bg-clip-text font-bold text-[#FF7043]/90 text-transparent`}
+					className={`${isMobile ? "text-4xl" : "text-6xl"} mb-4 bg-clip-text font-bold text-[#FF7043]/90`}
 				>
 					Neiji's Manifesto
 				</h1>

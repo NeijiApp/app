@@ -3,6 +3,7 @@ import { Hero } from "./_components/hero";
 import { MangaReader } from "./_components/manga-section";
 import { NewsSection } from "./_components/news-section";
 import { NewsletterSection } from "./_components/newsletter-section";
+import { HomeManifesto } from "./_components/home-manifesto";
 
 export default function Homepage() {
 	return (
@@ -11,8 +12,8 @@ export default function Homepage() {
 				<section id="manga">
 					<Hero />
 				</section>
-				<section id="manganeiji">
-					<MangaReader />
+				<section id="manifesto">
+					<HomeManifesto />
 				</section>
 				<section id="news">
 					<NewsSection />
