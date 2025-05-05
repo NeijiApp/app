@@ -45,16 +45,16 @@ function ChatLogic() {
 
 	return (
 		<Chat>
-			<div className="container mx-auto space-y-4 pt-8 pb-30">
+			<div className="container mx-auto space-y-4 pt-8 pb-30 px-4 sm:px-6">
 				{messages.length === 0 ? (
-					<div className="flex h-full flex-col items-center justify-center gap-4 pt-40">
+					<div className="flex h-full flex-col items-center justify-center gap-4 pt-40 text-center">
 						<Image
 							src="/logo-neiji-full.png"
 							alt="Neiji Logo"
 							width={120}
 							height={120}
 						/>
-						<p className="text-lg text-muted-foreground">
+						<p className="text-lg text-muted-foreground mx-auto max-w-md px-4">
 							I'm your coach for self development, Soonly sharing tailored
 							mindfulness.
 						</p>
