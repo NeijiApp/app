@@ -167,7 +167,12 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 						isOpen={cardOpen === "form"}
 						setOpen={(v) => setCardOpen(v ? "form" : null)}
 					>
-						Form
+						<div className="space-y-2">
+							<Input type="email" placeholder="Enter your email to subscribe" />
+							<Button type="submit" className="w-full">
+								Submit
+							</Button>
+						</div>
 					</ChatCard>
 				</div>
 			</div>
