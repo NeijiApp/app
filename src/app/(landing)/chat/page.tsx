@@ -78,7 +78,7 @@ function ChatLogic() {
 							{
 								id: "msg-originalmessage",
 								content:
-									"Hello! How can I assist you with your meditation practice today? Whether you're looking to learn about different techniques, understand the benefits, or need some tips to enhance your practice, I'm here to help.",
+									"Hey ! What is the one thing you want to improve in your life today ?",
 								role: "assistant",
 							},
 						]);
