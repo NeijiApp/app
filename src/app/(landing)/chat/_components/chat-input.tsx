@@ -148,7 +148,20 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 						isOpen={cardOpen === "options"}
 						setOpen={(v) => setCardOpen(v ? "options" : null)}
 					>
-						Options
+						<div className="grid grid-cols-2 gap-2">
+							<Button className="h-18" variant="outline">
+								Option 1
+							</Button>
+							<Button className="h-18" variant="outline">
+								Option 2
+							</Button>
+							<Button className="h-18" variant="outline">
+								Option 3
+							</Button>
+							<Button className="h-18" variant="outline">
+								Option 4
+							</Button>
+						</div>
 					</ChatCard>
 					<ChatCard
 						isOpen={cardOpen === "form"}
