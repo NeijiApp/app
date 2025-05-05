@@ -15,6 +15,9 @@
 - [ ] Make sure user can ask for subscription
 - [ ] Add a message to the chat when focusing on input chat
 - [ ] Make the chat input the main input for the user so the AI should be able to update it (Becomes a sound player, a email submition, etc...)
+- [ ] Add auto scroll the chat to the bottom
+- [ ] Make the subscription working on chat
+- [ ] Make sure user can ask for subscription
 - [ ] Add security measures to avoid spam attacks (auth, rates, etc...)
 
 ## Discovered During Work
