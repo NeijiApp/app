@@ -1,9 +1,9 @@
 import { ContactSection } from "./_components/contact-section";
 import { Hero } from "./_components/hero";
+import { HomeManifesto } from "./_components/home-manifesto";
 import { MangaReader } from "./_components/manga-section";
 import { NewsSection } from "./_components/news-section";
 import { NewsletterSection } from "./_components/newsletter-section";
-import { HomeManifesto } from "./_components/home-manifesto";
 
 export default function Homepage() {
 	return (

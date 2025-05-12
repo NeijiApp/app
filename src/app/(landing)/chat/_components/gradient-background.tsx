@@ -8,16 +8,10 @@ export function GradientBackground({
 	return (
 		<>
 			{/* Fixed background that covers the entire page */}
-			<div className="fixed inset-0 w-full h-full bg-gradient-to-br from-white via-orange-100 to-orange-200 -z-10" />
-			
+			<div className="-z-10 fixed inset-0 h-full w-full bg-gradient-to-br from-white via-orange-100 to-orange-200" />
+
 			{/* Content container */}
-			<div
-				className={cn(
-					"min-h-screen relative z-0",
-					className,
-				)}
-				{...props}
-			/>
+			<div className={cn("relative z-0 min-h-screen", className)} {...props} />
 		</>
 	);
 }

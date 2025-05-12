@@ -2,12 +2,12 @@ import type * as React from "react";
 
 import type { JSONValue, UIMessage } from "ai";
 import Image from "next/image";
+import { useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { z } from "zod";
 import { Input } from "~/components/ui/input";
-import { useEffect } from "react";
 import { useDrawer } from "./drawer-context";
 
 import type { ComponentProps, ElementType } from "react";
@@ -21,12 +21,12 @@ import { cn } from "~/lib/utils";
 function AnnotationInput({ annotation }: { annotation: EmailInputAnnotation }) {
 	// Get drawer context to open the drawer when email annotation is detected
 	const { openDrawer } = useDrawer();
-	
+
 	// Open drawer when this component mounts (when email annotation is detected)
 	useEffect(() => {
 		openDrawer();
 	}, [openDrawer]);
-	
+
 	return null;
 }
 

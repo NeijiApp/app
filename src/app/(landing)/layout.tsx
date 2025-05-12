@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { Menu, X } from "lucide-react";
 
@@ -91,7 +91,10 @@ function Header() {
 
 				{/* Desktop Navigation Links */}
 				<div className="hidden space-x-8 md:flex">
-					<Link href="/manifesto" className="text-gray-600 hover:text-orange-500">
+					<Link
+						href="/manifesto"
+						className="text-gray-600 hover:text-orange-500"
+					>
 						Manifesto
 					</Link>
 					<Link href="/ask" className="text-gray-600 hover:text-orange-500">
@@ -100,7 +103,10 @@ function Header() {
 					<Link href="/contact" className="text-gray-600 hover:text-orange-500">
 						Contact
 					</Link>
-					<Link href="/#newsletter" className="text-gray-600 hover:text-orange-500">
+					<Link
+						href="/#newsletter"
+						className="text-gray-600 hover:text-orange-500"
+					>
 						Newsletter
 					</Link>
 				</div>
@@ -113,18 +119,34 @@ function Header() {
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: -10 }}
 							transition={{ duration: 0.3 }}
-							className="fixed top-24 left-0 right-0 mx-4 px-4 pb-6 bg-white shadow-md rounded-xl space-y-3 z-50 md:hidden"
+							className="fixed top-24 right-0 left-0 z-50 mx-4 space-y-3 rounded-xl bg-white px-4 pb-6 shadow-md md:hidden"
 						>
-							<Link href="/manifesto" onClick={() => setIsMenuOpen(false)} className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200">
+							<Link
+								href="/manifesto"
+								onClick={() => setIsMenuOpen(false)}
+								className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"
+							>
 								Manifesto
 							</Link>
-							<Link href="/ask" onClick={() => setIsMenuOpen(false)} className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200">
+							<Link
+								href="/ask"
+								onClick={() => setIsMenuOpen(false)}
+								className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"
+							>
 								Chat
 							</Link>
-							<Link href="/contact" onClick={() => setIsMenuOpen(false)} className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200">
+							<Link
+								href="/contact"
+								onClick={() => setIsMenuOpen(false)}
+								className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"
+							>
 								Contact
 							</Link>
-							<Link href="/#newsletter" onClick={() => setIsMenuOpen(false)} className="block text-gray-800 font-medium hover:text-orange-500 transition-colors duration-200">
+							<Link
+								href="/#newsletter"
+								onClick={() => setIsMenuOpen(false)}
+								className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"
+							>
 								Newsletter
 							</Link>
 						</motion.nav>
