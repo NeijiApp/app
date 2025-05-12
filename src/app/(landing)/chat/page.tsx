@@ -10,6 +10,7 @@ import { GradientBackground } from "./_components/gradient-background";
 import { UserMessage } from "./_components/user-message";
 
 import { ChatStateProvider, useChatState } from "./_components/provider";
+import { DrawerProvider } from "./_components/drawer-context";
 
 function ChatLogic() {
 	const {
@@ -45,7 +46,7 @@ function ChatLogic() {
 
 	return (
 		<Chat>
-			<div className="container mx-auto space-y-4 pt-8 pb-30 px-4 sm:px-6">
+			<div className="container mx-auto space-y-4 pt-8 pb-30 px-4 sm:px-6 relative z-0">
 				{messages.length === 0 ? (
 					<div className="flex h-full flex-col items-center justify-center gap-4 pt-40 text-center">
 						<Image
@@ -93,7 +94,9 @@ export default function ChatPage() {
 	return (
 		<GradientBackground>
 			<ChatStateProvider>
-				<ChatLogic />
+				<DrawerProvider>
+					<ChatLogic />
+				</DrawerProvider>
 			</ChatStateProvider>
 		</GradientBackground>
 	);

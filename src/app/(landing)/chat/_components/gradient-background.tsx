@@ -6,12 +6,18 @@ export function GradientBackground({
 	...props
 }: React.ComponentProps<"div">) {
 	return (
-		<div
-			className={cn(
-				"min-h-[calc(100vh-var(--spacing)*30)] bg-gradient-to-br from-white via-orange-100 to-orange-200",
-				className,
-			)}
-			{...props}
-		/>
+		<>
+			{/* Fixed background that covers the entire page */}
+			<div className="fixed inset-0 w-full h-full bg-gradient-to-br from-white via-orange-100 to-orange-200 -z-10" />
+			
+			{/* Content container */}
+			<div
+				className={cn(
+					"min-h-screen relative z-0",
+					className,
+				)}
+				{...props}
+			/>
+		</>
 	);
 }
