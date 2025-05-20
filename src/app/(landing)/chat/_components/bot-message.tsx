@@ -2,7 +2,7 @@ import type * as React from "react";
 
 import type { JSONValue, UIMessage } from "ai";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
@@ -55,6 +55,31 @@ function Annotations({
 }
 
 export function BotMessage({ message }: { message: UIMessage }) {
+	const [displayedText, setDisplayedText] = useState("");
+
+	useEffect(() => {
+		if (message.content.trim().length === 0) return;
+
+		let currentIndex = 0;
+		const text = message.content;
+		let cancelled = false;
+
+		function showNextChar() {
+			if (cancelled) return;
+			if (currentIndex < text.length - 1) {
+				setDisplayedText((prev) => prev + text[currentIndex]);
+				currentIndex++;
+				setTimeout(showNextChar, 15); // Adjust speed here (ms per letter)
+			}
+		}
+
+		showNextChar();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [message.content]);
+
 	if (message.content.trim().length === 0) return null;
 
 	return (
@@ -102,7 +127,7 @@ export function BotMessage({ message }: { message: UIMessage }) {
 						),
 					}}
 				>
-					{message.content}
+					{displayedText}
 				</ReactMarkdown>
 			</div>
 			<div className="max-w-xs pt-4 lg:max-w-md">

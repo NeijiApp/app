@@ -14,7 +14,7 @@ import { ChatStateProvider, useChatState } from "./_components/provider";
 
 function ChatLogic() {
 	const {
-		chat: { messages, input, setInput, handleSubmit, status, setMessages },
+		chat: { messages, status, setMessages },
 	} = useChatState();
 
 	// Auto-scroll interval effect
@@ -61,11 +61,15 @@ function ChatLogic() {
 						</p>
 					</div>
 				) : (
-					messages.map((message) => {
+					messages.map((message, index) => {
 						if (message.role === "user") {
 							return (
 								<UserMessage key={message.id}>{message.content}</UserMessage>
 							);
+						}
+
+						if (status === "streaming" && index === messages.length - 1) {
+							return null;
 						}
 
 						return <BotMessage key={message.id} message={message} />;
