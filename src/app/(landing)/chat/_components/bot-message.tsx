@@ -93,7 +93,7 @@ export function BotMessage({ message }: { message: UIMessage }) {
 				/>
 				<span className="text-sm">Neiji</span>
 			</div>
-			<div className="prose prose-invert w-fit max-w-xs break-all rounded-tl-xl rounded-tr-xl rounded-br-xl rounded-bl-none bg-orange-500 px-4 py-2 text-white shadow lg:max-w-md">
+			<div className="w-fit max-w-xs whitespace-pre-line break-normal rounded-tl-xl rounded-tr-xl rounded-br-xl rounded-bl-none bg-orange-500 px-4 py-2 text-white shadow lg:max-w-md">
 				<ReactMarkdown
 					remarkPlugins={[remarkGfm]}
 					rehypePlugins={[rehypeHighlight]}
