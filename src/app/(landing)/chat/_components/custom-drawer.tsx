@@ -1,15 +1,15 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
+import { useDrawer } from "./drawer-context";
 
 interface CustomDrawerProps {
-	isOpen: boolean;
-	children: ReactNode;
-	className?: string;
+  isOpen: boolean;
+  children: ReactNode;
+  className?: string;
 }
 
 /**
@@ -17,97 +17,127 @@ interface CustomDrawerProps {
  * without using the shadcn Drawer component
  */
 export function CustomDrawer({
-	isOpen,
-	children,
-	className,
+  isOpen,
+  children,
+  className,
 }: CustomDrawerProps) {
-	return (
-		<div
-			className={cn(
-				"fixed right-1/2 bottom-18 w-full max-w-xl translate-x-1/2 transition-all duration-300 ease-in-out",
-				isOpen ? "h-[200px]" : "h-0",
-				className,
-			)}
-		>
-			<div className="h-full overflow-hidden rounded-t-2xl bg-white">
-				<div className="p-10">{children}</div>
-			</div>
-		</div>
-	);
+  // Use ref to track drawer state
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const { closeDrawer } = useDrawer();
+
+  // Force update the drawer state when isOpen changes
+  useEffect(() => {
+    if (drawerRef.current) {
+      if (!isOpen) {
+        drawerRef.current.style.height = "0";
+      } else {
+        drawerRef.current.style.height = "200px";
+      }
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      ref={drawerRef}
+      className={cn(
+        "fixed right-1/2 bottom-18 w-full max-w-xl translate-x-1/2 transition-all duration-300 ease-in-out",
+        isOpen ? "h-[200px]" : "h-0",
+        className
+      )}
+    >
+      <div className="h-full overflow-hidden rounded-t-2xl bg-white relative">
+        {/* Emergency close button */}
+        <Button
+          size="sm"
+          variant="ghost"
+          className="absolute top-2 right-2 rounded-full p-2 h-6 w-6"
+          onClick={() => {
+            if (drawerRef.current) {
+              drawerRef.current.style.height = "0";
+            }
+            closeDrawer();
+          }}
+        >
+          ✕
+        </Button>
+        <div className="p-10">{children}</div>
+      </div>
+    </div>
+  );
 }
 
 /**
  * Content for the registration drawer with state management
  */
 export function AskRegistrationDrawerContent({
-	onClose,
-}: { onClose: () => void }) {
-	const [showEmailForm, setShowEmailForm] = useState(false);
-	const [email, setEmail] = useState("");
+  onConfirmRegistration,
+}: {
+  onClose?: () => void;
+  onConfirmRegistration?: () => void;
+}) {
+  const { closeDrawer, isWaitingForEmail, setIsWaitingForEmail } = useDrawer();
 
-	// Handle Yes button click
-	const handleYesClick = () => {
-		setShowEmailForm(true);
-	};
+  // Handle Yes button click
+  const handleYesClick = () => {
+    setIsWaitingForEmail(true);
+    if (onConfirmRegistration) {
+      onConfirmRegistration();
+    }
+  };
 
-	// Handle No button click
-	const handleNoClick = () => {
-		onClose();
-	};
+  // Handle No button click - with multiple approaches to ensure it works
+  const handleNoClick = () => {
+    // First use the context method
+    closeDrawer();
 
-	// Handle email submission
-	const handleSubmitEmail = () => {
-		// Here you would typically handle the email submission
-		// For now, we'll just close the drawer
-		onClose();
-	};
+    // Delay and try again to be extra sure
+    setTimeout(() => {
+      closeDrawer();
 
-	// Show email form if user clicked Yes
-	if (showEmailForm) {
-		return (
-			<>
-				<h2 className="mb-4 text-center font-semibold text-lg">
-					Entre ton email
-				</h2>
-				<div className="flex flex-col gap-4">
-					<Input
-						type="email"
-						placeholder="ton@email.com"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						className="border-orange-200 focus-visible:ring-orange-400"
-					/>
-					<Button
-						className="w-full bg-orange-400 text-white hover:bg-orange-500"
-						onClick={handleSubmitEmail}
-					>
-						Confirmer
-					</Button>
-				</div>
-			</>
-		);
-	}
+      // Also directly set CSS to hide it (backup approach)
+      const drawerElement = document.querySelector('[class*="bottom-18"]');
+      if (drawerElement) {
+        (drawerElement as HTMLElement).style.height = "0";
+      }
+    }, 100);
+  };
 
-	// Show initial registration question
-	return (
-		<>
-			<h2 className="mb-4 text-center font-semibold text-lg">
-				Veux-tu t'inscrire ?
-			</h2>
-			<div className="flex justify-center gap-4">
-				<Button
-					className="bg-orange-400 text-white hover:bg-orange-500"
-					onClick={handleYesClick}
-				>
-					Oui
-				</Button>
-				<Button
-					className="bg-orange-400 text-white hover:bg-orange-500"
-					onClick={handleNoClick}
-				>
-					Non
-				</Button>
-			</div>
-		</>
-	);
+  // Show email prompt if user clicked Yes
+  if (isWaitingForEmail) {
+    return (
+      <>
+        <h2 className="mb-4 text-center font-semibold text-lg">
+          Entre ton email dans le champ ci-dessous
+        </h2>
+        <p className="text-center text-sm text-gray-500">
+          Utilise la barre de message pour saisir ton email
+        </p>
+      </>
+    );
+  }
+
+  // Show initial registration question
+  return (
+    <>
+      <h2 className="mb-4 text-center font-semibold text-lg">
+        Veux-tu t'inscrire ?
+      </h2>
+      <div className="flex justify-center gap-4">
+        <Button
+          className="bg-orange-400 text-white hover:bg-orange-500"
+          onClick={handleYesClick}
+        >
+          Oui
+        </Button>
+        <Button
+          className="bg-orange-400 text-white hover:bg-orange-500"
+          onClick={handleNoClick}
+        >
+          Non
+        </Button>
+      </div>
+    </>
+  );
 }
