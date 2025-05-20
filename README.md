@@ -1,5 +1,5 @@
 # Neiji
-
+ 
 A meditation application to help everyone access meditation anytime and anywhere power by AI.
 
 ## Features
