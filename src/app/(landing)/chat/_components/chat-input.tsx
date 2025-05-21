@@ -1,12 +1,13 @@
 "use client";
 
-import { Ban, type LucideIcon, Plus, SendHorizonal } from "lucide-react";
+import { OctagonX, type LucideIcon, Plus, SendHorizonal } from "lucide-react";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { AskRegistrationDrawerContent, CustomDrawer } from "./custom-drawer";
 import { useDrawer } from "./drawer-context";
 import { useChatState } from "./provider";
+import { api } from "~/trpc/react";
 
 import {
   Tooltip,
@@ -72,6 +73,9 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
     null | "play" | "options" | "form"
   >();
 
+  // API mutation for saving email to newsletter
+  const { mutateAsync: saveEmail } = api.newsletter.create.useMutation();
+
   // Cooldown ref to prevent reopening right after closing
   const cooldownRef = useRef(false);
   const lastOpenTimeRef = useRef(0);
@@ -90,6 +94,7 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
     isWaitingForEmail,
     setIsWaitingForEmail,
     isAIWriting,
+    setRegistrationSuccess,
   } = useDrawer();
 
   // Safe toggle drawer function that checks if AI is still writing
@@ -108,26 +113,38 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
   };
 
   // Handle email submission
-  const handleEmailSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleEmailSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (isWaitingForEmail) {
       // Validate the email (simple validation)
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (emailRegex.test(input)) {
-        // Process the email
-        // Close the drawer and reset state
-        closeDrawer();
-        setIsWaitingForEmail(false);
-        // Clear the input
-        handleInputChange({
-          target: { value: "" },
-        } as React.ChangeEvent<HTMLInputElement>);
-        // Set cooldown after submitting email
-        cooldownRef.current = true;
-        lastOpenTimeRef.current = Date.now();
-        setTimeout(() => {
-          cooldownRef.current = false;
-        }, 10000); // 10 second cooldown
-        return;
+        try {
+          // Save the email to the database via the newsletter API
+          await saveEmail({ email: input });
+
+          // Set success state
+          setRegistrationSuccess(true);
+
+          // Close the drawer and reset state
+          closeDrawer();
+          setIsWaitingForEmail(false);
+
+          // Clear the input
+          handleInputChange({
+            target: { value: "" },
+          } as React.ChangeEvent<HTMLInputElement>);
+
+          // Set cooldown after submitting email
+          cooldownRef.current = true;
+          lastOpenTimeRef.current = Date.now();
+          setTimeout(() => {
+            cooldownRef.current = false;
+          }, 10000); // 10 second cooldown
+          return;
+        } catch (error) {
+          console.error("Failed to save email:", error);
+          // Continue with submit anyway even if save failed
+        }
       }
     }
 
@@ -281,7 +298,7 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
               className="-translate-y-1/2 absolute top-1/2 right-1.5 z-10 size-11 rounded-full p-2 text-white"
             >
               {isLoading ? (
-                <Ban className="size-6" />
+                <OctagonX className="size-6" />
               ) : (
                 <SendHorizonal className="size-6" />
               )}

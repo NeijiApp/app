@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import { useDrawer } from "./drawer-context";
@@ -77,7 +77,12 @@ export function AskRegistrationDrawerContent({
   onClose?: () => void;
   onConfirmRegistration?: () => void;
 }) {
-  const { closeDrawer, isWaitingForEmail, setIsWaitingForEmail } = useDrawer();
+  const {
+    closeDrawer,
+    isWaitingForEmail,
+    setIsWaitingForEmail,
+    registrationSuccess,
+  } = useDrawer();
 
   // Handle Yes button click
   const handleYesClick = () => {
@@ -103,6 +108,20 @@ export function AskRegistrationDrawerContent({
       }
     }, 100);
   };
+
+  // Show success message if email was saved
+  if (registrationSuccess) {
+    return (
+      <>
+        <h2 className="mb-4 text-center font-semibold text-lg">
+          Merci de t'être inscrit !
+        </h2>
+        <p className="text-center text-sm text-gray-500">
+          Tu recevras bientôt des nouvelles de Neiji
+        </p>
+      </>
+    );
+  }
 
   // Show email prompt if user clicked Yes
   if (isWaitingForEmail) {

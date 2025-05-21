@@ -11,6 +11,8 @@ interface DrawerContextType {
   toggleDrawer: () => void;
   setIsWaitingForEmail: (value: boolean) => void;
   isAIWriting: boolean;
+  registrationSuccess: boolean;
+  setRegistrationSuccess: (value: boolean) => void;
 }
 
 const DrawerContext = createContext<DrawerContextType | undefined>(undefined);
@@ -28,6 +30,7 @@ export function DrawerProvider({
   const [isOpen, setIsOpen] = useState(false);
   const [isWaitingForEmail, setIsWaitingForEmail] = useState(false);
   const [isAutomaticOpen, setIsAutomaticOpen] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
   // Track when the drawer was last closed
   const lastCloseTimeRef = useRef(0);
@@ -52,6 +55,18 @@ export function DrawerProvider({
       }
     };
   }, [isOpen, isAutomaticOpen]);
+
+  // Reset success state when drawer closes
+  useEffect(() => {
+    if (!isOpen && registrationSuccess) {
+      // Reset the success state after a short delay so the animation completes first
+      const timeoutId = setTimeout(() => {
+        setRegistrationSuccess(false);
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isOpen, registrationSuccess]);
 
   const openDrawer = (isAutomatic = false) => {
     // Only open if AI is not writing and not too soon after closing
@@ -109,6 +124,8 @@ export function DrawerProvider({
         toggleDrawer,
         setIsWaitingForEmail,
         isAIWriting,
+        registrationSuccess,
+        setRegistrationSuccess,
       }}
     >
       {children}
