@@ -1,12 +1,12 @@
 "use client";
 
-import { Ban, type LucideIcon, Plus, SendHorizonal } from "lucide-react";
+import { Ban, type LucideIcon, Plus, SendHorizonal, Brain, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { AskRegistrationDrawerContent, CustomDrawer } from "./custom-drawer";
-import { useDrawer } from "./drawer-context";
-import { useChatState } from "./provider";
+import { useDrawer, useChatState } from "./provider";
+import { MeditationPanel, type MeditationParams } from "./meditation-panel";
 
 import {
 	Tooltip,
@@ -43,103 +43,239 @@ function ChatModeButton({
 	);
 }
 
-function ChatCard({
-	isOpen,
-	setOpen,
-	children,
-}: {
-	isOpen: boolean;
-	setOpen: (value: boolean) => void;
-	children?: React.ReactNode | undefined;
-}) {
-	return (
-		<div
-			className={cn("w-11/12 rounded-t-xl bg-background transition-all", {
-				"p-3": isOpen,
-			})}
-		>
-			{isOpen ? children : null}
-		</div>
-	);
-}
-
 export function ChatInput({ onChatFocus }: ChatInputProps) {
 	const {
-		chat: { messages, input, handleInputChange, handleSubmit, status, stop },
+		chat: { messages, input, handleInputChange, handleSubmit, status, stop, setInput },
+		meditationMode,
+		setMeditationMode,
+		addCustomMessage,
+		isGeneratingMeditation,
+		setIsGeneratingMeditation,
 	} = useChatState();
 
-	const [cardOpen, setCardOpen] = useState<
-		null | "play" | "options" | "form"
-	>();
+	const [isExpanded, setIsExpanded] = useState(false);
 
 	const isLoading = useMemo(
-		() => status === "streaming" || status === "submitted",
-		[status],
+		() => status === "streaming" || status === "submitted" || isGeneratingMeditation,
+		[status, isGeneratingMeditation],
 	);
 
-	// Use the shared drawer context instead of local state
 	const { isOpen, toggleDrawer } = useDrawer();
 
+	const getVoiceId = (gender: 'male' | 'female'): string => {
+		return gender === 'female' ? 'g6xIsTj2HwM6VR4iXFCw' : 'GUDYcgRAONiI1nXDcNQQ';
+	};
+
+	const generatePrompt = (params: MeditationParams): string => {
+		const guidanceInstructions = {
+			beginner: "Provide detailed, step-by-step guidance.",
+			confirmed: "Provide balanced guidance.",
+			expert: "Provide minimal guidance, with long pauses."
+		};
+		const goalInstructions = {
+			morning: "Create an energizing morning meditation.",
+			focus: "Create a concentration meditation.",
+			calm: "Create a calming meditation.",
+			sleep: "Create a sleep meditation."
+		};
+		return `Create a ${params.duration}-minute ${params.goal} meditation. ${goalInstructions[params.goal]} ${guidanceInstructions[params.guidance]} Use a ${params.gender} voice.`;
+	};
+
+	const handleMeditationGenerate = async (params: MeditationParams) => {
+		setIsGeneratingMeditation(true);
+		
+		const prompt = generatePrompt(params);
+		const voiceId = getVoiceId(params.gender);
+
+		addCustomMessage({
+			id: `user-${Date.now()}`,
+			content: `Generate: ${params.duration}m, ${params.goal}, ${params.guidance}, ${params.gender}, ${params.background} bg`,
+			role: "user",
+		});
+
+		const loadingId = `loading-${Date.now()}`;
+		addCustomMessage({
+			id: loadingId,
+			content: "🧘‍♀️ Generating your personalized meditation...",
+			role: "assistant",
+		});
+
+		try {
+			const response = await fetch('/api/meditation', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					prompt,
+					duration: params.duration,
+					voiceId,
+					background: params.background,
+					guidance: params.guidance,
+				}),
+			});
+
+			if (!response.ok) throw new Error(await response.text());
+			
+			const audioBlob = await response.blob();
+			if (audioBlob.size === 0) throw new Error('Received empty audio file');
+			
+			const audioUrl = URL.createObjectURL(audioBlob);
+
+			addCustomMessage({
+				id: `meditation-${Date.now()}`,
+				content: `Here is your personalized meditation.`,
+				role: "assistant",
+				audioUrl,
+			});
+
+		} catch (error) {
+			console.error('Error generating meditation:', error);
+			addCustomMessage({
+				id: `error-${Date.now()}`,
+				content: "Sorry, I couldn't generate your meditation. Please try again.",
+				role: "assistant",
+			});
+		} finally {
+			setIsGeneratingMeditation(false);
+		}
+	};
+
+	const handleMeditationSubmitFromInput = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!input.trim()) return;
+
+		const currentInput = input;
+		setInput('');
+
+		setIsGeneratingMeditation(true);
+
+		addCustomMessage({ id: `user-${Date.now()}`, content: currentInput, role: "user" });
+		const loadingId = `loading-${Date.now()}`;
+		addCustomMessage({ id: loadingId, content: "🧘‍♀️ Generating your personalized meditation from prompt...", role: "assistant" });
+
+		try {
+			const response = await fetch('/api/meditation', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ prompt: currentInput }),
+			});
+
+			if (!response.ok) throw new Error(await response.text());
+			
+			const audioBlob = await response.blob();
+			if (audioBlob.size === 0) throw new Error('Received empty audio file');
+			
+			const audioUrl = URL.createObjectURL(audioBlob);
+
+			addCustomMessage({
+				id: `meditation-${Date.now()}`,
+				content: `Here's your meditation based on your prompt.`,
+				role: "assistant",
+				audioUrl,
+			});
+		} catch (error) {
+			console.error('Error generating meditation from prompt:', error);
+			addCustomMessage({ id: `error-${Date.now()}`, content: "Sorry, I couldn't generate from your prompt.", role: "assistant" });
+		} finally {
+			setIsGeneratingMeditation(false);
+		}
+	};
+	
+	const finalHandleSubmit = meditationMode ? handleMeditationSubmitFromInput : handleSubmit;
+
 	return (
-		<div className="relative">
-			{/* Custom drawer that appears behind the input */}
+		<>
 			<div className="mb-16">
 				<CustomDrawer isOpen={isOpen}>
-					<AskRegistrationDrawerContent
-						onClose={() => useDrawer().closeDrawer()}
-					/>
+					<AskRegistrationDrawerContent onClose={() => useDrawer().closeDrawer()} />
 				</CustomDrawer>
 			</div>
-			{/* Input container */}
-			<div className="fixed right-1/2 bottom-0 z-10 w-full max-w-xl translate-x-1/2 self-center rounded-t-2xl bg-gradient-to-r from-white/90 to-orange-100/90 p-4 backdrop-blur-md transition-all duration-500 ease-in-out">
-				<div className="flex items-center gap-3">
-					{/* Drawer toggle button */}
-					<Button
-						type="button"
-						size="icon"
-						className="size-11 flex-shrink-0 rounded-full p-2 text-white"
-						onClick={toggleDrawer}
-					>
-						<Plus className="size-6" />
-					</Button>
+			
+			<div className={cn(
+				"fixed right-1/2 bottom-0 z-10 w-full max-w-xl translate-x-1/2 self-center transition-all duration-500 ease-in-out",
+				meditationMode ? "pb-[20px]" : "pb-0" // Padding to lift input bar
+			)}>
+				<div className={cn(
+					"transition-all duration-500 ease-in-out overflow-hidden",
+					meditationMode ? (isExpanded ? "h-[500px]" : "h-[250px]") : "h-0"
+				)}>
+					<div className="pt-4 px-4">
+						<MeditationPanel 
+							onGenerate={handleMeditationGenerate}
+							isGenerating={isGeneratingMeditation}
+							isExpanded={isExpanded}
+							toggleExpand={() => setIsExpanded(!isExpanded)}
+						/>
+					</div>
+				</div>
 
-					{/* Input and send button container */}
-					<div className="relative flex-1">
-						<Input
-							disabled={isLoading}
-							type="text"
-							value={input}
-							onChange={handleInputChange}
-							onKeyDown={(e) => {
-								if (e.key === "Enter" && handleSubmit && !e.shiftKey) {
-									e.preventDefault();
-									handleSubmit(
-										e as unknown as React.MouseEvent<HTMLButtonElement>,
-									);
-								}
+				<div className="bg-gradient-to-r from-white/90 to-orange-100/90 p-4 backdrop-blur-md rounded-t-2xl">
+					<div className="flex items-center gap-3">
+						<Button
+							type="button"
+							size="icon"
+							className="size-11 flex-shrink-0 rounded-full p-2 text-white"
+							onClick={toggleDrawer}
+						>
+							<Plus className="size-6" />
+						</Button>
+
+						<ChatModeButton
+							icon={Brain}
+							tooltip={meditationMode ? "Switch to Chat Mode" : "Switch to Meditation Mode"}
+							onClick={() => {
+								setMeditationMode(!meditationMode);
+								if (meditationMode) setIsExpanded(false);
 							}}
-							onFocus={onChatFocus}
-							placeholder={messages.length === 0 ? "Ask Neiji" : "Message"}
-							className="h-14 w-full rounded-full border-none bg-white pr-14 pl-5 text-base focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/50 md:text-md"
+							className={cn(
+								"size-11 flex-shrink-0 rounded-full",
+								meditationMode ? "bg-orange-500 text-white hover:bg-orange-600" : ""
+							)}
 						/>
 
-						{/* Send button */}
-						<Button
-							disabled={!isLoading && input.length === 0}
-							type="submit"
-							onClick={isLoading ? () => stop() : handleSubmit}
-							size="icon"
-							className="-translate-y-1/2 absolute top-1/2 right-1.5 z-10 size-11 rounded-full p-2 text-white"
-						>
-							{isLoading ? (
-								<Ban className="size-6" />
-							) : (
-								<SendHorizonal className="size-6" />
-							)}
-						</Button>
+						<form onSubmit={finalHandleSubmit} className="relative flex-1">
+							<Input
+								disabled={isLoading}
+								type="text"
+								value={input}
+								onChange={handleInputChange}
+								onKeyDown={(e) => {
+									if (e.key === "Enter" && !e.shiftKey) {
+										e.preventDefault();
+										finalHandleSubmit(e as any);
+									}
+								}}
+								onFocus={onChatFocus}
+								placeholder={
+									meditationMode 
+										? "Describe your meditation..." 
+										: messages.length === 0 
+											? "Ask Neiji" 
+											: "Message"
+								}
+								className="h-14 w-full rounded-full border-none bg-white pr-14 pl-5 text-base focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/50 md:text-md"
+							/>
+
+							<Button
+								disabled={isLoading || (!meditationMode && input.length === 0)}
+								type="submit"
+								size="icon"
+								className="-translate-y-1/2 absolute top-1/2 right-1.5 z-10 size-11 rounded-full p-2 text-white transition-all duration-300"
+								style={{
+									backgroundColor: meditationMode ? '#f97316' : '#3b82f6',
+								}}
+							>
+								{isLoading ? (
+									<Ban className="size-6 animate-spin" />
+								) : meditationMode ? (
+									<Sparkles className="size-6" />
+								) : (
+									<SendHorizonal className="size-6" />
+								)}
+							</Button>
+						</form>
 					</div>
 				</div>
 			</div>
-		</div>
+		</>
 	);
 }

@@ -1,60 +1,18 @@
-import type * as React from "react";
-
-import type { JSONValue, UIMessage } from "ai";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentProps } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
-import { z } from "zod";
-import { Input } from "~/components/ui/input";
-import { useDrawer } from "./drawer-context";
-
-import type { ComponentProps, ElementType } from "react";
-import type { ExtraProps } from "react-markdown";
-import type {
-	EmailInputAnnotation,
-	PossibleAnnotation,
-} from "~/app/api/chat/route";
 import { cn } from "~/lib/utils";
+import { EnhancedAudioPlayer } from "./enhanced-audio-player";
+import type { ExtendedMessage } from "./provider";
+import type { ExtraProps } from "react-markdown";
 
-function AnnotationInput({ annotation }: { annotation: EmailInputAnnotation }) {
-	// Get drawer context to open the drawer when email annotation is detected
-	const { openDrawer } = useDrawer();
-
-	// Open drawer when this component mounts (when email annotation is detected)
-	useEffect(() => {
-		openDrawer();
-	}, [openDrawer]);
-
-	return null;
+interface BotMessageProps {
+	message: ExtendedMessage;
 }
 
-function Annotation({ annotation }: { annotation: PossibleAnnotation }) {
-	if (annotation.type === "email")
-		return <AnnotationInput annotation={annotation} />;
-
-	return null;
-}
-
-function Annotations({
-	annotations,
-}: { annotations: UIMessage["annotations"] }) {
-	if (!annotations) return null;
-
-	if (annotations.length === 0) return null;
-
-	return (
-		<div className="flex flex-col gap-1">
-			{(annotations as PossibleAnnotation[]).map((annotation, i) => (
-				// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-				<Annotation key={i} annotation={annotation} />
-			))}
-		</div>
-	);
-}
-
-export function BotMessage({ message }: { message: UIMessage }) {
+export function BotMessage({ message }: BotMessageProps) {
 	const [displayedText, setDisplayedText] = useState("");
 
 	useEffect(() => {
@@ -130,9 +88,16 @@ export function BotMessage({ message }: { message: UIMessage }) {
 					{displayedText}
 				</ReactMarkdown>
 			</div>
-			<div className="max-w-xs pt-4 lg:max-w-md">
-				<Annotations annotations={message.annotations} />
-			</div>
+			
+			{/* Enhanced Audio Player for meditation messages */}
+			{message.audioUrl && (
+				<div className="mt-4 max-w-xs lg:max-w-md">
+					<EnhancedAudioPlayer 
+						audioUrl={message.audioUrl} 
+						title="Your Meditation"
+					/>
+				</div>
+			)}
 		</div>
 	);
 }
