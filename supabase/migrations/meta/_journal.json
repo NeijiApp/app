@@ -8,13 +8,6 @@
 			"when": 1745781357049,
 			"tag": "0000_regular_stellaris",
 			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "7",
-			"when": 1745781388751,
-			"tag": "0001_next_thena",
-			"breakpoints": true
 		}
 	]
 }

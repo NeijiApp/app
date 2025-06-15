@@ -1,0 +1,77 @@
+[
+  {
+    "id": 1,
+    "question": "Comment décririez-vous votre personnalité en quelques mots ?",
+    "context": "Décrivez vos traits de caractère principaux"
+  },
+  {
+    "id": 2,
+    "question": "Êtes-vous plutôt introverti(e) ou extraverti(e) ? Expliquez.",
+    "context": "Parlez de votre relation aux autres et à la socialisation"
+  },
+  {
+    "id": 3,
+    "question": "Comment réagissez-vous face au stress ou à la pression ?",
+    "context": "Décrivez vos mécanismes de gestion du stress"
+  },
+  {
+    "id": 4,
+    "question": "Quel style de communication préférez-vous ? (direct, diplomatique, détaillé, concis...)",
+    "context": "Expliquez comment vous aimez communiquer et recevoir des informations"
+  },
+  {
+    "id": 5,
+    "question": "Qu'est-ce qui vous motive le plus dans la vie ?",
+    "context": "Parlez de vos valeurs et de ce qui vous pousse à agir"
+  },
+  {
+    "id": 6,
+    "question": "Comment gérez-vous les échecs ou les déceptions ?",
+    "context": "Décrivez votre résilience et votre façon de rebondir"
+  },
+  {
+    "id": 7,
+    "question": "Êtes-vous plutôt optimiste, réaliste ou pessimiste ? Pourquoi ?",
+    "context": "Expliquez votre vision générale de la vie"
+  },
+  {
+    "id": 8,
+    "question": "Comment décririez-vous votre relation au temps ? (ponctuel, flexible, organisé...)",
+    "context": "Parlez de votre rapport à la planification et à l'organisation"
+  },
+  {
+    "id": 9,
+    "question": "Qu'est-ce qui vous met en colère ou vous frustre le plus ?",
+    "context": "Identifiez vos déclencheurs émotionnels"
+  },
+  {
+    "id": 10,
+    "question": "Comment préférez-vous apprendre de nouvelles choses ?",
+    "context": "Décrivez votre style d'apprentissage et vos préférences"
+  },
+  {
+    "id": 11,
+    "question": "Êtes-vous plutôt une personne de routine ou qui aime les changements ?",
+    "context": "Expliquez votre rapport au changement et à la stabilité"
+  },
+  {
+    "id": 12,
+    "question": "Comment prenez-vous vos décisions importantes ?",
+    "context": "Décrivez votre processus de prise de décision"
+  },
+  {
+    "id": 13,
+    "question": "Quels sont vos principaux défis ou faiblesses ?",
+    "context": "Identifiez les domaines où vous aimeriez vous améliorer"
+  },
+  {
+    "id": 14,
+    "question": "Comment définiriez-vous le succès pour vous ?",
+    "context": "Expliquez ce qui représente l'accomplissement dans votre vie"
+  },
+  {
+    "id": 15,
+    "question": "Y a-t-il autre chose d'important sur votre personnalité que je devrais savoir ?",
+    "context": "Ajoutez tout détail que vous jugez pertinent pour me comprendre"
+  }
+]

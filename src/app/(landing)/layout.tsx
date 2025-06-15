@@ -87,9 +87,7 @@ function Header() {
 
 					{/* Empty div to maintain spacing */}
 					<div className="w-8" />
-				</div>
-
-				{/* Desktop Navigation Links */}
+				</div>				{/* Desktop Navigation Links */}
 				<div className="hidden space-x-8 md:flex">
 					<Link
 						href="/manifesto"
@@ -108,6 +106,12 @@ function Header() {
 						className="text-gray-600 hover:text-orange-500"
 					>
 						Newsletter
+					</Link>
+					<Link
+						href="/auth/login"
+						className="text-gray-600 hover:text-orange-500"
+					>
+						Connexion
 					</Link>
 				</div>
 
@@ -141,13 +145,19 @@ function Header() {
 								className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"
 							>
 								Contact
-							</Link>
-							<Link
+							</Link>							<Link
 								href="/#newsletter"
 								onClick={() => setIsMenuOpen(false)}
 								className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"
 							>
 								Newsletter
+							</Link>
+							<Link
+								href="/auth/login"
+								onClick={() => setIsMenuOpen(false)}
+								className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"
+							>
+								Connexion
 							</Link>
 						</motion.nav>
 					)}

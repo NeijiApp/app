@@ -13,18 +13,35 @@
 					"type": "serial",
 					"primaryKey": true,
 					"notNull": true
-				},
-				"email": {
+				},				"email": {
 					"name": "email",
 					"type": "text",
 					"primaryKey": false,
 					"notNull": true
-				},
-				"password": {
-					"name": "password",
-					"type": "text",
+				},				"questionnaire": {
+					"name": "questionnaire",
+					"type": "jsonb",
 					"primaryKey": false,
-					"notNull": true
+					"notNull": false,
+					"default": "'{}'::jsonb"
+				},
+				"memory_L0": { 
+					"name": "memory_L0", 
+					"type": "text", 
+					"primaryKey": false, 
+					"notNull": false 
+				},
+				"memory_L1": { 
+					"name": "memory_L1",
+					"type": "text",
+					"primaryKey": false, 
+					"notNull": false 
+				},
+				"memory_L2": { 
+					"name": "memory_L2", 
+					"type": "text", 
+					"primaryKey": false, 
+					"notNull": false 
 				}
 			},
 			"indexes": {},
