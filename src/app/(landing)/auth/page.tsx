@@ -281,8 +281,7 @@ function AuthLogic() {
 				} else {
 					console.log('❓ NEITHER détecté - demande clarification');
 					addMessage('assistant', 'Je n\'ai pas bien compris votre réponse. Souhaitez-vous vous connecter ? Répondez par "oui" pour vous connecter ou "non" pour continuer en mode invité.');
-				}
-			}else if (authStep === 'email') {
+				}			}else if (authStep === 'email') {
 				const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 				if (!emailRegex.test(input)) {
 					addMessage('assistant', 'Hmm, cet email ne semble pas valide. Pouvez-vous le retaper ? (exemple: nom@exemple.com)');
@@ -291,20 +290,39 @@ function AuthLogic() {
 
 				setAuthData(prev => ({ ...prev, email: input }));
 
-				const { data: existingUser } = await supabase
-					.from('users_table')
-					.select('email')
-					.eq('email', input)
-					.single();
+				// Méthode plus simple : essayer de se connecter avec un mot de passe temporaire incorrect
+				// pour détecter si l'utilisateur existe
+				const { error } = await supabase.auth.signInWithPassword({
+					email: input,
+					password: 'temporary_wrong_password_12345'
+				});
 
-				if (existingUser) {
-					setAuthData(prev => ({ ...prev, isExistingUser: true }));
-					addMessage('assistant', `Bonjour ! Je vous reconnais. Quel est votre mot de passe ?`);
-					setAuthStep('password');
+				// Analyser le type d'erreur pour déterminer si l'email existe
+				if (error) {
+					if (error.message.includes('Invalid login credentials') || 
+						error.message.includes('Wrong password') ||
+						error.message.includes('Email not confirmed')) {
+						// L'email existe mais le mot de passe est incorrect (normal)
+						setAuthData(prev => ({ ...prev, isExistingUser: true }));
+						addMessage('assistant', `Bonjour ! Je vous reconnais. Quel est votre mot de passe ?`);
+						setAuthStep('password');
+					} else if (error.message.includes('User not found') || 
+							   error.message.includes('Email not found')) {
+						// L'email n'existe pas
+						setAuthData(prev => ({ ...prev, isExistingUser: false }));
+						addMessage('assistant', `Je ne vous connais pas encore ! Créons votre compte. Choisissez un mot de passe sécurisé (au moins 8 caractères avec lettres et chiffres).`);
+						setAuthStep('signup');
+					} else {
+						// Erreur ambiguë - on assume que l'utilisateur existe
+						console.log('Erreur auth ambiguë:', error.message);
+						setAuthData(prev => ({ ...prev, isExistingUser: true }));
+						addMessage('assistant', `Bonjour ! Je vous reconnais. Quel est votre mot de passe ?`);
+						setAuthStep('password');
+					}
 				} else {
-					setAuthData(prev => ({ ...prev, isExistingUser: false }));
-					addMessage('assistant', `Je ne vous connais pas encore ! Créons votre compte. Choisissez un mot de passe sécurisé (au moins 8 caractères avec lettres et chiffres).`);
-					setAuthStep('signup');
+					// Connexion réussie (cas très improbable avec le mot de passe temporaire)
+					addMessage('assistant', 'Connexion réussie ! Redirection...');
+					setTimeout(() => router.push('/protected/chat'), 1500);
 				}
 			} else if (authStep === 'password') {
 				const { error } = await supabase.auth.signInWithPassword({
