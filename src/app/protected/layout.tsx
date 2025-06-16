@@ -116,9 +116,8 @@ export default function ProtectedLayout({
 				<div className="text-lg">Chargement...</div>
 			</div>
 		);
-	}
-	return (
-		<div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+	}	return (
+		<div className="min-h-screen">
 			<header className="fixed z-50 w-full bg-white/90 backdrop-blur-md">
 				<nav className="flex h-30 items-center justify-between px-10">
 					{/* Desktop Version */}
