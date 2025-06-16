@@ -1,6 +1,6 @@
 "use client";
 
-import { Ban, type LucideIcon, User, SendHorizonal, Brain, Sparkles } from "lucide-react";
+import { Ban, User, SendHorizonal, Brain, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
@@ -8,40 +8,10 @@ import { Input } from "~/components/ui/input";
 import { AskRegistrationDrawerContent, CustomDrawer } from "./custom-drawer";
 import { useDrawer, useChatState } from "./provider";
 import { MeditationPanel, type MeditationParams } from "./meditation-panel";
-
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 
 interface ChatInputProps {
 	onChatFocus?: (() => void) | undefined;
-}
-
-function ChatModeButton({
-	icon: Icon,
-	tooltip,
-	...props
-}: { icon: LucideIcon; tooltip: string } & React.ComponentProps<
-	typeof Button
->) {
-	return (
-		<TooltipProvider>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<Button variant="ghost" size="icon" {...props}>
-						<Icon className="size-4" />
-					</Button>
-				</TooltipTrigger>
-				<TooltipContent>
-					<p>{tooltip}</p>
-				</TooltipContent>
-			</Tooltip>
-		</TooltipProvider>
-	);
 }
 
 export function ChatInput({ onChatFocus }: ChatInputProps) {
@@ -231,20 +201,43 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 						>
 							<User className="size-6" />
 						</Button>
-						*/}
-
-						<ChatModeButton
-							icon={Brain}
-							tooltip={meditationMode ? "Switch to Chat Mode" : "Switch to Meditation Mode"}
-							onClick={() => {
-								setMeditationMode(!meditationMode);
-								if (meditationMode) setIsExpanded(false);
-							}}
-							className={cn(
-								"size-11 flex-shrink-0 rounded-full",
-								meditationMode ? "bg-orange-500 text-white hover:bg-orange-600" : ""
+						*/}						{/* Bouton Méditation amélioré */}
+						<div className="relative group">
+							<Button
+								onClick={() => {
+									setMeditationMode(!meditationMode);
+									if (meditationMode) setIsExpanded(false);
+								}}
+								size="icon"
+								className={cn(
+									"size-12 flex-shrink-0 rounded-full transition-all duration-300 shadow-lg border-2",
+									meditationMode 
+										? "bg-gradient-to-br from-orange-300 to-orange-500 border-orange-200 text-white shadow-orange-100 hover:from-orange-400 hover:to-orange-600 hover:shadow-xl hover:scale-105" 
+										: "bg-gradient-to-br from-white to-orange-50 border-orange-200 text-orange-500 shadow-orange-100 hover:from-orange-50 hover:to-orange-100 hover:border-orange-300 hover:shadow-xl hover:scale-105"
+								)}
+							>
+								<Brain className={cn(
+									"transition-all duration-300",
+									meditationMode ? "size-7" : "size-6"
+								)} />
+							</Button>
+							
+							{/* Indicateur de statut élégant */}
+							{meditationMode && (
+								<div className="absolute -top-1 -right-1 size-4 bg-gradient-to-br from-orange-200 to-orange-400 rounded-full border-2 border-white shadow-sm">
+									<div className="size-full bg-gradient-to-br from-orange-100 to-orange-300 rounded-full animate-pulse opacity-75"></div>
+								</div>
 							)}
-						/>
+							
+							{/* Tooltip personnalisé qui apparaît au hover */}
+							<div className={cn(
+								"absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-700 text-white text-sm rounded-lg transition-all duration-200 whitespace-nowrap shadow-lg",
+								"before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-4 before:border-transparent before:border-t-gray-700",
+								"opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transform group-hover:-translate-y-1"
+							)}>
+								{meditationMode ? "Mode Chat" : "Mode Méditation"}
+							</div>
+						</div>
 
 						<form onSubmit={finalHandleSubmit} className="relative flex-1">
 							<Input
