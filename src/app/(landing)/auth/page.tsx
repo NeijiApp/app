@@ -71,15 +71,21 @@ function AuthLogic() {
 		};
 		setAuthMessages((prev) => [...prev, newMessage]);
 		return newMessage;
-	};
-	// Fonction pour détecter si l'utilisateur veut se connecter
+	};	// Fonction pour détecter si l'utilisateur veut se connecter
 	const detectPositiveResponse = (input: string): boolean => {
 		const normalizedInput = input.toLowerCase().trim();
+		console.log('✅ Début détection positive pour:', `"${normalizedInput}"`);
 		
-		// Variantes de "oui" en français
+		// Test le plus simple d'abord - juste "oui"
+		if (normalizedInput === 'oui') {
+			console.log('✅ Match exact "oui" trouvé');
+			return true;
+		}
+		
+		// Variantes de "oui" en français (sans les mots ambigus)
 		const positiveVariants = [
-			'oui', 'ui', 'oiu', 'ouai', 'ouais', 'ouaip', 'ok', 'okay', 'okey',
-			'yes', 'yep', 'yeah', 'yess', 'ye', 'si', 'bien', 'parfait',
+			'ui', 'oiu', 'ouai', 'ouais', 'ouaip', 'ok', 'okay', 'okey',
+			'yes', 'yep', 'yeah', 'yess', 'ye', 'bien', 'parfait',
 			'daccord', "d'accord", 'dacord', 'vas-y', 'vas y', 'go', 'gogogo',
 			'connect', 'connexion', 'connecter', 'login', 'signin', 'sign in',
 			'connecte', 'connecté', 'je veux', 'jveux', 'allons-y', 'allez',
@@ -88,12 +94,68 @@ function AuthLogic() {
 		];
 
 		// Vérifier si l'input correspond à une variante
-		return positiveVariants.some(variant => 
-			normalizedInput === variant || 
-			normalizedInput.includes(variant) ||
+		for (const variant of positiveVariants) {
+			if (normalizedInput === variant) {
+				console.log('✅ Match positif exact trouvé:', variant);
+				return true;
+			}
+			if (normalizedInput.includes(variant)) {
+				console.log('✅ Match positif par inclusion trouvé:', variant);
+				return true;
+			}
 			// Gérer les fautes de frappe courantes avec distance de Levenshtein simple
-			(variant.length > 2 && isCloseMatch(normalizedInput, variant))
-		);
+			if (variant.length > 2 && isCloseMatch(normalizedInput, variant)) {
+				console.log('✅ Match positif fuzzy trouvé:', variant);
+				return true;
+			}
+		}
+		
+		console.log('✅ Aucun match positif trouvé');
+		return false;
+	};// Fonction pour détecter si l'utilisateur refuse de se connecter
+	const detectNegativeResponse = (input: string): boolean => {
+		const normalizedInput = input.toLowerCase().trim();
+		console.log('🚫 Début détection négative pour:', `"${normalizedInput}"`);
+		
+		// Test le plus simple d'abord - juste "non"
+		if (normalizedInput === 'non') {
+			console.log('🚫 Match exact "non" trouvé');
+			return true;
+		}
+		
+		// Variantes de "non" en français et anglais - vérification stricte d'abord
+		const negativeVariants = [
+			'no', 'nop', 'nope', 'nn', 'nah', 'nan', 'naan', 'niet', 'nein',
+			'pas', 'jamais', 'never', 'pas question', 'hors de question', 'aucun',
+			'refuse', 'refus', 'decline', 'skip', 'passer', 'plus tard',
+			'later', 'not now', 'pas maintenant', 'pas envie', 'bof', 'mouais',
+			'non merci', 'no thanks', 'no thank you', 'ça va', 'ca va', 'ça ira',
+			'leave', 'quit', 'exit', 'sortir', 'partir', 'retour', 'back',
+			'annuler', 'cancel', 'abort', 'stop', 'arrêt', 'arret'
+		];
+
+		// Test strict d'abord (correspondance exacte et inclusion)
+		for (const variant of negativeVariants) {
+			if (normalizedInput === variant) {
+				console.log('🚫 Match exact trouvé:', variant);
+				return true;
+			}
+			if (normalizedInput.includes(variant)) {
+				console.log('🚫 Match par inclusion trouvé:', variant);
+				return true;
+			}
+		}
+
+		// Puis test avec Levenshtein seulement pour les mots longs
+		for (const variant of negativeVariants) {
+			if (variant.length > 3 && isCloseMatch(normalizedInput, variant)) {
+				console.log('🚫 Match fuzzy trouvé:', variant);
+				return true;
+			}
+		}
+		
+		console.log('🚫 Aucun match négatif trouvé');
+		return false;
 	};
 
 	// Fonction simple pour détecter les fautes de frappe (distance de 1-2 caractères)
@@ -128,22 +190,59 @@ function AuthLogic() {
 		
 		differences += Math.abs(longer.length - shorter.length);
 		return differences <= 2;
-	};
-
-	const handleUserInput = async (input: string) => {
+	};	const handleUserInput = async (input: string) => {
 		// Ajouter le message utilisateur
 		addMessage('user', input);
 		setIsLoading(true);
 
-		try {
+		// Debug: afficher les détections
+		console.log('🔍 === DEBUT DEBUG ===');
+		console.log('🔍 Input original:', `"${input}"`);
+		console.log('🔍 Input normalisé:', `"${input.toLowerCase().trim()}"`);
+		console.log('🔍 AuthStep actuel:', authStep);
+		
+		const normalizedInput = input.toLowerCase().trim();
+		const isPositive = detectPositiveResponse(input);
+		const isNegative = detectNegativeResponse(input);
+		
+		console.log('🔍 Résultat détection positive:', isPositive);
+		console.log('🔍 Résultat détection négative:', isNegative);
+		
+		// Test manuel pour "non"
+		if (normalizedInput === 'non') {
+			console.log('🔍 TEST MANUEL: "non" détecté directement');
+		}
+		
+		console.log('🔍 === FIN DEBUG ===');
+				try {
 			if (authStep === 'welcome') {
-				if (detectPositiveResponse(input)) {
+				// Test ultra-simple pour "non" en premier
+				if (normalizedInput === 'non') {
+					console.log('🎯 DETECTION DIRECTE: "non" trouvé - redirection immédiate');
+					addMessage('assistant', 'Très bien ! Je vous redirige vers le chat principal. À bientôt ! 👋');
+					setTimeout(() => {
+						router.push('/chat');
+					}, 2000);
+					return;
+				}
+				
+				// Puis les détections normales
+				if (isNegative) {
+					console.log('✅ NEGATIVE détecté - redirection vers chat');
+					addMessage('assistant', 'Très bien ! Je vous redirige vers le chat principal. À bientôt ! 👋');
+					setTimeout(() => {
+						router.push('/chat');
+					}, 2000);
+					return; // Important: arrêter l'exécution ici
+				} else if (isPositive) {
+					console.log('✅ POSITIVE détecté - passage à email');
 					addMessage('assistant', 'Parfait ! Quelle est votre adresse email ?');
 					setAuthStep('email');
 				} else {
-					addMessage('assistant', 'Aucun problème ! Vous pouvez utiliser le chat en mode invité. Si vous changez d\'avis, tapez "connexion" à tout moment.');
+					console.log('❓ NEITHER détecté - demande clarification');
+					addMessage('assistant', 'Je n\'ai pas bien compris votre réponse. Souhaitez-vous vous connecter ? Répondez par "oui" pour vous connecter ou "non" pour continuer en mode invité.');
 				}
-			} else if (authStep === 'email') {
+			}else if (authStep === 'email') {
 				const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 				if (!emailRegex.test(input)) {
 					addMessage('assistant', 'Hmm, cet email ne semble pas valide. Pouvez-vous le retaper ? (exemple: nom@exemple.com)');

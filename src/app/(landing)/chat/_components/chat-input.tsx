@@ -1,7 +1,8 @@
 "use client";
 
-import { Ban, type LucideIcon, Plus, SendHorizonal, Brain, Sparkles } from "lucide-react";
+import { Ban, type LucideIcon, User, SendHorizonal, Brain, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { AskRegistrationDrawerContent, CustomDrawer } from "./custom-drawer";
@@ -208,16 +209,29 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 					</div>
 				</div>
 
-				<div className="bg-gradient-to-r from-white/90 to-orange-100/90 p-4 backdrop-blur-md rounded-t-2xl">
-					<div className="flex items-center gap-3">
+				<div className="bg-gradient-to-r from-white/90 to-orange-100/90 p-4 backdrop-blur-md rounded-t-2xl">					<div className="flex items-center gap-3">
+						{/* Bouton de connexion (ancien bouton drawer) */}
+						<Link href="/auth">
+							<Button
+								type="button"
+								size="icon"
+								className="size-11 flex-shrink-0 rounded-full p-2 text-white bg-orange-500 hover:bg-orange-600 transition-all"
+							>
+								<User className="size-6" />
+							</Button>
+						</Link>
+
+						{/* 
+						// Ancien bouton drawer commenté
 						<Button
 							type="button"
 							size="icon"
 							className="size-11 flex-shrink-0 rounded-full p-2 text-white"
 							onClick={toggleDrawer}
 						>
-							<Plus className="size-6" />
+							<User className="size-6" />
 						</Button>
+						*/}
 
 						<ChatModeButton
 							icon={Brain}
