@@ -72,17 +72,30 @@ function AuthLogic() {
 	};	// Fonction pour détecter si l'utilisateur veut se connecter
 	const detectPositiveResponse = (input: string): boolean => {
 		const normalizedInput = input.toLowerCase().trim();
-		console.log('✅ Début détection positive pour:', `"${normalizedInput}"`);
+		console.log('✅ === DEBUG DETECTION POSITIVE ===');
+		console.log('✅ Input reçu:', `"${input}"`);
+		console.log('✅ Input normalisé:', `"${normalizedInput}"`);
 		
 		// Test le plus simple d'abord - juste "oui"
 		if (normalizedInput === 'oui') {
-			console.log('✅ Match exact "oui" trouvé');
+			console.log('✅ ✨ MATCH DIRECT "oui" trouvé !');
+			return true;
+		}
+		
+		// Tests individuels pour debug
+		if (normalizedInput === 'ouais') {
+			console.log('✅ ✨ MATCH DIRECT "ouais" trouvé !');
+			return true;
+		}
+		
+		if (normalizedInput === 'ouai') {
+			console.log('✅ ✨ MATCH DIRECT "ouai" trouvé !');
 			return true;
 		}
 		
 		// Variantes de "oui" en français (sans les mots ambigus)
 		const positiveVariants = [
-			'ui', 'oiu', 'ouai', 'ouais', 'ouaip', 'ok', 'okay', 'okey',
+			'ui', 'oiu', 'ouaip', 'ok', 'okay', 'okey',
 			'yes', 'yep', 'yeah', 'yess', 'ye', 'bien', 'parfait',
 			'daccord', "d'accord", 'dacord', 'vas-y', 'vas y', 'go', 'gogogo',
 			'connect', 'connexion', 'connecter', 'login', 'signin', 'sign in',
@@ -91,33 +104,40 @@ function AuthLogic() {
 			'pourquoi pas', 'why not', 'avec plaisir', 'volontiers', 'banco'
 		];
 
+		console.log('✅ Test des variantes...');
+		
 		// Vérifier si l'input correspond à une variante
 		for (const variant of positiveVariants) {
+			console.log(`✅ Test variant: "${variant}" vs "${normalizedInput}"`);
+			
 			if (normalizedInput === variant) {
-				console.log('✅ Match positif exact trouvé:', variant);
+				console.log(`✅ ✨ MATCH EXACT trouvé: "${variant}"`);
 				return true;
 			}
 			if (normalizedInput.includes(variant)) {
-				console.log('✅ Match positif par inclusion trouvé:', variant);
+				console.log(`✅ ✨ MATCH PAR INCLUSION trouvé: "${variant}"`);
 				return true;
 			}
 			// Gérer les fautes de frappe courantes avec distance de Levenshtein simple
 			if (variant.length > 2 && isCloseMatch(normalizedInput, variant)) {
-				console.log('✅ Match positif fuzzy trouvé:', variant);
+				console.log(`✅ ✨ MATCH FUZZY trouvé: "${variant}"`);
 				return true;
 			}
 		}
 		
-		console.log('✅ Aucun match positif trouvé');
+		console.log('✅ ❌ Aucun match positif trouvé');
+		console.log('✅ === FIN DEBUG DETECTION POSITIVE ===');
 		return false;
 	};// Fonction pour détecter si l'utilisateur refuse de se connecter
 	const detectNegativeResponse = (input: string): boolean => {
 		const normalizedInput = input.toLowerCase().trim();
-		console.log('🚫 Début détection négative pour:', `"${normalizedInput}"`);
+		console.log('🚫 === DEBUG DETECTION NEGATIVE ===');
+		console.log('🚫 Input reçu:', `"${input}"`);
+		console.log('🚫 Input normalisé:', `"${normalizedInput}"`);
 		
 		// Test le plus simple d'abord - juste "non"
 		if (normalizedInput === 'non') {
-			console.log('🚫 Match exact "non" trouvé');
+			console.log('🚫 ✨ MATCH DIRECT "non" trouvé !');
 			return true;
 		}
 		
@@ -132,27 +152,33 @@ function AuthLogic() {
 			'annuler', 'cancel', 'abort', 'stop', 'arrêt', 'arret'
 		];
 
+		console.log('🚫 Test des variantes...');
+
 		// Test strict d'abord (correspondance exacte et inclusion)
 		for (const variant of negativeVariants) {
+			console.log(`🚫 Test variant: "${variant}" vs "${normalizedInput}"`);
+			
 			if (normalizedInput === variant) {
-				console.log('🚫 Match exact trouvé:', variant);
+				console.log(`🚫 ✨ MATCH EXACT trouvé: "${variant}"`);
 				return true;
 			}
 			if (normalizedInput.includes(variant)) {
-				console.log('🚫 Match par inclusion trouvé:', variant);
+				console.log(`🚫 ✨ MATCH PAR INCLUSION trouvé: "${variant}"`);
 				return true;
 			}
 		}
 
 		// Puis test avec Levenshtein seulement pour les mots longs
+		console.log('🚫 Test fuzzy matching...');
 		for (const variant of negativeVariants) {
 			if (variant.length > 3 && isCloseMatch(normalizedInput, variant)) {
-				console.log('🚫 Match fuzzy trouvé:', variant);
+				console.log(`🚫 ✨ MATCH FUZZY trouvé: "${variant}"`);
 				return true;
 			}
 		}
 		
-		console.log('🚫 Aucun match négatif trouvé');
+		console.log('🚫 ❌ Aucun match négatif trouvé');
+		console.log('🚫 === FIN DEBUG DETECTION NEGATIVE ===');
 		return false;
 	};
 
@@ -193,28 +219,37 @@ function AuthLogic() {
 		addMessage('user', input);
 		setIsLoading(true);
 
-		// Debug: afficher les détections
-		console.log('🔍 === DEBUT DEBUG ===');
-		console.log('🔍 Input original:', `"${input}"`);
-		console.log('🔍 Input normalisé:', `"${input.toLowerCase().trim()}"`);
+		// Debug ultra-détaillé
+		console.log('🔍 === DEBUT DEBUG COMPLET ===');
+		console.log('🔍 Input brut reçu:', input);
+		console.log('🔍 Type de input:', typeof input);
+		console.log('🔍 Longueur input:', input.length);
+		console.log('🔍 Input avec caractères visibles:', JSON.stringify(input));
 		console.log('🔍 AuthStep actuel:', authStep);
 		
 		const normalizedInput = input.toLowerCase().trim();
+		console.log('🔍 Input après normalisation:', JSON.stringify(normalizedInput));
+		console.log('🔍 Longueur après normalisation:', normalizedInput.length);
+		
+		// Tests directs
+		console.log('🔍 === TESTS DIRECTS ===');
+		console.log('🔍 Test "oui":', normalizedInput === 'oui');
+		console.log('🔍 Test "ouais":', normalizedInput === 'ouais');
+		console.log('🔍 Test "ouai":', normalizedInput === 'ouai');
+		console.log('🔍 Test "yes":', normalizedInput === 'yes');
+		console.log('🔍 Test "non":', normalizedInput === 'non');
+		
 		const isPositive = detectPositiveResponse(input);
 		const isNegative = detectNegativeResponse(input);
 		
+		console.log('🔍 === RESULTATS FINAUX ===');
 		console.log('🔍 Résultat détection positive:', isPositive);
 		console.log('🔍 Résultat détection négative:', isNegative);
+		console.log('🔍 === FIN DEBUG COMPLET ===');
 		
-		// Test manuel pour "non"
-		if (normalizedInput === 'non') {
-			console.log('🔍 TEST MANUEL: "non" détecté directement');
-		}
-		
-		console.log('🔍 === FIN DEBUG ===');
-				try {
+		try {
 			if (authStep === 'welcome') {
-				// Test ultra-simple pour "non" en premier
+				// Tests ultra-simples en premier
 				if (normalizedInput === 'non') {
 					console.log('🎯 DETECTION DIRECTE: "non" trouvé - redirection immédiate');
 					addMessage('assistant', 'Très bien ! Je vous redirige vers le chat principal. À bientôt ! 👋');
@@ -224,16 +259,23 @@ function AuthLogic() {
 					return;
 				}
 				
+				if (normalizedInput === 'oui' || normalizedInput === 'ouais' || normalizedInput === 'ouai') {
+					console.log('🎯 DETECTION DIRECTE: réponse positive trouvée - passage à email');
+					addMessage('assistant', 'Parfait ! Quelle est votre adresse email ?');
+					setAuthStep('email');
+					return;
+				}
+				
 				// Puis les détections normales
 				if (isNegative) {
-					console.log('✅ NEGATIVE détecté - redirection vers chat');
+					console.log('✅ NEGATIVE détecté par fonction - redirection vers chat');
 					addMessage('assistant', 'Très bien ! Je vous redirige vers le chat principal. À bientôt ! 👋');
 					setTimeout(() => {
 						router.push('/chat');
 					}, 2000);
-					return; // Important: arrêter l'exécution ici
+					return;
 				} else if (isPositive) {
-					console.log('✅ POSITIVE détecté - passage à email');
+					console.log('✅ POSITIVE détecté par fonction - passage à email');
 					addMessage('assistant', 'Parfait ! Quelle est votre adresse email ?');
 					setAuthStep('email');
 				} else {
