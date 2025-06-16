@@ -13,12 +13,14 @@
 					"type": "serial",
 					"primaryKey": true,
 					"notNull": true
-				},				"email": {
+				},
+				"email": {
 					"name": "email",
 					"type": "text",
 					"primaryKey": false,
 					"notNull": true
-				},				"questionnaire": {
+				},
+				"questionnaire": {
 					"name": "questionnaire",
 					"type": "jsonb",
 					"primaryKey": false,
@@ -54,6 +56,226 @@
 					"name": "users_table_email_unique"
 				}
 			},
+			"checkConstraints": {},
+			"policies": {},
+			"isRLSEnabled": false
+		},
+		"public.meditation_history": {
+			"name": "meditation_history",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"prompt": {
+					"name": "prompt",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"duration": {
+					"name": "duration",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"voice_gender": {
+					"name": "voice_gender",
+					"type": "varchar(10)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"guidance_level": {
+					"name": "guidance_level",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"background_sound": {
+					"name": "background_sound",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"goal": {
+					"name": "goal",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"audio_url": {
+					"name": "audio_url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"idx_meditation_history_user_id": {
+					"name": "idx_meditation_history_user_id",
+					"columns": ["user_id"],
+					"isUnique": false
+				}
+			},
+			"foreignKeys": {
+				"meditation_history_user_id_users_table_id_fk": {
+					"name": "meditation_history_user_id_users_table_id_fk",
+					"tableFrom": "meditation_history",
+					"tableTo": "users_table",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {},
+			"isRLSEnabled": false
+		},
+		"public.meditation_favorites": {
+			"name": "meditation_favorites",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"meditation_id": {
+					"name": "meditation_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"idx_meditation_favorites_user_id": {
+					"name": "idx_meditation_favorites_user_id",
+					"columns": ["user_id"],
+					"isUnique": false
+				}
+			},
+			"foreignKeys": {
+				"meditation_favorites_user_id_users_table_id_fk": {
+					"name": "meditation_favorites_user_id_users_table_id_fk",
+					"tableFrom": "meditation_favorites",
+					"tableTo": "users_table",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"meditation_favorites_meditation_id_meditation_history_id_fk": {
+					"name": "meditation_favorites_meditation_id_meditation_history_id_fk",
+					"tableFrom": "meditation_favorites",
+					"tableTo": "meditation_history",
+					"columnsFrom": ["meditation_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"meditation_favorites_user_id_meditation_id_unique": {
+					"columns": ["user_id", "meditation_id"],
+					"nullsNotDistinct": false,
+					"name": "meditation_favorites_user_id_meditation_id_unique"
+				}
+			},
+			"checkConstraints": {},
+			"policies": {},
+			"isRLSEnabled": false
+		},
+		"public.meditation_analytics": {
+			"name": "meditation_analytics",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"meditation_id": {
+					"name": "meditation_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"play_count": {
+					"name": "play_count",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false,
+					"default": 0
+				},
+				"total_play_time": {
+					"name": "total_play_time",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false,
+					"default": 0
+				},
+				"last_played_at": {
+					"name": "last_played_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {
+				"idx_meditation_analytics_meditation_id": {
+					"name": "idx_meditation_analytics_meditation_id",
+					"columns": ["meditation_id"],
+					"isUnique": false
+				}
+			},
+			"foreignKeys": {
+				"meditation_analytics_meditation_id_meditation_history_id_fk": {
+					"name": "meditation_analytics_meditation_id_meditation_history_id_fk",
+					"tableFrom": "meditation_analytics",
+					"tableTo": "meditation_history",
+					"columnsFrom": ["meditation_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
 			"checkConstraints": {},
 			"policies": {},
 			"isRLSEnabled": false
