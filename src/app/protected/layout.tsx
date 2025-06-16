@@ -53,18 +53,34 @@ export default function ProtectedLayout({
 	// Hooks pour la navigation et l'authentification
 	const router = useRouter();
 	const supabase = createClient();
-
 	useEffect(() => {
 		/**
 		 * Vérifie l'authentification de l'utilisateur
 		 * Redirige vers la page de connexion si non authentifié
-		 */		const getUser = async () => {
+		 * Bypass pour développeurs en mode développement
+		 */		
+		const getUser = async () => {
+			// Bypass pour développeurs en mode développement
+			if (process.env.NODE_ENV === 'development') {
+				// Vous pouvez créer un utilisateur mockup pour le développement
+				const isDeveloper = localStorage.getItem('neiji_dev_mode') === 'true';
+				if (isDeveloper) {
+					setUser({
+						id: 'dev-user',
+						email: 'dev@neiji.com',
+						// ...autres propriétés mockées
+					} as User);
+					setLoading(false);
+					return;
+				}
+			}
+
 			// Récupération des données utilisateur depuis Supabase
 			const { data: { user } } = await supabase.auth.getUser();
 			
-			// Redirection si utilisateur non authentifié
+			// Redirection si utilisateur non authentifié - utilise notre système d'auth conversationnel
 			if (!user) {
-				router.push("/auth/login");
+				router.push("/auth");
 				return;
 			}
 
@@ -75,11 +91,11 @@ export default function ProtectedLayout({
 		getUser();
 	}, [router, supabase]);	/**
 	 * Gère la déconnexion de l'utilisateur
-	 * Supprime la session et redirige vers la page de connexion
+	 * Supprime la session et redirige vers la page d'accueil
 	 */
 	const handleSignOut = async () => {
 		await supabase.auth.signOut();
-		router.push("/auth/login");
+		router.push("/chat"); // Retourne au chat landing au lieu de forcer la connexion
 	};
 
 	/**

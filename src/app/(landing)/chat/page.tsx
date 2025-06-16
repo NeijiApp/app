@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect } from "react";
+import { User } from "lucide-react";
 
 import { BotMessage } from "./_components/bot-message";
 import { Chat } from "./_components/chat";
@@ -51,9 +53,18 @@ function ChatLogic() {
 			}
 		};
 	}, [status]);
-
 	return (
 		<Chat>
+			{/* Bouton d'authentification discret */}
+			<div className="absolute top-4 right-4 z-10">
+				<Link href="/auth">
+					<button className="flex items-center gap-2 px-3 py-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white/90 transition-all duration-200 shadow-sm group">
+						<User className="w-4 h-4 text-gray-600 group-hover:text-orange-500" />
+						<span className="text-sm text-gray-600 group-hover:text-orange-500">Se connecter</span>
+					</button>
+				</Link>
+			</div>
+
 			<div className="container relative z-0 mx-auto space-y-4 px-4 pt-8 pb-30 sm:px-6">
 				{allMessages.length === 0 ? (
 					<div className="flex h-full flex-col items-center justify-center gap-4 pt-40 text-center">

@@ -4,11 +4,12 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import { DevModeToggle } from "~/components/dev-mode-toggle";
 
 export const metadata: Metadata = {
 	title: "Neiji",
 	description: "The first meditation avaible to everyone",
-	icons: [{ rel: "icon", url: "/logo.png" }],
+	icons: [{ rel: "icon", url: "/NeijiHeadLogo1.4.png" }],
 	openGraph: {
 		title: "Neiji - Meditation for Everyone",
 		description: "The first meditation avaible to everyone",
@@ -44,6 +45,7 @@ export default function RootLayout({
 		<html lang="en" className={`${roboto.variable}`}>
 			<body>
 				<TRPCReactProvider>{children}</TRPCReactProvider>
+				<DevModeToggle />
 			</body>
 		</html>
 	);
