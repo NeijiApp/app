@@ -13,10 +13,12 @@ interface BotMessageProps {
 }
 
 export function BotMessage({ message }: BotMessageProps) {
-	const [displayedText, setDisplayedText] = useState("");
+        const [displayedText, setDisplayedText] = useState("");
+        const [visible, setVisible] = useState(false);
 
-	useEffect(() => {
-		if (message.content.trim().length === 0) return;
+        useEffect(() => {
+                setVisible(true);
+                if (message.content.trim().length === 0) return;
 
 		let currentIndex = 0;
 		const text = message.content;
@@ -41,7 +43,7 @@ export function BotMessage({ message }: BotMessageProps) {
 	if (message.content.trim().length === 0) return null;
 
 	return (
-		<div className="relative pt-10">
+                <div className={cn("relative pt-10 transition-opacity duration-500", visible ? "opacity-100" : "opacity-0")}>
 			<div className="absolute top-1 flex items-center gap-1">
 				<Image
 					src="/NeijiHeadLogo1.4.png"
