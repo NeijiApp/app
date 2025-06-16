@@ -1,10 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft } from "lucide-react";
 import { createClient } from "~/utils/supabase/client";
 
 import { BotMessage } from "../chat/_components/bot-message";
@@ -310,18 +308,9 @@ function AuthLogic() {
 			setIsLoading(false);
 		}
 	};
-
 	return (
 		<Chat>
-			{/* Bouton retour (même style que le bouton Se connecter) */}
-			<div className="absolute top-4 right-4 z-10">
-				<Link href="/chat">
-					<button className="flex items-center gap-2 px-3 py-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white/90 transition-all duration-200 shadow-sm group">
-						<ArrowLeft className="w-4 h-4 text-gray-600 group-hover:text-orange-500" />
-						<span className="text-sm text-gray-600 group-hover:text-orange-500">Retour au chat</span>
-					</button>
-				</Link>
-			</div>			<div className="container relative z-0 mx-auto space-y-4 px-4 pt-8 pb-30 sm:px-6">
+			<div className="container relative z-0 mx-auto space-y-4 px-4 pt-8 pb-30 sm:px-6">
 				{authMessages.length === 0 ? (
 					<div className="flex h-full flex-col items-center justify-center gap-4 pt-40 text-center">
 						<Image
