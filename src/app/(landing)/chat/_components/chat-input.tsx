@@ -248,37 +248,34 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 								onKeyDown={(e) => {
 									if (e.key === "Enter" && !e.shiftKey) {
 										e.preventDefault();
-										finalHandleSubmit(e as any);
+										finalHandleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
 									}
 								}}
 								onFocus={onChatFocus}
-								placeholder={
-									meditationMode 
-										? "Describe your meditation..." 
-										: messages.length === 0 
-											? "Ask Neiji" 
-											: "Message"
-								}
-								className="h-14 w-full rounded-full border-none bg-white pr-14 pl-5 text-base focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/50 md:text-md"
+								placeholder={meditationMode ? "Describe your ideal meditation..." : "Ask me anything..."}
+								className="h-12 w-full rounded-full border-orange-200 bg-white/80 pl-6 pr-14 text-base transition-all focus:bg-white focus:ring-2 focus:ring-orange-300"
 							/>
-
-							<Button
-								disabled={isLoading || (!meditationMode && input.length === 0)}
-								type="submit"
-								size="icon"
-								className="-translate-y-1/2 absolute top-1/2 right-1.5 z-10 size-11 rounded-full p-2 text-white transition-all duration-300"
-								style={{
-									backgroundColor: meditationMode ? '#f97316' : '#3b82f6',
-								}}
-							>
+							<div className="absolute right-3 top-1/2 -translate-y-1/2">
 								{isLoading ? (
-									<Ban className="size-6 animate-spin" />
-								) : meditationMode ? (
-									<Sparkles className="size-6" />
+									<Button
+										type="button"
+										size="icon"
+										className="size-9 flex-shrink-0 rounded-full bg-orange-200 text-orange-500"
+										onClick={stop}
+									>
+										<Ban className="size-5 animate-spin" />
+									</Button>
 								) : (
-									<SendHorizonal className="size-6" />
+									<Button
+										type="submit"
+										size="icon"
+										className="size-9 flex-shrink-0 rounded-full bg-orange-500 text-white hover:bg-orange-600"
+										disabled={!input.trim()}
+									>
+										{meditationMode ? <Sparkles className="size-5" /> : <SendHorizonal className="size-5" />}
+									</Button>
 								)}
-							</Button>
+							</div>
 						</form>
 					</div>
 				</div>
