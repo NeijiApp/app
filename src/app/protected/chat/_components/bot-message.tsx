@@ -13,24 +13,30 @@ interface BotMessageProps {
 }
 
 export function BotMessage({ message }: BotMessageProps) {
-	const [displayedText, setDisplayedText] = useState("");
+        const [displayedText, setDisplayedText] = useState("");
+        const [visible, setVisible] = useState(false);
 
-	useEffect(() => {
-		if (message.content.trim().length === 0) return;
+    	useEffect(() => {
+                setVisible(true);
+                if (message.content.trim().length === 0) return;
 
 		let currentIndex = 0;
 		const text = message.content;
 		let cancelled = false;
+		
+		// Réinitialiser le texte affiché
+		setDisplayedText("");
 
 		function showNextChar() {
 			if (cancelled) return;
-			if (currentIndex < text.length - 1) {
-				setDisplayedText((prev) => prev + text[currentIndex]);
+			if (currentIndex < text.length) {
+				setDisplayedText(text.substring(0, currentIndex + 1));
 				currentIndex++;
 				setTimeout(showNextChar, 15); // Adjust speed here (ms per letter)
 			}
 		}
 
+		// Commencer immédiatement
 		showNextChar();
 
 		return () => {
@@ -41,7 +47,7 @@ export function BotMessage({ message }: BotMessageProps) {
 	if (message.content.trim().length === 0) return null;
 
 	return (
-		<div className="relative pt-10">
+                <div className={cn("relative pt-10 transition-opacity duration-500", visible ? "opacity-100" : "opacity-0")}>
 			<div className="absolute top-1 flex items-center gap-1">
 				<Image
 					src="/NeijiHeadLogo1.4.png"

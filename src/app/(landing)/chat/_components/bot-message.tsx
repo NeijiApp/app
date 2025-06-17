@@ -16,23 +16,27 @@ export function BotMessage({ message }: BotMessageProps) {
         const [displayedText, setDisplayedText] = useState("");
         const [visible, setVisible] = useState(false);
 
-        useEffect(() => {
+    	useEffect(() => {
                 setVisible(true);
                 if (message.content.trim().length === 0) return;
 
 		let currentIndex = 0;
 		const text = message.content;
 		let cancelled = false;
+		
+		// Réinitialiser le texte affiché
+		setDisplayedText("");
 
 		function showNextChar() {
 			if (cancelled) return;
-			if (currentIndex < text.length - 1) {
-				setDisplayedText((prev) => prev + text[currentIndex]);
+			if (currentIndex < text.length) {
+				setDisplayedText(text.substring(0, currentIndex + 1));
 				currentIndex++;
 				setTimeout(showNextChar, 15); // Adjust speed here (ms per letter)
 			}
 		}
 
+		// Commencer immédiatement
 		showNextChar();
 
 		return () => {
