@@ -211,10 +211,43 @@ function AuthLogic() {
 				j++;
 			}
 		}
-		
-		differences += Math.abs(longer.length - shorter.length);
+				differences += Math.abs(longer.length - shorter.length);
 		return differences <= 2;
-	};	const handleUserInput = async (input: string) => {
+	};
+
+	/**
+	 * Crée un profil utilisateur dans la table users_table
+	 * Initialise les champs de mémoire IA pour le nouveau utilisateur
+	 * 
+	 * @param email - Email de l'utilisateur pour lequel créer le profil
+	 * @returns Promise<void>
+	 */	const createUserProfile = async (email: string) => {
+		try {
+			console.log('🔄 Création du profil utilisateur pour:', email);
+			// Insertion du profil utilisateur avec les champs de mémoire IA initialisés
+			const { error } = await supabase
+				.from("users_table")
+				.insert([
+					{
+						email,
+						memory_L0: "", // Mémoire immédiate
+						memory_L1: "", // Mémoire court terme
+						memory_L2: "", // Mémoire long terme
+						questionnaire: {}, // Profil de personnalité pour l'entraînement de l'IA (objet JSON vide)
+					},
+				]);
+
+			if (error) {
+				console.error("❌ Erreur lors de la création du profil:", error);
+			} else {
+				console.log('✅ Profil utilisateur créé avec succès pour:', email);
+			}
+		} catch (err) {
+			console.error("❌ Erreur:", err);
+		}
+	};
+
+	const handleUserInput = async (input: string) => {
 		// Ajouter le message utilisateur
 		addMessage('user', input);
 		setIsLoading(true);
@@ -286,43 +319,30 @@ function AuthLogic() {
 				if (!emailRegex.test(input)) {
 					addMessage('assistant', 'Hmm, cet email ne semble pas valide. Pouvez-vous le retaper ? (exemple: nom@exemple.com)');
 					return;
-				}
+				}				setAuthData(prev => ({ ...prev, email: input }));
 
-				setAuthData(prev => ({ ...prev, email: input }));
+				// Vérifier si l'utilisateur existe dans la table users_table
+				console.log('🔍 Recherche utilisateur pour email:', input);
+				const { data: existingUser, error: dbError } = await supabase
+					.from('users_table')
+					.select('email')
+					.eq('email', input)
+					.single();
 
-				// Méthode plus simple : essayer de se connecter avec un mot de passe temporaire incorrect
-				// pour détecter si l'utilisateur existe
-				const { error } = await supabase.auth.signInWithPassword({
-					email: input,
-					password: 'temporary_wrong_password_12345'
-				});
+				console.log('🔍 Résultat recherche:', { existingUser, dbError });
 
-				// Analyser le type d'erreur pour déterminer si l'email existe
-				if (error) {
-					if (error.message.includes('Invalid login credentials') || 
-						error.message.includes('Wrong password') ||
-						error.message.includes('Email not confirmed')) {
-						// L'email existe mais le mot de passe est incorrect (normal)
-						setAuthData(prev => ({ ...prev, isExistingUser: true }));
-						addMessage('assistant', `Bonjour ! Je vous reconnais. Quel est votre mot de passe ?`);
-						setAuthStep('password');
-					} else if (error.message.includes('User not found') || 
-							   error.message.includes('Email not found')) {
-						// L'email n'existe pas
-						setAuthData(prev => ({ ...prev, isExistingUser: false }));
-						addMessage('assistant', `Je ne vous connais pas encore ! Créons votre compte. Choisissez un mot de passe sécurisé (au moins 8 caractères avec lettres et chiffres).`);
-						setAuthStep('signup');
-					} else {
-						// Erreur ambiguë - on assume que l'utilisateur existe
-						console.log('Erreur auth ambiguë:', error.message);
-						setAuthData(prev => ({ ...prev, isExistingUser: true }));
-						addMessage('assistant', `Bonjour ! Je vous reconnais. Quel est votre mot de passe ?`);
-						setAuthStep('password');
-					}
+				if (existingUser) {
+					// Utilisateur existant trouvé dans la base de données
+					console.log('✅ Utilisateur existant trouvé');
+					setAuthData(prev => ({ ...prev, isExistingUser: true }));
+					addMessage('assistant', `Bonjour ! Je vous reconnais. Quel est votre mot de passe ?`);
+					setAuthStep('password');
 				} else {
-					// Connexion réussie (cas très improbable avec le mot de passe temporaire)
-					addMessage('assistant', 'Connexion réussie ! Redirection...');
-					setTimeout(() => router.push('/protected/chat'), 1500);
+					// Utilisateur non trouvé dans la base de données
+					console.log('❌ Utilisateur non trouvé, création d\'un nouveau compte');
+					setAuthData(prev => ({ ...prev, isExistingUser: false }));
+					addMessage('assistant', `Je ne vous connais pas encore ! Créons votre compte. Choisissez un mot de passe sécurisé (au moins 8 caractères avec lettres et chiffres).`);
+					setAuthStep('signup');
 				}
 			} else if (authStep === 'password') {
 				const { error } = await supabase.auth.signInWithPassword({
@@ -346,16 +366,15 @@ function AuthLogic() {
 				if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(input)) {
 					addMessage('assistant', 'Votre mot de passe doit contenir à la fois des lettres et des chiffres pour plus de sécurité. Réessayez !');
 					return;
-				}
-
-				const { error } = await supabase.auth.signUp({
+				}				const { error } = await supabase.auth.signUp({
 					email: authData.email,
 					password: input
-				});
-
-				if (error) {
+				});				if (error) {
 					addMessage('assistant', `Désolé, il y a eu un problème : ${error.message}. Pouvez-vous réessayer ?`);
 				} else {
+					// Créer le profil utilisateur dans la table users_table
+					console.log('✅ Inscription réussie, création du profil pour:', authData.email);
+					await createUserProfile(authData.email);
 					addMessage('assistant', 'Excellent ! Votre compte a été créé. Bienvenue dans la communauté Neiji ! 🌟');
 					setTimeout(() => {
 						router.push('/protected/chat');
