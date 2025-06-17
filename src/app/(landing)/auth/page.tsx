@@ -246,10 +246,12 @@ function AuthLogic() {
 			console.error("❌ Erreur:", err);
 		}
 	};
-
 	const handleUserInput = async (input: string) => {
-		// Ajouter le message utilisateur
-		addMessage('user', input);
+		// Ajouter le message utilisateur (masquer le mot de passe dans le chat)
+		const displayText = (authStep === 'password' || authStep === 'signup') 
+			? '•'.repeat(input.length) 
+			: input;
+		addMessage('user', displayText);
 		setIsLoading(true);
 
 		// Debug ultra-détaillé

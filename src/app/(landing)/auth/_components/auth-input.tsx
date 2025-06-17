@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, SendHorizonal } from "lucide-react";
+import { ArrowLeft, SendHorizonal, Eye, EyeOff } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 
@@ -20,14 +20,24 @@ export function AuthInput({
 	placeholder, 
 	isPassword = false, 
 	onFocus 
-}: AuthInputProps) {
-	const [input, setInput] = useState("");
+}: AuthInputProps) {	const [input, setInput] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
+	
+	// Réinitialiser la visibilité du mot de passe quand isPassword change
+	useEffect(() => {
+		setShowPassword(false);
+	}, [isPassword]);
+	
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (input.trim() && !disabled) {
 			onSend(input.trim());
 			setInput("");
 		}
+	};
+
+	const togglePasswordVisibility = () => {
+		setShowPassword(!showPassword);
 	};
 
 	return (
@@ -45,12 +55,10 @@ export function AuthInput({
 							>
 								<ArrowLeft className="size-6" />
 							</Button>
-						</Link>
-
-						<form onSubmit={handleSubmit} className="relative flex-1">
+						</Link>						<form onSubmit={handleSubmit} className="relative flex-1">
 							<Input
 								disabled={disabled}
-								type={isPassword ? "password" : "text"}
+								type={isPassword && !showPassword ? "password" : "text"}
 								value={input}
 								onChange={(e) => setInput(e.target.value)}
 								onKeyDown={(e) => {
@@ -61,8 +69,26 @@ export function AuthInput({
 								}}
 								onFocus={onFocus}
 								placeholder={placeholder}
-								className="h-14 w-full rounded-full border-none bg-white pr-14 pl-5 text-base focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/50 md:text-md"
+								className={`h-14 w-full rounded-full border-none bg-white pl-5 text-base focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/50 md:text-md ${
+									isPassword ? "pr-24" : "pr-14"
+								}`}
 							/>
+
+							{/* Bouton œil pour les mots de passe */}
+							{isPassword && (
+								<Button
+									type="button"
+									size="icon"
+									onClick={togglePasswordVisibility}
+									className="-translate-y-1/2 absolute top-1/2 right-14 z-10 size-8 rounded-full p-1 text-gray-500 hover:text-gray-700 bg-transparent hover:bg-gray-100 transition-all duration-300"
+								>
+									{showPassword ? (
+										<EyeOff className="size-4" />
+									) : (
+										<Eye className="size-4" />
+									)}
+								</Button>
+							)}
 
 							<Button
 								disabled={disabled || input.length === 0}
