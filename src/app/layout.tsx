@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
-import { DevModeToggle } from "~/components/dev-mode-toggle";
 
 export const metadata: Metadata = {
 	title: "Neiji",
@@ -45,7 +44,6 @@ export default function RootLayout({
 		<html lang="en" className={`${roboto.variable}`}>
 			<body>
 				<TRPCReactProvider>{children}</TRPCReactProvider>
-				<DevModeToggle />
 			</body>
 		</html>
 	);

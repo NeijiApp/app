@@ -15,8 +15,7 @@ import { AuthInput } from "./_components/auth-input";
 function AuthLogic() {
 	const router = useRouter();
 	const supabase = createClient();
-	
-	const [authStep, setAuthStep] = useState<'welcome' | 'email' | 'password' | 'signup'>('welcome');
+		const [authStep, setAuthStep] = useState<'welcome' | 'email' | 'password' | 'signup' | 'email-sent'>('welcome');
 	const [authData, setAuthData] = useState({
 		email: '',
 		password: '',
@@ -359,8 +358,7 @@ function AuthLogic() {
 					setTimeout(() => {
 						router.push('/protected/chat');
 					}, 2000);
-				}
-			} else if (authStep === 'signup') {
+				}			} else if (authStep === 'signup') {
 				if (input.length < 8) {
 					addMessage('assistant', 'Ce mot de passe est trop court. Il doit contenir au moins 8 caractères. Essayez encore !');
 					return;
@@ -368,19 +366,30 @@ function AuthLogic() {
 				if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(input)) {
 					addMessage('assistant', 'Votre mot de passe doit contenir à la fois des lettres et des chiffres pour plus de sécurité. Réessayez !');
 					return;
-				}				const { error } = await supabase.auth.signUp({
+				}
+				
+				const { error } = await supabase.auth.signUp({
 					email: authData.email,
 					password: input
-				});				if (error) {
-					addMessage('assistant', `Désolé, il y a eu un problème : ${error.message}. Pouvez-vous réessayer ?`);
-				} else {
+				});
+				
+				if (error) {
+					addMessage('assistant', `Désolé, il y a eu un problème : ${error.message}. Pouvez-vous réessayer ?`);				} else {
 					// Créer le profil utilisateur dans la table users_table
 					console.log('✅ Inscription réussie, création du profil pour:', authData.email);
 					await createUserProfile(authData.email);
-					addMessage('assistant', 'Excellent ! Votre compte a été créé. Bienvenue dans la communauté Neiji ! 🌟');
+					
+					// Passer à l'état "email envoyé"
+					setAuthStep('email-sent');
+					
+					// Message pour demander de vérifier l'email
+					addMessage('assistant', 'Parfait ! Votre compte a été créé avec succès ! 🎉');
 					setTimeout(() => {
-						router.push('/protected/chat');
-					}, 2000);
+						addMessage('assistant', `Un email de confirmation a été envoyé à ${authData.email}. Veuillez cliquer sur le lien dans l'email pour activer votre compte et accéder au chat ! 📧`);
+					}, 1500);
+					setTimeout(() => {
+						addMessage('assistant', 'Une fois votre email confirmé, vous pourrez profiter de toutes les fonctionnalités de méditation personnalisées ! ✨');
+					}, 3000);
 				}
 			}
 		} catch (error) {
@@ -417,20 +426,45 @@ function AuthLogic() {
 						}
 
 						return <BotMessage key={message.id} message={message} />;
-					})
-				)}
+					})				)}
 			</div>
 			
-			{/* AuthInput remplace ChatInput */}
+			{/* Message d'aide pour l'email de confirmation */}
+			{authStep === 'email-sent' && (
+				<div className="container mx-auto px-4 pb-4">
+					<div className="bg-orange-100 border border-orange-200 rounded-lg p-4 text-center">
+						<p className="text-orange-800 text-sm">
+							Vous n'avez pas reçu l'email ? Vérifiez vos spams ou{' '}
+							<button 
+								onClick={async () => {
+									const { error } = await supabase.auth.resend({
+										type: 'signup',
+										email: authData.email
+									});
+									if (!error) {
+										addMessage('assistant', 'Email de confirmation renvoyé ! 📧');
+									}
+								}}
+								className="text-orange-600 underline hover:text-orange-700"
+							>
+								cliquez ici pour le renvoyer
+							</button>
+						</p>
+					</div>
+				</div>
+			)}
+			
+					{/* AuthInput remplace ChatInput */}
 			<AuthInput
 				onSend={handleUserInput}
-				disabled={isLoading}
+				disabled={isLoading || authStep === 'email-sent'}
 				isPassword={authStep === 'password' || authStep === 'signup'}
 				placeholder={
 					authStep === 'welcome' ? "Tapez 'oui' pour vous connecter..." :
 					authStep === 'email' ? "Votre adresse email..." :
 					authStep === 'password' ? "Votre mot de passe..." :
 					authStep === 'signup' ? "Choisissez un mot de passe..." :
+					authStep === 'email-sent' ? "Vérifiez vos emails pour continuer..." :
 					"Tapez votre message..."
 				}
 				onFocus={() => {
