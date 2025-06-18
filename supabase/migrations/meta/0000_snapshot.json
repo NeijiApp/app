@@ -273,6 +273,76 @@
 					"onDelete": "no action",
 					"onUpdate": "no action"
 				}
+			},			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {},
+			"isRLSEnabled": false
+		},
+		"public.conversation_history": {
+			"name": "conversation_history",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"message_content": {
+					"name": "message_content",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"message_role": {
+					"name": "message_role",
+					"type": "varchar(20)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"audio_url": {
+					"name": "audio_url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"idx_conversation_history_user_id": {
+					"name": "idx_conversation_history_user_id",
+					"columns": ["user_id"],
+					"isUnique": false
+				},
+				"idx_conversation_history_created_at": {
+					"name": "idx_conversation_history_created_at",
+					"columns": ["created_at"],
+					"isUnique": false
+				}
+			},
+			"foreignKeys": {
+				"conversation_history_user_id_users_table_id_fk": {
+					"name": "conversation_history_user_id_users_table_id_fk",
+					"tableFrom": "conversation_history",
+					"tableTo": "users_table",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
 			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},

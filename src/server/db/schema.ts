@@ -45,7 +45,22 @@ export const meditationAnalytics = pgTable("meditation_analytics", (t) => ({
 	meditationIdIdx: index("idx_meditation_analytics_meditation_id").on(table.meditation_id),
 }));
 
+export const conversationHistory = pgTable("conversation_history", (t) => ({
+	id: t.serial().primaryKey(),
+	user_id: t.integer().references(() => usersTable.id).notNull(),
+	message_content: t.text().notNull(),
+	message_role: t.varchar({ length: 20 }).notNull(), // 'user' ou 'assistant'
+	audio_url: t.text(), // pour les méditations (nullable)
+	created_at: t.timestamp().defaultNow(),
+}), (table) => ({
+	userIdIdx: index("idx_conversation_history_user_id").on(table.user_id),
+	createdAtIdx: index("idx_conversation_history_created_at").on(table.created_at),
+}));
+
 export const InsertUserSchema = createInsertSchema(usersTable);
 
 export type InsertUser = typeof usersTable.$inferInsert;
 export type SelectUser = typeof usersTable.$inferSelect;
+
+export type InsertConversationHistory = typeof conversationHistory.$inferInsert;
+export type SelectConversationHistory = typeof conversationHistory.$inferSelect;
