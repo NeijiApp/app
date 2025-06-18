@@ -28,7 +28,7 @@ function generateContent({
 
 				// For each chunk of data coming from the streaming endpoint,
 				// enqueue it into the controller
-				for await (const chunk of response) {
+				for await (const chunk of response as any) {
 					const content = chunk?.choices?.[0]?.delta?.content;
 					if (content) {
 						controller.enqueue(encoder.encode(content));
