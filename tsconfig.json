@@ -38,5 +38,18 @@
 		"**/*.js",
 		".next/types/**/*.ts"
 	],
-	"exclude": ["node_modules"]
+	"exclude": [
+		"node_modules",
+		"debug-conversation.js",
+		"clean-test-messages.js",
+		"check-tables.js",
+		"inspect-database.js",
+		"test-*.js",
+		"track-user-messages.js",
+		"useEffect-corrected.tsx",
+		"test-supabase-connection.js",
+		"test-conversation-history.js",
+		"test-db.js",
+		"*.sql"
+	]
 }

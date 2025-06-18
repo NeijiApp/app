@@ -69,7 +69,7 @@ export async function* parseTextContent(stream: ReadableStream<Uint8Array>) {
                         const directive = buffer.slice(startIndex, endIndex + 1);
                         // Example: "[pause: 3s]" or "[pause 3]"
                         const match = directive.match(/\[pause[:\s]+([^\]]+)\]/i);
-                        if (match) {
+                        if (match && match[1]) {
                                 const seconds = parseDuration(match[1]);
                                 yield seconds; // yield the numeric pause
                         }

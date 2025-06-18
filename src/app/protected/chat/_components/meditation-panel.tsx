@@ -269,6 +269,4 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
       </div>
     </TooltipProvider>
   );
-}
-
-export { type MeditationParams }; 
+} 

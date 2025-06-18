@@ -5,7 +5,7 @@ export function parseDuration(input: string): number {
     const parsed = parseFloat(trimmed);
     return isNaN(parsed) ? 0 : parsed;
   }
-  const value = parseFloat(match[1]);
+  const value = parseFloat(match[1] ?? '0');
   const unit = match[2] ?? 's';
   switch (unit) {
     case 'ms':
