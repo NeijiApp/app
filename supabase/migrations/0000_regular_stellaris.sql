@@ -49,6 +49,23 @@ CREATE TABLE "conversation_history" (
 	"created_at" timestamp DEFAULT now()
 );
 
+-- Table de cache pour les segments audio (phrases individuelles)
+CREATE TABLE "audio_segments_cache" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"text_content" text NOT NULL,
+	"text_hash" varchar(64) NOT NULL,
+	"voice_id" varchar(50) NOT NULL,
+	"voice_gender" varchar(10) NOT NULL,
+	"voice_style" varchar(20) NOT NULL,
+	"audio_url" text NOT NULL,
+	"audio_duration" integer,
+	"file_size" integer,
+	"usage_count" integer DEFAULT 1,
+	"created_at" timestamp DEFAULT now(),
+	"last_used_at" timestamp DEFAULT now(),
+	CONSTRAINT "audio_segments_cache_unique_segment" UNIQUE("text_hash", "voice_id", "voice_style")
+);
+
 -- Contraintes de clé étrangère
 ALTER TABLE "meditation_history" ADD CONSTRAINT "meditation_history_user_id_users_table_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users_table"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "meditation_favorites" ADD CONSTRAINT "meditation_favorites_user_id_users_table_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users_table"("id") ON DELETE no action ON UPDATE no action;
@@ -62,4 +79,8 @@ CREATE INDEX "idx_meditation_favorites_user_id" ON "meditation_favorites" USING 
 CREATE INDEX "idx_meditation_analytics_meditation_id" ON "meditation_analytics" USING btree ("meditation_id");
 CREATE INDEX "idx_conversation_history_user_id" ON "conversation_history" USING btree ("user_id");
 CREATE INDEX "idx_conversation_history_created_at" ON "conversation_history" USING btree ("created_at");
+CREATE INDEX "idx_audio_segments_cache_text_hash" ON "audio_segments_cache" USING btree ("text_hash");
+CREATE INDEX "idx_audio_segments_cache_voice_id" ON "audio_segments_cache" USING btree ("voice_id");
+CREATE INDEX "idx_audio_segments_cache_usage_count" ON "audio_segments_cache" USING btree ("usage_count" DESC);
+CREATE INDEX "idx_audio_segments_cache_last_used" ON "audio_segments_cache" USING btree ("last_used_at" DESC);
 
