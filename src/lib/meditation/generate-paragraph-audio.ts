@@ -33,12 +33,12 @@ const generateParagraphAudio = async (
 		await incrementUsageCount(cachedSegment.id);
 		
 		// Récupérer l'audio depuis l'URL cachée
-		const cachedResponse = await fetch(cachedSegment.audio_url);
+		const cachedResponse = await fetch(cachedSegment.audioUrl);
 		if (cachedResponse.ok && cachedResponse.body) {
-			console.log(`🎵 Serving cached audio from: ${cachedSegment.audio_url}`);
+			console.log(`🎵 Serving cached audio from: ${cachedSegment.audioUrl}`);
 			return cachedResponse.body;
 		} else {
-			console.warn(`⚠️ Cached audio URL not accessible: ${cachedSegment.audio_url}`);
+			console.warn(`⚠️ Cached audio URL not accessible: ${cachedSegment.audioUrl}`);
 		}
 	}
 
