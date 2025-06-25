@@ -1,0 +1,18 @@
+# Assembly service (JavaScript pur)
+assembly-service/
+
+# Tests avec Bun
+**/*.test.ts
+**/*.test.js
+
+# Fichiers de build
+.next/
+dist/
+build/
+
+# Node modules
+node_modules/
+
+# Fichiers temporaires
+*.tmp
+*.temp 

@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3001:3001"
     volumes:
       # Monter le dossier temp pour persister les fichiers temporaires
       - ./temp:/app/temp
@@ -13,14 +13,14 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - PORT=3000
+      - PORT=3001
       - TEMP_DIR=/app/temp
       - MAX_FILE_SIZE=50mb
       - CLEANUP_INTERVAL=3600000
       - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,https://your-vercel-app.vercel.app
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health/simple"]
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -44,7 +44,7 @@ services:
         echo 'Attente du service assembly...' &&
         sleep 10 &&
         echo 'Test de santé...' &&
-        curl -f http://assembly-service:3000/api/health &&
+        curl -f http://assembly-service:3001/api/health &&
         echo 'Service prêt pour les tests!'
       "
 

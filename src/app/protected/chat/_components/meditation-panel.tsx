@@ -39,7 +39,7 @@ interface MeditationPanelProps {
   toggleExpand: () => void;
 }
 
-const DURATION_OPTIONS = [2, 3, 5, 7, 10];
+const DURATION_OPTIONS = [0.5, 2, 3, 5, 7, 10];
 const GENDER_OPTIONS = [
   { value: 'female' as const, label: 'Female', voiceId: 'g6xIsTj2HwM6VR4iXFCw' },
   { value: 'male' as const, label: 'Male', voiceId: 'GUDYcgRAONiI1nXDcNQQ' }
@@ -90,12 +90,16 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
                   variant={params.duration === duration ? "default" : "outline"}
                   size="sm"
                   onClick={() => setParams(prev => ({ ...prev, duration }))}
-                  className={cn("min-w-[40px] h-9 text-xs", params.duration === duration ? "bg-orange-500 text-white" : "border-orange-300 text-orange-700")}
+                  className={cn(
+                    "min-w-[40px] h-9 text-xs", 
+                    params.duration === duration ? "bg-orange-500 text-white" : "border-orange-300 text-orange-700",
+                    duration === 0.5 ? "bg-red-100 border-red-300 text-red-700 hover:bg-red-200" : ""
+                  )}
                 >
-                  {duration}m
+                  {duration === 0.5 ? "TEST" : `${duration}m`}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent><p>{duration} minutes</p></TooltipContent>
+              <TooltipContent><p>{duration === 0.5 ? "Test 30 secondes (temporaire)" : `${duration} minutes`}</p></TooltipContent>
             </Tooltip>
           ))}
         </div>
@@ -150,8 +154,18 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
         </div>
         <div className="flex gap-2 flex-wrap">
           {DURATION_OPTIONS.map((duration) => (
-            <Button key={duration} variant={params.duration === duration ? "default" : "outline"} size="sm" onClick={() => setParams(prev => ({ ...prev, duration }))} className={cn("min-w-[60px]", params.duration === duration ? "bg-orange-500 text-white" : "border-orange-300 text-orange-700")}>
-              {duration}min
+            <Button 
+              key={duration} 
+              variant={params.duration === duration ? "default" : "outline"} 
+              size="sm" 
+              onClick={() => setParams(prev => ({ ...prev, duration }))} 
+              className={cn(
+                "min-w-[60px]", 
+                params.duration === duration ? "bg-orange-500 text-white" : "border-orange-300 text-orange-700",
+                duration === 0.5 ? "bg-red-100 border-red-300 text-red-700 hover:bg-red-200" : ""
+              )}
+            >
+              {duration === 0.5 ? "TEST (30s)" : `${duration}min`}
             </Button>
           ))}
         </div>

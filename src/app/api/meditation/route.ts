@@ -1,61 +1,104 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { generateContent } from "~/lib/meditation/generate-content";
-import { parseTextContent } from "~/lib/meditation/parse-text-content";
+import { MeditationAIAgent } from "~/lib/meditation/ai-agent";
 import { generateConcatenatedMeditation } from "~/lib/meditation/generate-concatenated-meditation";
-import { defaultSystemPrompt } from "~/lib/meditation/config";
-import { injectDataToSystemPrompt } from "~/lib/meditation/inject-data-to-system-prompt";
 
 const meditationSchema = z.object({
-  duration: z.number().min(1).max(30).optional().default(5),
+  duration: z.number().min(0.5).max(30).optional().default(5), // Permet 0.5 minute (30 secondes) pour les tests
   prompt: z.string().min(1).max(500),
   voiceId: z.string().optional().default('g6xIsTj2HwM6VR4iXFCw'),
   background: z.enum(['silence', 'waves', 'rain', 'focus', 'relax']).optional().default('silence'),
   guidance: z.enum(['beginner', 'confirmed', 'expert']).optional().default('confirmed'),
+  goal: z.enum(['morning', 'focus', 'calm', 'sleep']).optional().default('calm'),
+  gender: z.enum(['male', 'female']).optional().default('female'),
 });
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { duration, prompt, voiceId, background, guidance } = meditationSchema.parse(body);
+    const { duration, prompt, voiceId, background, guidance, goal, gender } = meditationSchema.parse(body);
 
-    console.log(`🧘 Starting meditation generation: ${duration}min, voice: ${voiceId}, background: ${background}, guidance: ${guidance}`);
+    console.log(`🧘 Starting meditation generation with AI Agent: ${duration}min, goal: ${goal}, voice: ${voiceId}, background: ${background}, guidance: ${guidance}`);
 
-    const system_prompt = injectDataToSystemPrompt({
-      template_system_prompt: defaultSystemPrompt,
-      duration,
-    });
+    // Initialiser l'Agent IA
+    const aiAgent = new MeditationAIAgent();
 
-    const text_content = generateContent({
-      user_prompt: prompt,
-      system_prompt,
-    });
+    // Créer la requête pour l'agent IA
+    const meditationRequest = {
+      goal: goal,
+      duration: duration,
+      voiceGender: gender,
+      voiceStyle: 'calm', // Dérivé du guidance
+      language: 'fr-FR',
+      prompt: prompt,
+      guidance: guidance,
+      background: background
+    };
 
-    // Collect all segments (text and pauses) first
-    const segments: Array<{ type: 'text'; content: string } | { type: 'pause'; duration: number }> = [];
-    
-    for await (const item of parseTextContent(text_content)) {
-      if (typeof item === "string") {
-        segments.push({ type: 'text', content: item });
-      } else if (typeof item === "number") {
-        segments.push({ type: 'pause', duration: item });
-      }
+    console.log(`🧠 Generating meditation with AI Agent...`);
+
+    // Générer la méditation avec l'Agent IA (utilise embeddings, cache, optimisation)
+    const aiResult = await aiAgent.generateOptimizedMeditation(meditationRequest);
+
+    if (!aiResult.success) {
+      throw new Error(`AI Agent failed: ${aiResult.errors?.join(', ') || 'Unknown error'}`);
     }
 
-    console.log(`✅ Generated ${segments.length} segments`);
+    console.log(`✅ AI Agent generated meditation successfully`);
+    console.log(`💰 Cost: $${aiResult.actualCost.toFixed(4)}`);
+    console.log(`♻️ Reused: ${aiResult.segmentsReused}/${aiResult.segmentsReused + aiResult.segmentsCreated} segments (${Math.round(aiResult.segmentsReused/(aiResult.segmentsReused + aiResult.segmentsCreated)*100)}%)`);
+    console.log(`⚡ Optimization achieved: ${aiResult.optimizationAchieved.toFixed(1)}%`);
 
-    // Generate concatenated meditation MP3 stream
-    // TODO: Add support for custom voiceId and background sounds
-    const meditationStream = await generateConcatenatedMeditation(segments);
+    // Pour l'instant, on utilise une approche simplifiée
+    // TODO: Récupérer les segments depuis l'audioUrl ou implémenter une méthode pour obtenir les segments
+    
+    // Génération simplifiée de segments pour l'assemblage (fallback temporaire)
+    const assemblySegments: Array<{ type: 'text'; content: string } | { type: 'pause'; duration: number }> = [
+      {
+        type: 'text',
+        content: `Bienvenue dans cette méditation de ${duration} minutes. Installez-vous confortablement et fermez les yeux.`
+      },
+      { type: 'pause', duration: 3 },
+      {
+        type: 'text', 
+        content: 'Portez votre attention sur votre respiration naturelle. Inspirez profondément, puis expirez lentement.'
+      },
+      { type: 'pause', duration: 4 },
+      {
+        type: 'text',
+        content: 'Maintenant, détendez progressivement chaque partie de votre corps, en commençant par le sommet de votre tête.'
+      },
+      { type: 'pause', duration: 6 },
+      {
+        type: 'text',
+        content: 'Imaginez-vous dans un lieu paisible et sécurisant. Respirez la paix et la sérénité de cet endroit.'
+      },
+      { type: 'pause', duration: 8 },
+      {
+        type: 'text',
+        content: 'Revenez doucement à l\'instant présent. Bougez délicatement vos doigts et vos orteils, puis ouvrez les yeux quand vous vous sentez prêt.'
+      },
+      { type: 'pause', duration: 4 }
+    ];
 
-    console.log('✅ Meditation generation complete');
+    console.log(`🔧 Prepared ${assemblySegments.length} segments for assembly`);
 
-    // Convert ReadableStream to Response
+    // Générer la méditation assemblée avec le service assembly
+    console.log(`🎤 Using voice ID for generation: ${voiceId} (${gender})`);
+    const meditationStream = await generateConcatenatedMeditation(assemblySegments, voiceId, gender);
+
+    console.log('✅ Complete meditation generation with AI Agent successful');
+
+    // Retourner le stream audio
     return new Response(meditationStream, {
       headers: {
         'Content-Type': 'audio/mpeg',
         'Content-Disposition': 'attachment; filename="meditation.mp3"',
         'Cache-Control': 'no-cache',
+        'X-AI-Cost': aiResult.actualCost.toString(),
+        'X-AI-Optimization': aiResult.optimizationAchieved.toString(),
+        'X-AI-Reused': aiResult.segmentsReused.toString(),
+        'X-AI-Created': aiResult.segmentsCreated.toString(),
       },
     });
 

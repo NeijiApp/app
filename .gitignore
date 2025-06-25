@@ -45,4 +45,16 @@ yarn-error.log*
 # idea files
 .idea
 
+# audio files
+*.mp3
+*.wav
+*.m4a
+*.aac
+*.ogg
+*.flac
+
+# assembly service temp files
+assembly-service/temp/uploads/
+assembly-service/temp/output/
+
 .windsurfrules

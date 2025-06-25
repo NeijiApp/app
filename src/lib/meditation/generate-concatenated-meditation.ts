@@ -1,120 +1,157 @@
-import { PassThrough } from "node:stream";
-import ffmpeg from "fluent-ffmpeg";
-import { writeFile, unlink, mkdtemp, copyFile } from "node:fs/promises";
+import { writeFile, unlink, mkdtemp, copyFile, mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { existsSync } from "node:fs";
 import { generateParagraphAudio } from "./generate-paragraph-audio";
+import { v4 as uuidv4 } from "uuid";
 
 type Segment = { type: "text"; content: string } | { type: "pause"; duration: number };
 
-// Path to the pre-made silent audio file.
-const SILENT_AUDIO_PATH = join(process.cwd(), "src/assets/silence.mp3");
+// Configuration du service assembly
+const ASSEMBLY_SERVICE_URL = "http://localhost:3001";
+const ASSEMBLY_SHARED_DIR = join(process.cwd(), "assembly-service", "temp", "uploads");
 
 async function generateConcatenatedMeditation(
 	segments: Segment[],
+	voiceId?: string,
+	voiceGender?: 'male' | 'female',
 ): Promise<ReadableStream<Uint8Array>> {
 	// Create a unique temporary directory for this request.
 	const tempDir = await mkdtemp(join(tmpdir(), "meditation-"));
-	const tempFiles: string[] = [];
+	const jobId = uuidv4();
+	const tempFiles: { audioUrl: string; duration: number; silenceAfter?: number }[] = [];
 
 	try {
-		// 1. Create temporary files for all segments.
+		// Ensure assembly shared directory exists
+		await mkdir(ASSEMBLY_SHARED_DIR, { recursive: true });
+
+		// 1. Generate audio segments and copy to shared directory
+		let segmentIndex = 0;
 		for (let i = 0; i < segments.length; i++) {
 			const segment = segments[i];
 			if (!segment) continue;
 
 			if (segment.type === "text") {
-				console.log(`📝 Generating text segment ${i + 1}: "${segment.content}"`);
-				const tempFile = join(tempDir, `segment-${i}.mp3`);
-				tempFiles.push(tempFile);
+				console.log(`📝 Generating text segment ${segmentIndex + 1}: "${segment.content.substring(0, 50)}..."`);
+				
+				// Use provided voiceId or default to female voice
+				const selectedVoiceId = voiceId || "g6xIsTj2HwM6VR4iXFCw";
+				const selectedVoiceGender = voiceGender || (selectedVoiceId === 'g6xIsTj2HwM6VR4iXFCw' ? 'female' : 'male');
+				console.log(`🎤 Using voice ID: ${selectedVoiceId} (${selectedVoiceGender})`);
+				
+				// Generate audio for this text segment
 				const audioStream = await generateParagraphAudio(segment.content, {
-					voice_id: "GUDYcgRAONiI1nXDcNQQ",
+					voice_id: selectedVoiceId,
+					voice_gender: selectedVoiceGender,
+					voice_style: "calm",
 				});
+				
+				// Save to temporary file first
+				const tempFile = join(tempDir, `segment-${segmentIndex}.mp3`);
 				const audioBuffer = await streamToBuffer(audioStream);
 				await writeFile(tempFile, audioBuffer);
+				
+				// Copy to shared directory with unique name
+				const sharedFileName = `${jobId}_segment_${segmentIndex}.mp3`;
+				const sharedFilePath = join(ASSEMBLY_SHARED_DIR, sharedFileName);
+				await copyFile(tempFile, sharedFilePath);
+				
+				// Le service assembly utilisera le nom de fichier relatif
+				tempFiles.push({
+					audioUrl: sharedFileName, // Nom de fichier seulement, pas le chemin complet
+					duration: 3000, // Estimated duration in ms
+					silenceAfter: 0
+				});
+				
+				segmentIndex++;
 			} else {
 				console.log(`⏸️ Generating pause segment ${i + 1}: ${segment.duration}s`);
-				// For a pause, add the silent audio file to the list for each second of duration.
-				for (let j = 0; j < segment.duration; j++) {
-					// We can just reference the same silent file multiple times.
-					tempFiles.push(SILENT_AUDIO_PATH);
+				// For pauses, add silence after the previous segment
+				if (tempFiles.length > 0) {
+					const lastSegment = tempFiles[tempFiles.length - 1];
+					if (lastSegment) {
+						lastSegment.silenceAfter = segment.duration * 1000; // Convert to ms
+					}
 				}
 			}
 		}
 
-		// 2. Create a file list for FFmpeg's concat demuxer.
-		const fileListPath = join(tempDir, "filelist.txt");
-		const fileListContent = tempFiles
-			.map((file) => `file '${file.replace(/'/g, "'\\''")}'`)
-			.join("\n");
-		await writeFile(fileListPath, fileListContent);
-		console.log("📄 Generated FFmpeg file list for concatenation.");
+		console.log("📄 Prepared segments for assembly service.");
 
-		// 3. Use FFmpeg to concatenate the files and stream the output.
-		const outputStream = new PassThrough();
-		ffmpeg()
-			.input(fileListPath)
-			.inputOptions(["-f concat", "-safe 0"])
-			.audioCodec("copy") // Use "copy" to avoid re-encoding and ensure stability.
-			.format("mp3")
-			.on("error", (err) => {
-				console.error("FFmpeg error during concatenation:", err);
-				outputStream.emit("error", err);
+		// 2. Call assembly service
+		console.log(`🔗 Calling assembly service at ${ASSEMBLY_SERVICE_URL}`);
+		
+		const assemblyResponse = await fetch(`${ASSEMBLY_SERVICE_URL}/api/assembly/create`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				segments: tempFiles,
+				options: {
+					format: 'mp3',
+					quality: '320k',
+					normalize: true
+				}
 			})
-			.pipe(outputStream);
+		});
 
-		// 4. Return the final stream and set up cleanup.
+		if (!assemblyResponse.ok) {
+			const errorText = await assemblyResponse.text();
+			throw new Error(`Assembly service error: ${assemblyResponse.status} - ${errorText}`);
+		}
+
+		const assemblyResult = await assemblyResponse.json();
+		console.log(`✅ Assembly job created: ${assemblyResult.jobId}`);
+
+		// 3. Download the assembled meditation
+		const downloadUrl = `${ASSEMBLY_SERVICE_URL}${assemblyResult.downloadUrl}`;
+		console.log(`⬇️ Downloading from: ${downloadUrl}`);
+		
+		const downloadResponse = await fetch(downloadUrl);
+		
+		if (!downloadResponse.ok) {
+			throw new Error(`Download failed: ${downloadResponse.status}`);
+		}
+
+		// 4. Return the audio stream
 		const finalStream = new ReadableStream<Uint8Array>({
 			start(controller) {
-				let isControllerClosed = false;
+				if (!downloadResponse.body) {
+					controller.error(new Error("No response body"));
+					return;
+				}
+
+				const reader = downloadResponse.body.getReader();
 				
-				const closeController = () => {
-					if (!isControllerClosed) {
-						isControllerClosed = true;
-						controller.close();
-					}
-				};
-				
-				const errorController = (err: Error) => {
-					if (!isControllerClosed) {
-						isControllerClosed = true;
-						controller.error(err);
-					}
-				};
-				
-				outputStream.on("data", (chunk) => {
-					if (!isControllerClosed) {
-						try {
-							controller.enqueue(chunk);
-						} catch (err) {
-							console.error("Error enqueueing chunk:", err);
-							errorController(err as Error);
+				const pump = async () => {
+					try {
+						while (true) {
+							const { done, value } = await reader.read();
+							if (done) {
+								controller.close();
+								break;
+							}
+							controller.enqueue(value);
 						}
+					} catch (error) {
+						controller.error(error);
+					} finally {
+						// Clean up temporary files
+						cleanup(tempDir, jobId, false);
 					}
-				});
+				};
 				
-				outputStream.on("end", () => {
-					console.log("✅ Concatenation finished.");
-					closeController();
-				});
-				
-				outputStream.on("error", (err) => {
-					console.error("FFmpeg output stream error:", err);
-					errorController(err);
-				});
+				pump();
 			},
 		});
-		
-		// Clean up the temp directory once the stream is closed or errors out.
-		const cleanupOnce = () => cleanup(tempDir, false);
-		outputStream.once("close", cleanupOnce);
-		outputStream.once("error", cleanupOnce);
 
+		console.log('✅ Meditation generation complete via assembly service');
 		return finalStream;
 
 	} catch (error) {
 		console.error("Error in meditation generation pipeline:", error);
-		await cleanup(tempDir, true); // Clean everything on pipeline error
+		await cleanup(tempDir, jobId, true);
 		throw error;
 	}
 }
@@ -132,18 +169,32 @@ async function streamToBuffer(stream: ReadableStream<Uint8Array>): Promise<Buffe
 }
 
 // Helper function to safely delete temporary files.
-async function cleanup(dir: string, includeSelf: boolean) {
+async function cleanup(dir: string, jobId: string, includeSelf: boolean) {
 	try {
+		// Clean up local temp directory
 		const files = await require("fs/promises").readdir(dir);
 		for (const file of files) {
-			if (file.startsWith("segment-") || file === "filelist.txt") {
+			if (file.startsWith("segment-")) {
 				await unlink(join(dir, file));
 			}
 		}
 		if (includeSelf) {
 			await require("fs/promises").rmdir(dir);
 		}
-		console.log(`🗑️ Cleaned up temporary files in: ${dir}`);
+
+		// Clean up shared directory files
+		try {
+			const sharedFiles = await require("fs/promises").readdir(ASSEMBLY_SHARED_DIR);
+			for (const file of sharedFiles) {
+				if (file.startsWith(`${jobId}_`)) {
+					await unlink(join(ASSEMBLY_SHARED_DIR, file));
+				}
+			}
+		} catch (err) {
+			console.warn(`⚠️ Could not clean shared directory: ${err}`);
+		}
+
+		console.log(`🗑️ Cleaned up temporary files for job: ${jobId}`);
 	} catch (err) {
 		console.error(`🧹 Failed to clean up temporary directory ${dir}:`, err);
 	}

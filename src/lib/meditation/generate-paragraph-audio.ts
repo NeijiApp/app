@@ -1,4 +1,5 @@
-import { findCachedAudioSegment, saveAudioSegmentToCache, incrementUsageCount } from './audio-cache';
+import { findCachedAudioSegment, saveAudioSegmentToCache, incrementUsageCount, generateTextHash } from './audio-cache';
+import { saveAudioToStorage, initializeAudioBucket, isStorageUrl } from './audio-storage';
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 
@@ -19,9 +20,11 @@ const generateParagraphAudio = async (
 		voice_id,
 		next_text = ". With a calm and relaxing voice",
 		voice_style = "calm",
-		voice_gender = "male",
+		voice_gender,
 	}: GenerateParagrapheAudioProps,
 ) => {
+	// Déduire le genre de la voix à partir de l'ID si pas fourni
+	const actualVoiceGender = voice_gender || (voice_id === 'g6xIsTj2HwM6VR4iXFCw' ? 'female' : 'male');
 	// 1. Vérifier d'abord le cache
 	console.log(`🔍 Checking cache for: "${paragraph.substring(0, 50)}..."`);
 	const cachedSegment = await findCachedAudioSegment(paragraph, voice_id, voice_style);
@@ -29,16 +32,28 @@ const generateParagraphAudio = async (
 	if (cachedSegment) {
 		console.log(`✅ Found cached audio segment (ID: ${cachedSegment.id})`);
 		
-		// Incrémenter le compteur d'utilisation
-		await incrementUsageCount(cachedSegment.id);
-		
-		// Récupérer l'audio depuis l'URL cachée
-		const cachedResponse = await fetch(cachedSegment.audioUrl);
-		if (cachedResponse.ok && cachedResponse.body) {
-			console.log(`🎵 Serving cached audio from: ${cachedSegment.audioUrl}`);
-			return cachedResponse.body;
+		// Vérifier si l'URL est valide (seulement HTTP pour l'instant)
+		if (cachedSegment.audioUrl && 
+			cachedSegment.audioUrl.startsWith('http') && 
+			!cachedSegment.audioUrl.startsWith('elevenlabs://')) {
+			
+			// Incrémenter le compteur d'utilisation
+			await incrementUsageCount(cachedSegment.id);
+			
+			// Récupérer l'audio depuis l'URL cachée
+			try {
+				const cachedResponse = await fetch(cachedSegment.audioUrl);
+				if (cachedResponse.ok && cachedResponse.body) {
+					console.log(`🎵 Serving cached audio from: ${cachedSegment.audioUrl}`);
+					return cachedResponse.body;
+				} else {
+					console.warn(`⚠️ Cached audio URL not accessible: ${cachedSegment.audioUrl}`);
+				}
+			} catch (error) {
+				console.warn(`⚠️ Error fetching cached audio: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			}
 		} else {
-			console.warn(`⚠️ Cached audio URL not accessible: ${cachedSegment.audioUrl}`);
+			console.warn(`⚠️ Cached segment has invalid URL, generating new audio: ${cachedSegment.audioUrl}`);
 		}
 	}
 
@@ -72,12 +87,33 @@ const generateParagraphAudio = async (
 		);
 	}
 
-	// 3. Sauvegarder dans le cache (optionnel - nécessite de stocker le fichier quelque part)
-	// Pour l'instant, on retourne juste le stream
-	// TODO: Implémenter la sauvegarde du fichier audio et l'ajout au cache
-	
-	console.log(`✅ Generated new audio segment`);
-	return response.body;
+	// 3. Sauvegarder l'audio dans Supabase Storage et le cache
+	try {
+		// Initialiser le bucket si nécessaire
+		await initializeAudioBucket();
+		
+		// Sauvegarder l'audio dans le Storage
+		const textHash = paragraph.slice(0, 50).replace(/[^a-zA-Z0-9]/g, '');
+		const audioUrl = await saveAudioToStorage(response.body!, voice_id, textHash);
+		
+		// Sauvegarder dans le cache DB (gère automatiquement les doublons)
+		await saveAudioSegmentToCache(paragraph, voice_id, actualVoiceGender, voice_style, audioUrl);
+		
+		console.log(`✅ Generated and saved new audio segment with voice: ${actualVoiceGender} (${voice_id}) to ${audioUrl}`);
+		
+		// Récupérer l'audio depuis l'URL sauvegardée
+		const savedResponse = await fetch(audioUrl);
+		return savedResponse.body!;
+	} catch (storageError) {
+		console.warn(`⚠️ Storage failed, returning stream directly: ${storageError instanceof Error ? storageError.message : 'Unknown error'}`);
+		
+		// Fallback: sauvegarder seulement dans le cache avec URL temporaire
+		const tempUrl = `elevenlabs://generated/${voice_id}/${Date.now()}`;
+		await saveAudioSegmentToCache(paragraph, voice_id, actualVoiceGender, voice_style, tempUrl);
+		
+		console.log(`✅ Generated new audio segment with voice: ${actualVoiceGender} (${voice_id}) - Storage fallback`);
+		return response.body!;
+	}
 };
 
 export { generateParagraphAudio };

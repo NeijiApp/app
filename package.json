@@ -36,6 +36,7 @@
 		"@trpc/react-query": "^11.0.0",
 		"@trpc/server": "^11.0.0",
 		"@types/fluent-ffmpeg": "^2.1.27",
+		"@types/uuid": "^10.0.0",
 		"ai": "^4.3.10",
 		"axios": "^1.8.4",
 		"class-variance-authority": "^0.7.1",
@@ -60,6 +61,7 @@
 		"server-only": "^0.0.1",
 		"superjson": "^2.2.1",
 		"tailwind-merge": "^3.2.0",
+		"uuid": "^11.1.0",
 		"valibot": "^1.1.0",
 		"zod": "^3.24.2"
 	},

@@ -7,7 +7,7 @@ const axios = require('axios');
 const { execSync } = require('child_process');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
@@ -105,26 +105,32 @@ async function downloadFile(url, outputPath) {
   }
 }
 
-// Fonction d'assemblage FFmpeg
+// Importer le wrapper FFmpeg qui gère les pauses
+const { assembleAudioSegments } = require('./lib/ffmpeg-wrapper');
+
+// Fonction d'assemblage FFmpeg avec gestion des pauses
 async function assembleAudio(segments, outputPath) {
   try {
-    console.log(`🔧 Assemblage de ${segments.length} segments`);
+    console.log(`🔧 Assemblage de ${segments.length} segments avec pauses`);
     
-    // Créer un fichier de liste pour FFmpeg
-    const listPath = outputPath.replace('.mp3', '_list.txt');
-    const listContent = segments.map(seg => `file '${seg.localPath}'`).join('\n');
-    await fs.writeFile(listPath, listContent);
-
-    // Commande FFmpeg pour concaténer
-    const command = `ffmpeg -f concat -safe 0 -i "${listPath}" -c copy "${outputPath}"`;
-    console.log(`🎵 Commande: ${command}`);
+    // Afficher les informations de debug sur les pauses
+    segments.forEach((segment, index) => {
+      console.log(`📊 Segment ${index + 1}: ${path.basename(segment.localPath)}`);
+      if (segment.silenceAfter && segment.silenceAfter > 0) {
+        console.log(`   ⏸️ Pause après: ${segment.silenceAfter}ms (${segment.silenceAfter/1000}s)`);
+      } else {
+        console.log(`   ⏸️ Pas de pause après ce segment`);
+      }
+    });
     
-    execSync(command, { timeout: 60000 });
+    // Utiliser le wrapper FFmpeg qui gère les pauses
+    await assembleAudioSegments(segments, outputPath, {
+      format: 'mp3',
+      quality: '320k',
+      normalize: true
+    });
     
-    // Nettoyer le fichier de liste
-    await fs.unlink(listPath);
-    
-    console.log(`✅ Assemblage terminé: ${outputPath}`);
+    console.log(`✅ Assemblage terminé avec pauses: ${outputPath}`);
     return outputPath;
     
   } catch (error) {
@@ -150,7 +156,7 @@ app.post('/api/assembly/create', async (req, res) => {
 
     console.log(`📊 Job ${jobId}: ${segments.length} segments à traiter`);
 
-    // Télécharger tous les segments
+    // Préparer tous les segments
     const downloadedSegments = [];
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i];
@@ -158,8 +164,25 @@ app.post('/api/assembly/create', async (req, res) => {
         throw new Error(`Segment ${i} sans audioUrl`);
       }
 
-      const localPath = path.join(__dirname, 'temp', 'uploads', `${jobId}_segment_${i}.mp3`);
-      await downloadFile(segment.audioUrl, localPath);
+      let localPath;
+      
+      // Si c'est juste un nom de fichier, chercher dans le dossier uploads
+      if (!segment.audioUrl.includes('/') && !segment.audioUrl.includes('\\') && !segment.audioUrl.startsWith('http')) {
+        localPath = path.join(__dirname, 'temp', 'uploads', segment.audioUrl);
+        console.log(`📁 Fichier local: ${localPath}`);
+        
+        // Vérifier que le fichier existe
+        try {
+          await fs.access(localPath);
+          console.log(`✅ Fichier trouvé: ${segment.audioUrl}`);
+        } catch (error) {
+          throw new Error(`Fichier local non trouvé: ${segment.audioUrl}`);
+        }
+      } else {
+        // Sinon, télécharger depuis l'URL
+        localPath = path.join(__dirname, 'temp', 'uploads', `${jobId}_segment_${i}.mp3`);
+        await downloadFile(segment.audioUrl, localPath);
+      }
       
       downloadedSegments.push({
         ...segment,

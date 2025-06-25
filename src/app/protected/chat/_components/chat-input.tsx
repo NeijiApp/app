@@ -79,8 +79,10 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 					prompt,
 					duration: params.duration,
 					voiceId,
+					gender: params.gender,
 					background: params.background,
 					guidance: params.guidance,
+					goal: params.goal,
 				}),
 			});
 
@@ -124,10 +126,20 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 		addCustomMessage({ id: loadingId, content: "🧘‍♀️ Generating your personalized meditation from prompt...", role: "assistant" });
 
 		try {
+			// Use default meditation parameters when generating from prompt
+			const defaultVoiceId = getVoiceId('female'); // Default to female voice
 			const response = await fetch('/api/meditation', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ prompt: currentInput }),
+				body: JSON.stringify({ 
+					prompt: currentInput,
+					voiceId: defaultVoiceId,
+					gender: 'female',
+					duration: 5,
+					background: 'silence',
+					guidance: 'confirmed',
+					goal: 'calm'
+				}),
 			});
 
 			if (!response.ok) throw new Error(await response.text());

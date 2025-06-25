@@ -50,6 +50,46 @@ export async function findCachedAudioSegment(
 }
 
 /**
+ * Met à jour un segment audio existant dans le cache
+ */
+export async function updateAudioSegmentInCache(
+    text: string,
+    voiceId: string,
+    voiceStyle: string,
+    audioUrl: string
+): Promise<SelectAudioSegmentsCache | null> {
+    const textHash = generateTextHash(text);
+    
+    try {
+        const updated = await db
+            .update(audioSegmentsCache)
+            .set({
+                audioUrl: audioUrl,
+                lastUsedAt: sql`now()`,
+                usageCount: sql`${audioSegmentsCache.usageCount} + 1`,
+            })
+            .where(
+                and(
+                    eq(audioSegmentsCache.textHash, textHash),
+                    eq(audioSegmentsCache.voiceId, voiceId),
+                    eq(audioSegmentsCache.voiceStyle, voiceStyle)
+                )
+            )
+            .returning();
+            
+        const updatedSegment = updated?.[0];
+        if (updatedSegment) {
+            console.log(`🔄 Updated existing cache entry: "${text.substring(0, 50)}..."`);
+        }
+        
+        return updatedSegment || null;
+    } catch (error) {
+        console.error('❌ Error updating audio segment in cache:', error);
+        return null;
+    }
+}
+
+/**
  * Sauvegarde un nouveau segment audio dans le cache avec embedding
  */
 export async function saveAudioSegmentToCache(
@@ -64,6 +104,13 @@ export async function saveAudioSegmentToCache(
 ): Promise<SelectAudioSegmentsCache | null> {
     const textHash = generateTextHash(text);
     
+    // D'abord, essayer de mettre à jour si existe
+    const existing = await updateAudioSegmentInCache(text, voiceId, voiceStyle, audioUrl);
+    if (existing) {
+        return existing;
+    }
+    
+    // Sinon, insérer un nouveau segment
     const newSegment: InsertAudioSegmentsCache = {
         textContent: text,
         textHash: textHash,

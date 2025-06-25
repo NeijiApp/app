@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 
 /**
  * Assemble plusieurs segments audio avec FFmpeg
- * @param {Array} segments - Liste des segments avec localPath, duration, silenceAfter
+ * @param {Array<Object>} segments - Liste des segments avec localPath, duration, silenceAfter
  * @param {string} outputPath - Chemin de sortie du fichier final
  * @param {Object} options - Options d'assemblage
  */
@@ -182,12 +182,12 @@ async function getAudioInfo(filePath) {
       }
 
       resolve({
-        duration: parseFloat(metadata.format.duration) * 1000, // en ms
-        bitrate: parseInt(metadata.format.bit_rate) || 0,
+        duration: parseFloat(metadata.format.duration || '0') * 1000, // en ms
+        bitrate: parseInt(metadata.format.bit_rate || '0') || 0,
         sampleRate: audioStream.sample_rate,
         channels: audioStream.channels,
         codec: audioStream.codec_name,
-        size: parseInt(metadata.format.size) || 0
+        size: parseInt(metadata.format.size || '0') || 0
       });
     });
   });
