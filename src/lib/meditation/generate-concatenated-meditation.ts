@@ -11,6 +11,20 @@ type Segment = { type: "text"; content: string } | { type: "pause"; duration: nu
 const ASSEMBLY_SERVICE_URL = "http://localhost:3001";
 const ASSEMBLY_SHARED_DIR = join(process.cwd(), "assembly-service", "temp", "uploads");
 
+/**
+ * Calcule la durée estimée d'un texte en millisecondes
+ * Basé sur une vitesse de parole moyenne de 150 mots par minute pour la méditation
+ */
+function estimateTextDuration(text: string): number {
+	const words = text.trim().split(/\s+/).length;
+	const wordsPerMinute = 120; // Vitesse plus lente pour la méditation guidée
+	const durationMinutes = words / wordsPerMinute;
+	const durationMs = durationMinutes * 60 * 1000;
+	
+	// Minimum 2 secondes, maximum 30 secondes par segment
+	return Math.max(2000, Math.min(30000, durationMs));
+}
+
 async function generateConcatenatedMeditation(
 	segments: Segment[],
 	voiceId?: string,
@@ -56,10 +70,14 @@ async function generateConcatenatedMeditation(
 				const sharedFilePath = join(ASSEMBLY_SHARED_DIR, sharedFileName);
 				await copyFile(tempFile, sharedFilePath);
 				
+				// Calculer la durée estimée du texte
+				const estimatedDuration = estimateTextDuration(segment.content);
+				console.log(`⏱️ Estimated duration for segment ${segmentIndex + 1}: ${Math.round(estimatedDuration/1000)}s (${segment.content.split(/\s+/).length} words)`);
+				
 				// Le service assembly utilisera le nom de fichier relatif
 				tempFiles.push({
 					audioUrl: sharedFileName, // Nom de fichier seulement, pas le chemin complet
-					duration: 3000, // Estimated duration in ms
+					duration: estimatedDuration, // Durée estimée basée sur le texte
 					silenceAfter: 0
 				});
 				
