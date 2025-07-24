@@ -15,7 +15,10 @@
 		"db:studio": "drizzle-kit studio",
 		"supabase:local": "pnpm dlx supabase start",
 		"supabase:local:stop": "pnpm dlx supabase stop",
+		"assembly:start": "cd assembly-service && node serveur-assemblage.js",
+		"assembly:health": "curl -f http://localhost:3001/api/health",
 		"dev": "next dev --turbo",
+		"dev:full": "pnpm run assembly:start & pnpm run dev",
 		"preview": "next build && next start",
 		"start": "next start",
 		"typecheck": "tsc --noEmit"

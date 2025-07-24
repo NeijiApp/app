@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+// Use Node.js runtime for FFmpeg dynamic import support
+export const runtime = 'nodejs';
 import { z } from "zod";
 import { MeditationAIAgent } from "~/lib/meditation/ai-agent";
 import { generateConcatenatedMeditation } from "~/lib/meditation/generate-concatenated-meditation";
+import { env } from "~/env";
 
 const meditationSchema = z.object({
   duration: z.number().min(0.5).max(30).optional().default(5), // Permet 0.5 minute (30 secondes) pour les tests
@@ -71,8 +74,33 @@ function generateOptimizedSegments(duration: number, goal: string) {
   }));
 }
 
+async function checkAssemblyServiceHealth(): Promise<boolean> {
+  try {
+    const response = await fetch(`${env.ASSEMBLY_SERVICE_URL}/api/health`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(5000)
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('Assembly service health check failed:', error);
+    return false;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Check assembly service health first
+    const isAssemblyHealthy = await checkAssemblyServiceHealth();
+    if (!isAssemblyHealthy) {
+      return NextResponse.json(
+        { 
+          error: 'Assembly service unavailable', 
+          details: `Please ensure the assembly service is running at ${env.ASSEMBLY_SERVICE_URL}. Run 'pnpm run assembly:start' to start it.`
+        },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const { duration, prompt, voiceId, background, guidance, goal, gender } = meditationSchema.parse(body);
 

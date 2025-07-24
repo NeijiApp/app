@@ -1,0 +1,32 @@
+{
+
+  
+  "sessionId": "ce771be0-5e12-463c-b4b4-635a38f23b18",
+  "prompt": "My mind is racing with anxious thoughts and I can't slow them down. I need help calming my racing mind.",
+  "duration": 3,
+  "gender": "female",
+  "generatedAt": "2025-07-19T14:19:29.452Z",
+  "performance": {
+    "totalTimeMs": 3938,
+    "agentTimeMs": 1436,
+    "audioTimeMs": 2501,
+    "efficiency": "EXCELLENT"
+  },
+  "content": {
+    "theme": "Stress relief and inner tranquility",
+    "benefits": "Stress reduction, Emotional balance, Inner peace",
+    "segmentsCount": 10,
+    "racingThoughtsDetected": false
+  },
+  "cost": {
+    "total": 0.0101,
+    "perMinute": 0.0033666666666666667,
+    "efficiency": "EXCELLENT"
+  },
+  "optimization": {
+    "cacheHitRate": 0,
+    "reusedSegments": 0,
+    "newSegments": 5,
+    "cacheStatus": "BUILDING"
+  }
+}

@@ -42,7 +42,7 @@ async function downloadFile(url, outputPath) {
 
     // Attendre la fin du téléchargement
     await new Promise((resolve, reject) => {
-      writer.on('finish', resolve);
+      writer.on('finish', () => resolve(undefined));
       writer.on('error', reject);
       response.data.on('error', reject);
     });
@@ -54,7 +54,8 @@ async function downloadFile(url, outputPath) {
     return outputPath;
 
   } catch (error) {
-    console.error(`❌ Erreur téléchargement ${url}:`, error.message);
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error(`❌ Erreur téléchargement ${url}:`, msg);
     
     // Nettoyer le fichier partiellement téléchargé
     try {
@@ -63,7 +64,7 @@ async function downloadFile(url, outputPath) {
       // Ignore si le fichier n'existe pas
     }
     
-    throw new Error(`Échec du téléchargement: ${error.message}`);
+    throw new Error(`Échec du téléchargement: ${msg}`);
   }
 }
 
@@ -81,6 +82,9 @@ async function cleanupTempFiles(tempDir, maxAge = 60 * 60 * 1000) {
     let totalSize = 0;
 
     // Fonction récursive pour nettoyer
+    /**
+     * @param {string} dir - Répertoire à nettoyer
+     */
     async function cleanDirectory(dir) {
       try {
         const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -113,7 +117,8 @@ async function cleanupTempFiles(tempDir, maxAge = 60 * 60 * 1000) {
           }
         }
       } catch (error) {
-        console.warn(`⚠️ Erreur lors du nettoyage de ${dir}:`, error.message);
+        const msg = error instanceof Error ? error.message : String(error);
+        console.warn(`⚠️ Erreur lors du nettoyage de ${dir}:`, msg);
       }
     }
 
@@ -132,7 +137,7 @@ async function cleanupTempFiles(tempDir, maxAge = 60 * 60 * 1000) {
 
 /**
  * Vérifie l'espace disque disponible
- * @param {string} path - Chemin à vérifier
+ * @param {string} checkPath - Chemin à vérifier
  * @returns {Promise<Object>} Informations sur l'espace disque
  */
 async function checkDiskSpace(checkPath) {
@@ -152,7 +157,7 @@ async function checkDiskSpace(checkPath) {
     // Parse basique pour Linux/Unix
     if (process.platform !== 'win32') {
       const lines = output.trim().split('\n');
-      const dataLine = lines[lines.length - 1];
+      const dataLine = lines[lines.length - 1] || '';
       const parts = dataLine.split(/\s+/);
       
       return {
@@ -172,10 +177,11 @@ async function checkDiskSpace(checkPath) {
     };
     
   } catch (error) {
-    console.warn('⚠️ Impossible de vérifier l\'espace disque:', error.message);
+    const msg = error instanceof Error ? error.message : String(error);
+    console.warn('⚠️ Impossible de vérifier l\'espace disque:', msg);
     return {
       path: checkPath,
-      error: error.message
+      error: msg
     };
   }
 }
@@ -197,9 +203,10 @@ async function ensureDirectories(baseDir) {
       await fs.mkdir(dir, { recursive: true });
       console.log(`📁 Dossier créé: ${path.relative(baseDir, dir)}`);
     } catch (error) {
-      if (error.code !== 'EEXIST') {
-        console.error(`❌ Erreur création dossier ${dir}:`, error.message);
-        throw error;
+      const e = /** @type {any} */ (error);
+      if (e.code !== 'EEXIST') {
+        console.error(`❌ Erreur création dossier ${dir}:`, e.message);
+        throw e;
       }
     }
   }
@@ -217,6 +224,9 @@ async function getTempStats(tempDir) {
     
     const now = Date.now();
     
+    /**
+     * @param {string} dir - Dossier à scanner
+     */
     async function scanDirectory(dir) {
       try {
         const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -253,13 +263,14 @@ async function getTempStats(tempDir) {
       lastScan: new Date().toISOString()
     };
     
-  } catch (error) {
-    console.error('❌ Erreur lors du scan des stats:', error);
-    return {
-      error: error.message,
-      lastScan: new Date().toISOString()
-    };
-  }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error('❌ Erreur lors du scan des stats:', msg);
+      return {
+        error: msg,
+        lastScan: new Date().toISOString()
+      };
+    }
 }
 
 module.exports = {

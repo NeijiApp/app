@@ -1,11 +1,8 @@
 import { findCachedAudioSegment, saveAudioSegmentToCache, incrementUsageCount, generateTextHash } from './audio-cache';
 import { saveAudioToStorage, initializeAudioBucket, isStorageUrl } from './audio-storage';
 
-const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
-
-if (!ELEVENLABS_API_KEY) {
-	throw new Error("The environement variable ELEVENLABS_API_KEY is not set");
-}
+// ELEVENLABS_API_KEY may be undefined in contexts that don't generate audio (e.g., chat landing)
+// Check inside the function when actually generating.
 
 type GenerateParagrapheAudioProps = {
 	voice_id: string;
@@ -23,6 +20,12 @@ const generateParagraphAudio = async (
 		voice_gender,
 	}: GenerateParagrapheAudioProps,
 ) => {
+	// Ensure API key is present for audio generation
+	const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
+	if (!ELEVENLABS_API_KEY) {
+		throw new Error("The environment variable ELEVENLABS_API_KEY is not set");
+	}
+
 	// Déduire le genre de la voix à partir de l'ID si pas fourni
 	const actualVoiceGender = voice_gender || (voice_id === 'g6xIsTj2HwM6VR4iXFCw' ? 'female' : 'male');
 	// 1. Vérifier d'abord le cache

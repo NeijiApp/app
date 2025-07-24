@@ -11,6 +11,9 @@ export const env = createEnv({
 		OPENAI_API_KEY: z.string(),
 		ELEVENLABS_API_KEY: z.string().optional(),
 		OPENROUTER_API_KEY: z.string().optional(),
+		ASSEMBLY_SERVICE_URL: z.string().url().optional().default("http://localhost:3001"),
+		ASSEMBLY_API_KEY: z.string().optional().default("dev-key-123"),
+		ASSEMBLY_TIMEOUT: z.string().optional().default("60000"),
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
@@ -35,6 +38,9 @@ export const env = createEnv({
 		OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 		ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY,
 		OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+		ASSEMBLY_SERVICE_URL: process.env.ASSEMBLY_SERVICE_URL,
+		ASSEMBLY_API_KEY: process.env.ASSEMBLY_API_KEY,
+		ASSEMBLY_TIMEOUT: process.env.ASSEMBLY_TIMEOUT,
 		NODE_ENV: process.env.NODE_ENV,
 		NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 		NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,

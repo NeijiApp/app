@@ -4,9 +4,9 @@ const fs = require('fs').promises;
 
 /**
  * Assemble plusieurs segments audio avec FFmpeg
- * @param {Array<Object>} segments - Liste des segments avec localPath, duration, silenceAfter
+ * @param {Array<{localPath: string, silenceAfter?: number, duration?: number}>} segments - Liste des segments avec localPath, duration, silenceAfter
  * @param {string} outputPath - Chemin de sortie du fichier final
- * @param {Object} options - Options d'assemblage
+ * @param {{format?: string, quality?: string, normalize?: boolean, fadeIn?: number, fadeOut?: number}} [options] - Options d'assemblage
  */
 async function assembleAudioSegments(segments, outputPath, options = {}) {
   return new Promise((resolve, reject) => {
@@ -71,8 +71,10 @@ async function assembleAudioSegments(segments, outputPath, options = {}) {
           }
           if (fadeOut > 0) {
             // Calculer la durée totale pour le fade out
-            const totalDuration = segments.reduce((total, seg) => 
-              total + seg.duration + (seg.silenceAfter || 0), 0) / 1000;
+            const totalDuration = segments.reduce(
+              (total, seg) => total + (seg.duration ?? 0) + (seg.silenceAfter || 0),
+              0,
+            ) / 1000;
             fadeFilter = `${filterGraph}afade=t=out:st=${totalDuration - (fadeOut / 1000)}:d=${fadeOut / 1000}[fadeout]`;
             filterGraph = '[fadeout]';
           }
@@ -182,12 +184,12 @@ async function getAudioInfo(filePath) {
       }
 
       resolve({
-        duration: parseFloat(metadata.format.duration || '0') * 1000, // en ms
-        bitrate: parseInt(metadata.format.bit_rate || '0') || 0,
+        duration: parseFloat(String(metadata.format.duration ?? '0')) * 1000, // en ms
+        bitrate: parseInt(String(metadata.format.bit_rate ?? '0')) || 0,
         sampleRate: audioStream.sample_rate,
         channels: audioStream.channels,
         codec: audioStream.codec_name,
-        size: parseInt(metadata.format.size || '0') || 0
+        size: parseInt(String(metadata.format.size ?? '0')) || 0
       });
     });
   });

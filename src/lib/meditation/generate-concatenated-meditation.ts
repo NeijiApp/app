@@ -1,221 +1,110 @@
-import { writeFile, unlink, mkdtemp, copyFile, mkdir } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { existsSync } from "node:fs";
-import { generateParagraphAudio } from "./generate-paragraph-audio";
-import { v4 as uuidv4 } from "uuid";
+import { mkdtemp, writeFile, readFile, copyFile, mkdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { generateParagraphAudio } from './generate-paragraph-audio';
 
-type Segment = { type: "text"; content: string } | { type: "pause"; duration: number };
-
-// Configuration du service assembly
-const ASSEMBLY_SERVICE_URL = "http://localhost:3001";
-const ASSEMBLY_SHARED_DIR = join(process.cwd(), "assembly-service", "temp", "uploads");
+type Segment = { type: 'text'; content: string } | { type: 'pause'; duration: number };
 
 /**
- * Calcule la durée estimée d'un texte en millisecondes
- * Basé sur une vitesse de parole moyenne de 150 mots par minute pour la méditation
+ * Génère et assemble localement tous les segments de méditation en un seul fichier audio MP3.
  */
-function estimateTextDuration(text: string): number {
-	const words = text.trim().split(/\s+/).length;
-	const wordsPerMinute = 120; // Vitesse plus lente pour la méditation guidée
-	const durationMinutes = words / wordsPerMinute;
-	const durationMs = durationMinutes * 60 * 1000;
-	
-	// Minimum 2 secondes, maximum 30 secondes par segment
-	return Math.max(2000, Math.min(30000, durationMs));
-}
-
-async function generateConcatenatedMeditation(
+export async function generateConcatenatedMeditation(
 	segments: Segment[],
 	voiceId?: string,
 	voiceGender?: 'male' | 'female',
 ): Promise<ReadableStream<Uint8Array>> {
-	// Create a unique temporary directory for this request.
-	const tempDir = await mkdtemp(join(tmpdir(), "meditation-"));
-	const jobId = uuidv4();
-	const tempFiles: { audioUrl: string; duration: number; silenceAfter?: number }[] = [];
+	// Répertoire temporaire pour cette requête
+	const tempDir = await mkdtemp(join(tmpdir(), 'meditation-'));
+	const audioFiles: Array<{ localPath: string; silenceAfter?: number }> = [];
 
-	try {
-		// Ensure assembly shared directory exists
-		await mkdir(ASSEMBLY_SHARED_DIR, { recursive: true });
-
-		// 1. Generate audio segments and copy to shared directory
-		let segmentIndex = 0;
-		for (let i = 0; i < segments.length; i++) {
-			const segment = segments[i];
-			if (!segment) continue;
-
-			if (segment.type === "text") {
-				console.log(`📝 Generating text segment ${segmentIndex + 1}: "${segment.content.substring(0, 50)}..."`);
-				
-				// Use provided voiceId or default to female voice
-				const selectedVoiceId = voiceId || "g6xIsTj2HwM6VR4iXFCw";
-				const selectedVoiceGender = voiceGender || (selectedVoiceId === 'g6xIsTj2HwM6VR4iXFCw' ? 'female' : 'male');
-				console.log(`🎤 Using voice ID: ${selectedVoiceId} (${selectedVoiceGender})`);
-				
-				// Generate audio for this text segment
-				const audioStream = await generateParagraphAudio(segment.content, {
-					voice_id: selectedVoiceId,
-					voice_gender: selectedVoiceGender,
-					voice_style: "calm",
-				});
-				
-				// Save to temporary file first
-				const tempFile = join(tempDir, `segment-${segmentIndex}.mp3`);
-				const audioBuffer = await streamToBuffer(audioStream);
-				await writeFile(tempFile, audioBuffer);
-				
-				// Copy to shared directory with unique name
-				const sharedFileName = `${jobId}_segment_${segmentIndex}.mp3`;
-				const sharedFilePath = join(ASSEMBLY_SHARED_DIR, sharedFileName);
-				await copyFile(tempFile, sharedFilePath);
-				
-				// Calculer la durée estimée du texte
-				const estimatedDuration = estimateTextDuration(segment.content);
-				console.log(`⏱️ Estimated duration for segment ${segmentIndex + 1}: ${Math.round(estimatedDuration/1000)}s (${segment.content.split(/\s+/).length} words)`);
-				
-				// Le service assembly utilisera le nom de fichier relatif
-				tempFiles.push({
-					audioUrl: sharedFileName, // Nom de fichier seulement, pas le chemin complet
-					duration: estimatedDuration, // Durée estimée basée sur le texte
-					silenceAfter: 0
-				});
-				
-				segmentIndex++;
-			} else {
-				console.log(`⏸️ Generating pause segment ${i + 1}: ${segment.duration}s`);
-				// For pauses, add silence after the previous segment
-				if (tempFiles.length > 0) {
-					const lastSegment = tempFiles[tempFiles.length - 1];
-					if (lastSegment) {
-						lastSegment.silenceAfter = segment.duration * 1000; // Convert to ms
-					}
-				}
+	// Générer les fichiers audio pour chaque segment
+	for (let i = 0; i < segments.length; i++) {
+		const seg = segments[i]!;
+		if (seg.type === 'text') {
+			const stream = await generateParagraphAudio(seg.content, {
+				voice_id: voiceId!,
+				voice_gender: voiceGender,
+				voice_style: 'calm',
+			});
+			// Lire le flux et écrire en fichier
+			const buffer = await new Response(stream).arrayBuffer();
+			const filePath = join(tempDir, `segment-${i}.mp3`);
+			await writeFile(filePath, Buffer.from(buffer));
+			audioFiles.push({ localPath: filePath });
+		} else {
+			// Pause : appliquer silence sur le segment précédent
+			const silenceMs = seg.duration * 1000;
+			if (audioFiles.length > 0) {
+				audioFiles[audioFiles.length - 1]!.silenceAfter = silenceMs;
 			}
 		}
+	}
 
-		console.log("📄 Prepared segments for assembly service.");
-
-		// 2. Call assembly service
-		console.log(`🔗 Calling assembly service at ${ASSEMBLY_SERVICE_URL}`);
+	// Chemin de sortie final
+	const outputPath = join(tempDir, 'meditation-final.mp3');
+	// Assemblage avec le service assembly externe
+	try {
+		const assemblyServiceUrl = process.env.ASSEMBLY_SERVICE_URL || 'http://localhost:3001';
+		const assemblyUploadsDir = join(process.cwd(), 'assembly-service', 'temp', 'uploads');
 		
-		const assemblyResponse = await fetch(`${ASSEMBLY_SERVICE_URL}/api/assembly/create`, {
+		// S'assurer que le dossier uploads existe
+		await mkdir(assemblyUploadsDir, { recursive: true });
+		
+		// Copier les fichiers vers le dossier uploads du service assembly
+		const assemblySegments = [];
+		for (let i = 0; i < audioFiles.length; i++) {
+			const file = audioFiles[i]!;
+			const fileName = `segment-${Date.now()}-${i}.mp3`;
+			const targetPath = join(assemblyUploadsDir, fileName);
+			
+			await copyFile(file.localPath, targetPath);
+			console.log(`📁 Copied ${file.localPath} to ${targetPath}`);
+			
+			assemblySegments.push({
+				id: `segment-${i}`,
+				audioUrl: fileName, // Juste le nom du fichier
+				duration: 30, // Durée estimée en secondes
+				silenceAfter: file.silenceAfter || 0
+			});
+		}
+
+		console.log(`🔧 Calling assembly service at ${assemblyServiceUrl} with ${assemblySegments.length} segments`);
+
+		const response = await fetch(`${assemblyServiceUrl}/api/assembly/create`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json',
+				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				segments: tempFiles,
-				options: {
-					format: 'mp3',
-					quality: '320k',
-					normalize: true
-				}
+				segments: assemblySegments
 			})
 		});
 
-		if (!assemblyResponse.ok) {
-			const errorText = await assemblyResponse.text();
-			throw new Error(`Assembly service error: ${assemblyResponse.status} - ${errorText}`);
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(`Assembly service error: ${response.status} ${response.statusText} - ${errorText}`);
 		}
 
-		const assemblyResult = await assemblyResponse.json();
-		console.log(`✅ Assembly job created: ${assemblyResult.jobId}`);
+		const result = await response.json();
+		console.log(`✅ Assembly completed: ${result.jobId}`);
 
-		// 3. Download the assembled meditation
-		const downloadUrl = `${ASSEMBLY_SERVICE_URL}${assemblyResult.downloadUrl}`;
-		console.log(`⬇️ Downloading from: ${downloadUrl}`);
-		
-		const downloadResponse = await fetch(downloadUrl);
-		
-		if (!downloadResponse.ok) {
-			throw new Error(`Download failed: ${downloadResponse.status}`);
+		// Télécharger le fichier assemblé
+		const downloadResponse = await fetch(`${assemblyServiceUrl}${result.downloadUrl}`);
+		if (!downloadResponse.ok || !downloadResponse.body) {
+			throw new Error('Failed to download assembled audio');
 		}
 
-		// 4. Return the audio stream
-		const finalStream = new ReadableStream<Uint8Array>({
-			start(controller) {
-				if (!downloadResponse.body) {
-					controller.error(new Error("No response body"));
-					return;
-				}
-
-				const reader = downloadResponse.body.getReader();
-				
-				const pump = async () => {
-					try {
-						while (true) {
-							const { done, value } = await reader.read();
-							if (done) {
-								controller.close();
-								break;
-							}
-							controller.enqueue(value);
-						}
-					} catch (error) {
-						controller.error(error);
-					} finally {
-						// Clean up temporary files
-						cleanup(tempDir, jobId, false);
-					}
-				};
-				
-				pump();
-			},
-		});
-
-		console.log('✅ Meditation generation complete via assembly service');
-		return finalStream;
-
+		// Sauvegarder temporairement pour retour
+		const buffer = await new Response(downloadResponse.body).arrayBuffer();
+		await writeFile(outputPath, Buffer.from(buffer));
+		
+		console.log(`✅ Assembly service completed successfully`);
 	} catch (error) {
-		console.error("Error in meditation generation pipeline:", error);
-		await cleanup(tempDir, jobId, true);
-		throw error;
+		console.error('❌ Assembly service failed:', error);
+		throw new Error(`Audio assembly failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
 	}
+
+	// Lire le fichier final et renvoyer un ReadableStream
+	const data = await readFile(outputPath);
+	return new Response(data).body as ReadableStream<Uint8Array>;
 }
-
-// Helper function to convert a ReadableStream to a Buffer.
-async function streamToBuffer(stream: ReadableStream<Uint8Array>): Promise<Buffer> {
-	const reader = stream.getReader();
-	const chunks: Uint8Array[] = [];
-	while (true) {
-		const { done, value } = await reader.read();
-		if (done) break;
-		chunks.push(value);
-	}
-	return Buffer.concat(chunks);
-}
-
-// Helper function to safely delete temporary files.
-async function cleanup(dir: string, jobId: string, includeSelf: boolean) {
-	try {
-		// Clean up local temp directory
-		const files = await require("fs/promises").readdir(dir);
-		for (const file of files) {
-			if (file.startsWith("segment-")) {
-				await unlink(join(dir, file));
-			}
-		}
-		if (includeSelf) {
-			await require("fs/promises").rmdir(dir);
-		}
-
-		// Clean up shared directory files
-		try {
-			const sharedFiles = await require("fs/promises").readdir(ASSEMBLY_SHARED_DIR);
-			for (const file of sharedFiles) {
-				if (file.startsWith(`${jobId}_`)) {
-					await unlink(join(ASSEMBLY_SHARED_DIR, file));
-				}
-			}
-		} catch (err) {
-			console.warn(`⚠️ Could not clean shared directory: ${err}`);
-		}
-
-		console.log(`🗑️ Cleaned up temporary files for job: ${jobId}`);
-	} catch (err) {
-		console.error(`🧹 Failed to clean up temporary directory ${dir}:`, err);
-	}
-}
-
-export { generateConcatenatedMeditation }; 
