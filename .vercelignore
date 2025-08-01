@@ -1,10 +1,17 @@
 # Debug and testing files
 debug-elevenlabs-account.js
+debug-elevenlabs-params.js
+debug-elevenlabs.js
 test-tts-router.js
+test-credit-efficient.js
+test-english-meditation.js
+test-openai-tts.js
 
 # Development only files  
 *.debug.js
 *.test.js
+debug-*.js
+test-*.js
 
 # Local environment files
 .env.local

@@ -40,6 +40,7 @@
 	],
 	"exclude": [
 		"node_modules",
+		"debug-scripts/**/*",
 		"debug-conversation.js",
 		"clean-test-messages.js",
 		"check-tables.js",
