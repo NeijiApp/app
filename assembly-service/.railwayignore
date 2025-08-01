@@ -1,0 +1,10 @@
+node_modules/
+temp/
+*.log
+.env
+.env.*
+docker-compose.yml
+Dockerfile
+test-local.js
+README.md
+.git/
