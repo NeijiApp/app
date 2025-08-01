@@ -2,15 +2,17 @@ import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 
 // Configuration Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error('Missing Supabase configuration for audio storage');
+// Create client only if configuration is available
+let supabase: ReturnType<typeof createClient> | null = null;
+
+if (supabaseUrl && supabaseServiceKey) {
+    supabase = createClient(supabaseUrl, supabaseServiceKey);
+} else {
+    console.warn('⚠️ Supabase configuration missing - audio storage will be unavailable');
 }
-
-// Client Supabase avec clé de service pour les opérations backend
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const AUDIO_BUCKET = 'audio-segments';
 
@@ -18,6 +20,11 @@ const AUDIO_BUCKET = 'audio-segments';
  * Initialise le bucket audio s'il n'existe pas
  */
 export async function initializeAudioBucket(): Promise<void> {
+    if (!supabase) {
+        console.warn('⚠️ Supabase not configured - skipping audio bucket initialization');
+        return;
+    }
+    
     try {
         // Vérifier si le bucket existe
         const { data: buckets } = await supabase.storage.listBuckets();
@@ -54,6 +61,10 @@ export async function saveAudioToStorage(
     voiceId: string,
     textHash: string
 ): Promise<string> {
+    if (!supabase) {
+        throw new Error('Supabase not configured - cannot save audio to storage');
+    }
+    
     try {
         // Générer un nom de fichier unique
         const fileName = `${voiceId}/${textHash}-${uuidv4()}.mp3`;
@@ -94,6 +105,11 @@ export async function saveAudioToStorage(
  * Supprime un fichier audio du Storage
  */
 export async function deleteAudioFromStorage(audioUrl: string): Promise<void> {
+    if (!supabase) {
+        console.warn('⚠️ Supabase not configured - cannot delete audio from storage');
+        return;
+    }
+    
     try {
         // Extraire le nom du fichier depuis l'URL
         const fileName = extractFileNameFromUrl(audioUrl);
@@ -124,6 +140,11 @@ export async function deleteAudioFromStorage(audioUrl: string): Promise<void> {
  * Nettoie les fichiers audio anciens (plus de 30 jours et peu utilisés)
  */
 export async function cleanupOldAudioFiles(): Promise<void> {
+    if (!supabase) {
+        console.warn('⚠️ Supabase not configured - cannot cleanup audio files');
+        return;
+    }
+    
     try {
         console.log('🧹 Starting audio cleanup...');
         
@@ -181,6 +202,15 @@ export async function getStorageStats(): Promise<{
     totalSize: number;
     bucketInfo: any;
 }> {
+    if (!supabase) {
+        console.warn('⚠️ Supabase not configured - cannot get storage stats');
+        return {
+            totalFiles: 0,
+            totalSize: 0,
+            bucketInfo: null
+        };
+    }
+    
     try {
         // Lister tous les fichiers pour compter
         const { data: files, error } = await supabase.storage
