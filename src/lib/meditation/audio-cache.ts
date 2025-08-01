@@ -100,7 +100,7 @@ export async function saveAudioSegmentToCache(
     audioUrl: string,
     audioDuration?: number,
     fileSize?: number,
-    language: string = 'fr-FR'
+    language: string = 'en-US'
 ): Promise<SelectAudioSegmentsCache | null> {
     const textHash = generateTextHash(text);
     
@@ -268,7 +268,7 @@ export async function findBestCachedSegment(
     const {
         useSemanticSearch = true,
         semanticThreshold = 0.9,
-        language = 'fr-FR'
+        language = 'en-US',
     } = options;
     
     try {

@@ -1,7 +1,7 @@
 import { mkdtemp, writeFile, readFile, copyFile, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { generateParagraphAudio } from './generate-paragraph-audio';
+import { generateParagraphAudioWithRouter } from './tts-router';
 
 type Segment = { type: 'text'; content: string } | { type: 'pause'; duration: number };
 
@@ -21,7 +21,7 @@ export async function generateConcatenatedMeditation(
 	for (let i = 0; i < segments.length; i++) {
 		const seg = segments[i]!;
 		if (seg.type === 'text') {
-			const stream = await generateParagraphAudio(seg.content, {
+			const stream = await generateParagraphAudioWithRouter(seg.content, {
 				voice_id: voiceId!,
 				voice_gender: voiceGender,
 				voice_style: 'calm',

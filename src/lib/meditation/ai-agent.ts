@@ -20,7 +20,7 @@ const AI_CONFIG = {
     // Paramètres d'optimisation
     maxCacheSearchResults: 5,       // Nombre max de résultats à analyser
     qualityThreshold: 4.0,          // Score qualité minimum (sur 5)
-    maxGenerationTime: 30000,       // Timeout génération (30s)
+    maxGenerationTime: 30000,       // Generation timeout (30s)
     
     // Métriques de performance
     targetCostReduction: 0.4,       // 40% de réduction visée
@@ -56,7 +56,7 @@ export interface OptimizationDecision {
     cachedSegment?: any;      // Segment trouvé si réutilisation
     similarity?: number;      // Score de similarité si applicable
     estimatedCost: number;    // Coût estimé de cette décision
-    estimatedTime: number;    // Temps estimé de génération
+    estimatedTime: number;    // Estimated generation time
 }
 
 export interface GenerationPlan {
@@ -99,16 +99,16 @@ export class MeditationAIAgent {
     };
 
     /**
-     * Point d'entrée principal : Génère une méditation optimisée
+     * Main entry point: Generates an optimized meditation
      */
     async generateOptimizedMeditation(request: MeditationRequest): Promise<GenerationResult> {
-        console.log('🧠 Agent IA démarré pour:', request.prompt);
+        console.log('🧠 AI Agent started for:', request.prompt);
         const startTime = Date.now();
 
         try {
             // Étape 1: Analyser et planifier
             const plan = await this.createGenerationPlan(request);
-            console.log(`📋 Plan créé: ${plan.segments.length} segments, optimisation ${plan.optimizationScore.toFixed(1)}/5`);
+            console.log(`📋 Plan created: ${plan.segments.length} segments, optimization ${plan.optimizationScore.toFixed(1)}/5`);
 
             // Étape 2: Exécuter le plan
             const result = await this.executePlan(plan, request);
@@ -117,7 +117,7 @@ export class MeditationAIAgent {
             await this.updateMetrics(result);
             
             result.actualTime = Date.now() - startTime;
-            console.log(`✅ Méditation générée en ${result.actualTime}ms`);
+            console.log(`✅ Meditation generated in ${result.actualTime}ms`);
             
             return result;
 
@@ -137,14 +137,14 @@ export class MeditationAIAgent {
     }
 
     /**
-     * Étape 1: Créer un plan de génération optimisé
+     * Step 1: Create an optimized generation plan
      */
     private async createGenerationPlan(request: MeditationRequest): Promise<GenerationPlan> {
-        console.log('📝 Création du plan de génération...');
+        console.log('📝 Creating generation plan...');
 
-        // 1. Parser la demande en segments
+        // 1. Parse the request into segments
         const segments = await this.parseRequestToSegments(request);
-        console.log(`🧩 ${segments.length} segments identifiés`);
+        console.log(`🧩 ${segments.length} segments identified`);
 
         // 2. Pour chaque segment, décider de la stratégie optimale
         const decisions: OptimizationDecision[] = [];
@@ -175,7 +175,7 @@ export class MeditationAIAgent {
     }
 
     /**
-     * Parser intelligent : Convertit une demande en segments structurés
+     * Intelligent parser: Converts a request into structured segments
      */
     private async parseRequestToSegments(request: MeditationRequest): Promise<SegmentPlan[]> {
         const segments: SegmentPlan[] = [];
@@ -184,7 +184,7 @@ export class MeditationAIAgent {
         // Template de base selon l'objectif
         const template = this.selectTemplate(request.goal, request.duration);
         
-        // Générer les segments selon le template
+        // Generate segments according to template
         let currentTime = 0;
         for (const templateSegment of template) {
             const duration = Math.round(totalDuration * templateSegment.percentage);
@@ -263,10 +263,10 @@ export class MeditationAIAgent {
     }
 
     /**
-     * Exécuter le plan de génération
+     * Execute the generation plan
      */
     private async executePlan(plan: GenerationPlan, request: MeditationRequest): Promise<GenerationResult> {
-        console.log('🎬 Exécution du plan de génération...');
+        console.log('🎦 Executing generation plan...');
         
         const audioSegments: string[] = [];
         let actualCost = 0;
@@ -300,7 +300,7 @@ export class MeditationAIAgent {
                         audioUrl = await this.createNewSegment(segment, request);
                         segmentsCreated++;
                         actualCost += decision.estimatedCost;
-                        console.log(`🆕 Nouveau segment créé: ${segment.type}`);
+                        console.log(`🆕 New segment created: ${segment.type}`);
                         break;
 
                     default:
@@ -310,7 +310,7 @@ export class MeditationAIAgent {
                 if (audioUrl) {
                     audioSegments.push(audioUrl);
                 } else {
-                    errors.push(`Échec génération segment ${segment.type}`);
+                    errors.push(`Generation failed for segment ${segment.type}`);
                 }
 
             } catch (error) {
@@ -349,16 +349,16 @@ export class MeditationAIAgent {
     }
 
     private generateSegmentContent(templateSegment: any, request: MeditationRequest): string {
-        // Génération de contenu basique - sera enrichie plus tard
+        // Basic content generation - will be enriched later
         const baseContent = {
-            intro: `Installez-vous confortablement pour cette méditation de ${request.duration} minutes`,
-            breathing: "Prenez une profonde inspiration, puis expirez lentement",
-            body_scan: "Portez votre attention sur votre corps, en commençant par le sommet de votre tête",
-            visualization: "Imaginez-vous dans un lieu paisible et sécurisant",
-            conclusion: "Revenez doucement à l'instant présent"
+            intro: `Get comfortable for this ${request.duration}-minute meditation`,
+            breathing: "Take a deep breath, then exhale slowly",
+            body_scan: "Focus your attention on your body, starting from the top of your head",
+            visualization: "Imagine yourself in a peaceful and safe place",
+            conclusion: "Gently return to the present moment"
         };
         
-        return baseContent[templateSegment.type as keyof typeof baseContent] || "Contenu de méditation";
+        return baseContent[templateSegment.type as keyof typeof baseContent] || "Meditation content";
     }
 
     private getVoiceId(gender: 'male' | 'female'): string {
@@ -419,7 +419,7 @@ export class MeditationAIAgent {
 
     private async assembleAudio(audioSegments: string[]): Promise<string> {
         // Placeholder - sera implémenté avec FFmpeg
-        console.log(`🎵 Assemblage de ${audioSegments.length} segments audio`);
+        console.log(`🎵 Assembling ${audioSegments.length} audio segments`);
         return `https://assembled-meditation-${Date.now()}.mp3`;
     }
 

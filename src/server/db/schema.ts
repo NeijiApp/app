@@ -72,7 +72,7 @@ export const audioSegmentsCache = pgTable("audio_segments_cache", {
 	lastUsedAt: timestamp("last_used_at", { mode: 'string' }).defaultNow(),
 	// Nouvelles colonnes pour l'IA
 	embedding: text(), // Embedding OpenAI (stocké comme JSON string)
-	language: varchar({ length: 10 }).default('fr-FR'), // Code langue ISO
+	language: varchar({ length: 10 }).default('en-US'), // Language code ISO
 	similarityThreshold: real("similarity_threshold").default(0.92), // Seuil de similarité
 }, (table) => ({
 	languageIdx: index("idx_audio_segments_cache_language").on(table.language),

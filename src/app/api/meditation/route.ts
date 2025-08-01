@@ -4,6 +4,7 @@ export const runtime = 'nodejs';
 import { z } from "zod";
 import { MeditationAIAgent } from "~/lib/meditation/ai-agent";
 import { generateConcatenatedMeditation } from "~/lib/meditation/generate-concatenated-meditation";
+import { generateCreditEfficientSegments, estimateCreditUsage, canGenerateWithinCredits } from "~/lib/meditation/optimized-segments";
 import { env } from "~/env";
 
 const meditationSchema = z.object({
@@ -25,31 +26,31 @@ function generateOptimizedSegments(duration: number, goal: string) {
   // Templates optimisés selon la durée
   let template;
   if (duration <= 2) {
-    // Méditation courte : focus sur l'essentiel
+    // Short meditation: focus on essentials
     template = [
-      { type: 'intro', content: `Bienvenue dans cette méditation de ${duration} minutes. Installez-vous confortablement et fermez les yeux.`, pauseAfter: 2 },
-      { type: 'breathing', content: `Portez votre attention sur votre respiration naturelle. Inspirez profondément par le nez, puis expirez lentement par la bouche. Laissez votre souffle vous ancrer dans l'instant présent.`, pauseAfter: 8 },
-      { type: 'body_scan', content: `Maintenant, détendez progressivement chaque partie de votre corps. Commencez par le sommet de votre tête, puis vos épaules, vos bras, votre torse, et vos jambes. Relâchez toutes les tensions.`, pauseAfter: 6 },
-      { type: 'visualization', content: `Imaginez-vous dans un lieu paisible et sécurisant. Peut-être une plage, une forêt, ou simplement votre endroit préféré. Ressentez la paix et la sérénité de ce lieu.`, pauseAfter: 8 },
-      { type: 'conclusion', content: `Revenez doucement à l'instant présent. Bougez délicatement vos doigts et vos orteils. Quand vous êtes prêt, ouvrez les yeux. Vous vous sentez calme et détendu.`, pauseAfter: 2 }
+      { type: 'intro', content: `Welcome to this ${duration}-minute meditation. Get comfortable and close your eyes.`, pauseAfter: 2 },
+      { type: 'breathing', content: `Focus your attention on your natural breathing. Breathe deeply through your nose, then exhale slowly through your mouth. Let your breath anchor you in the present moment.`, pauseAfter: 8 },
+      { type: 'body_scan', content: `Now, gradually relax each part of your body. Start from the top of your head, then your shoulders, arms, torso, and legs. Release all tensions.`, pauseAfter: 6 },
+      { type: 'visualization', content: `Imagine yourself in a peaceful and safe place. Perhaps a beach, a forest, or simply your favorite spot. Feel the peace and serenity of this place.`, pauseAfter: 8 },
+      { type: 'conclusion', content: `Gently return to the present moment. Wiggle your fingers and toes softly. When you're ready, open your eyes. You feel calm and relaxed.`, pauseAfter: 2 }
     ];
   } else if (duration <= 5) {
-    // Méditation moyenne : équilibre texte/pauses
+    // Medium meditation: balance text/pauses
     template = [
-      { type: 'intro', content: `Bienvenue dans cette méditation de ${duration} minutes. Installez-vous confortablement dans une position qui vous convient. Fermez les yeux et accordez-vous ce moment de paix.`, pauseAfter: 4 },
-      { type: 'breathing', content: `Portez votre attention sur votre respiration naturelle, sans chercher à la modifier. Observez simplement l'air qui entre et qui sort. À chaque expiration, relâchez un peu plus les tensions de votre journée.`, pauseAfter: 12 },
-      { type: 'body_scan', content: `Maintenant, parcourez votre corps avec bienveillance. Commencez par le sommet de votre tête, détendez votre front, vos yeux, votre mâchoire. Puis vos épaules, vos bras, votre poitrine, votre ventre, vos hanches, vos jambes et vos pieds.`, pauseAfter: 15 },
-      { type: 'visualization', content: `Imaginez-vous dans votre lieu de paix personnel. Un endroit où vous vous sentez parfaitement en sécurité et détendu. Explorez ce lieu avec tous vos sens. Ressentez la tranquillité qu'il vous apporte.`, pauseAfter: 18 },
-      { type: 'conclusion', content: `Il est maintenant temps de revenir doucement. Prenez conscience de votre corps, de votre respiration. Bougez délicatement vos mains et vos pieds. Quand vous vous sentez prêt, ouvrez doucement les yeux. Emportez avec vous cette sensation de calme.`, pauseAfter: 3 }
+      { type: 'intro', content: `Welcome to this ${duration}-minute meditation. Settle into a comfortable position that works for you. Close your eyes and allow yourself this moment of peace.`, pauseAfter: 4 },
+      { type: 'breathing', content: `Focus your attention on your natural breathing, without trying to change it. Simply observe the air flowing in and out. With each exhale, release a little more of the day's tensions.`, pauseAfter: 12 },
+      { type: 'body_scan', content: `Now, scan through your body with kindness. Start from the top of your head, relax your forehead, your eyes, your jaw. Then your shoulders, arms, chest, belly, hips, legs, and feet.`, pauseAfter: 15 },
+      { type: 'visualization', content: `Imagine yourself in your personal place of peace. A place where you feel perfectly safe and relaxed. Explore this place with all your senses. Feel the tranquility it brings you.`, pauseAfter: 18 },
+      { type: 'conclusion', content: `It's time to gently return. Become aware of your body, your breathing. Gently move your hands and feet. When you feel ready, slowly open your eyes. Take this feeling of calm with you.`, pauseAfter: 3 }
     ];
   } else {
-    // Méditation longue : plus de pauses contemplatives
+    // Long meditation: more contemplative pauses
     template = [
-      { type: 'intro', content: `Bienvenue dans cette méditation de ${duration} minutes. Prenez le temps de vous installer confortablement. Fermez les yeux et laissez-vous guider dans ce voyage intérieur vers la paix et la sérénité.`, pauseAfter: 6 },
-      { type: 'breathing', content: `Commençons par nous connecter à notre respiration. Observez le rythme naturel de votre souffle. Sentez l'air frais qui entre par vos narines et l'air chaud qui en ressort. Laissez votre respiration devenir votre ancre dans l'instant présent.`, pauseAfter: 20 },
-      { type: 'body_scan', content: `Maintenant, explorons votre corps avec attention et bienveillance. Commencez par le sommet de votre crâne. Détendez chaque muscle de votre visage, relâchez vos épaules, libérez vos bras. Sentez votre poitrine s'ouvrir, votre ventre se détendre. Relâchez vos hanches, vos cuisses, vos mollets, jusqu'à la pointe de vos orteils.`, pauseAfter: 25 },
-      { type: 'visualization', content: `Visualisez maintenant votre sanctuaire intérieur. Un lieu unique qui n'appartient qu'à vous, où règnent la paix et l'harmonie. Explorez ce lieu magique, ressentez sa beauté, sa tranquillité. Laissez-vous imprégner par l'énergie apaisante de cet espace sacré.`, pauseAfter: 30 },
-      { type: 'conclusion', content: `Notre voyage touche à sa fin. Revenez progressivement à votre corps physique, à votre respiration. Emportez avec vous la paix et la sérénité que vous venez de cultiver. Bougez doucement vos membres, et quand vous vous sentez prêt, ouvrez les yeux avec un sourire.`, pauseAfter: 4 }
+      { type: 'intro', content: `Welcome to this ${duration}-minute meditation. Take time to settle in comfortably. Close your eyes and let yourself be guided on this inner journey toward peace and serenity.`, pauseAfter: 6 },
+      { type: 'breathing', content: `Let's begin by connecting to our breath. Observe the natural rhythm of your breathing. Feel the cool air entering through your nostrils and the warm air flowing out. Let your breath become your anchor in the present moment.`, pauseAfter: 20 },
+      { type: 'body_scan', content: `Now, let's explore your body with attention and kindness. Start from the crown of your head. Relax each muscle in your face, release your shoulders, free your arms. Feel your chest opening, your belly softening. Release your hips, thighs, calves, down to the tips of your toes.`, pauseAfter: 25 },
+      { type: 'visualization', content: `Now visualize your inner sanctuary. A unique place that belongs only to you, where peace and harmony reign. Explore this magical place, feel its beauty, its tranquility. Let yourself be filled with the soothing energy of this sacred space.`, pauseAfter: 30 },
+      { type: 'conclusion', content: `Our journey is coming to an end. Gradually return to your physical body, to your breathing. Take with you the peace and serenity you have just cultivated. Gently move your limbs, and when you feel ready, open your eyes with a smile.`, pauseAfter: 4 }
     ];
   }
   
@@ -135,8 +136,18 @@ export async function POST(request: NextRequest) {
     console.log(`♻️ Reused: ${aiResult.segmentsReused}/${aiResult.segmentsReused + aiResult.segmentsCreated} segments (${Math.round(aiResult.segmentsReused/(aiResult.segmentsReused + aiResult.segmentsCreated)*100)}%)`);
     console.log(`⚡ Optimization achieved: ${aiResult.optimizationAchieved.toFixed(1)}%`);
 
-    // Générer des segments optimisés pour la durée demandée
-    const optimizedSegments = generateOptimizedSegments(duration, goal);
+    // Générer des segments optimisés pour les crédits ElevenLabs
+    const optimizedSegments = generateCreditEfficientSegments(duration, goal);
+    
+    // Vérifier si on peut générer avec les crédits disponibles
+    const estimatedCredits = estimateCreditUsage(optimizedSegments);
+    console.log(`💰 Estimated ElevenLabs credits needed: ${estimatedCredits}`);
+    
+    // Note: With 38 credits remaining, we can handle ~38 characters of text
+    // Each segment is now ~100 chars max to stay within limits
+    if (estimatedCredits > 500) {
+      console.warn(`⚠️ High credit usage estimated: ${estimatedCredits}. Consider shorter segments.`);
+    }
     
     // Convertir en format attendu par generateConcatenatedMeditation
     const assemblySegments: Array<{ type: 'text'; content: string } | { type: 'pause'; duration: number }> = [];

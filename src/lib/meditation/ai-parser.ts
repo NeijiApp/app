@@ -26,7 +26,7 @@ const INTENT_PATTERNS = {
     ],
     general: [
         'bien-être', 'détente', 'paix', 'sérénité', 'équilibre',
-        'mindfulness', 'pleine conscience', 'méditation', 'zen'
+        'mindfulness', 'awareness', 'meditation', 'zen'
     ]
 } as const;
 
@@ -51,7 +51,7 @@ const VOICE_PATTERNS = {
 } as const;
 
 /**
- * Templates de méditation selon les objectifs
+ * Meditation templates based on goals
  */
 const MEDITATION_TEMPLATES = {
     stress: {
@@ -129,106 +129,106 @@ const CONTENT_GENERATORS = {
     // Introductions selon l'objectif
     intro: {
         accueil_stress: (duration: number) => 
-            `Bienvenue dans cette méditation de ${duration} minutes spécialement conçue pour apaiser votre stress. Installez-vous confortablement, fermez les yeux si cela vous convient, et accordez-vous ce moment de répit bien mérité.`,
+            `Welcome to this ${duration}-minute meditation specially designed to ease your stress. Get comfortable, close your eyes if that feels right, and allow yourself this well-deserved moment of rest.`,
         
         preparation_sommeil: (duration: number) => 
-            `Il est temps de vous préparer pour une nuit réparatrice. Cette méditation de ${duration} minutes va vous accompagner vers un sommeil profond et paisible. Allongez-vous confortablement et laissez-vous guider.`,
+            `It's time to prepare for a restorative night. This ${duration}-minute meditation will guide you toward deep and peaceful sleep. Lie down comfortably and let yourself be guided.`,
         
         preparation_concentration: (duration: number) => 
-            `Préparez-vous à cultiver votre concentration avec cette méditation de ${duration} minutes. Asseyez-vous dans une position stable et confortable, le dos droit mais détendu, prêt à affûter votre attention.`,
+            `Prepare to cultivate your concentration with this ${duration}-minute meditation. Sit in a stable and comfortable position, back straight but relaxed, ready to sharpen your attention.`,
         
         accueil_douleur: (duration: number) => 
-            `Cette méditation de ${duration} minutes vous accompagne dans l'exploration bienveillante de vos sensations. Trouvez une position qui vous convient, en respectant les limites de votre corps.`,
+            `This ${duration}-minute meditation accompanies you in the kind exploration of your sensations. Find a position that works for you, respecting your body's limits.`,
         
         accueil_emotion: (duration: number) => 
-            `Accordez-vous ${duration} minutes pour accueillir et transformer vos émotions avec bienveillance. Installez-vous confortablement, le cœur ouvert à ce qui se présente.`,
+            `Allow yourself ${duration} minutes to welcome and transform your emotions with kindness. Get comfortable, with an open heart to what presents itself.`,
         
         accueil_general: (duration: number) => 
-            `Bienvenue dans cette méditation de ${duration} minutes pour cultiver votre bien-être. Prenez une position confortable et accordez-vous pleinement à cet instant présent.`
+            `Welcome to this ${duration}-minute meditation to cultivate your well-being. Take a comfortable position and fully allow yourself this present moment.`
     },
 
     // Exercices de respiration
     breathing: {
         respiration_apaisante: () => 
-            `Portez maintenant votre attention sur votre respiration naturelle. À chaque inspiration, imaginez que vous accueillez la paix et la sérénité. À chaque expiration, relâchez les tensions et le stress de votre journée. Laissez votre souffle devenir votre ancre dans l'instant présent.`,
+            `Now focus your attention on your natural breathing. With each inhale, imagine that you welcome peace and serenity. With each exhale, release the tensions and stress of your day. Let your breath become your anchor in the present moment.`,
         
         respiration_lente: () => 
-            `Ralentissez progressivement le rythme de votre respiration. Inspirez lentement par le nez en comptant jusqu'à quatre, retenez doucement votre souffle pendant deux temps, puis expirez par la bouche en comptant jusqu'à six. Ce rythme apaisant prépare votre corps et votre esprit au repos.`,
+            `Gradually slow down your breathing rhythm. Breathe in slowly through your nose counting to four, gently hold your breath for two counts, then exhale through your mouth counting to six. This soothing rhythm prepares your body and mind for rest.`,
         
         respiration_focalisee: () => 
-            `Utilisez votre respiration comme un outil de concentration. Inspirez en visualisant l'air pur qui nourrit votre clarté mentale, expirez en évacuant les distractions et les pensées parasites. Chaque cycle respiratoire affine votre attention et votre présence.`,
+            `Use your breathing as a concentration tool. Inhale while visualizing pure air that nourishes your mental clarity, exhale while releasing distractions and intrusive thoughts. Each breathing cycle refines your attention and presence.`,
         
         respiration_therapeutique: () => 
-            `Respirez avec intention thérapeutique. À chaque inspiration, imaginez que vous faites circuler une énergie apaisante dans tout votre corps. À chaque expiration, vous relâchez les tensions et permettez à votre corps de se détendre naturellement.`,
+            `Breathe with therapeutic intention. With each inhale, imagine that you circulate soothing energy throughout your body. With each exhale, you release tensions and allow your body to relax naturally.`,
         
         respiration_equilibrante: () => 
-            `Laissez votre respiration équilibrer vos émotions. Inspirez la stabilité et la paix intérieure, expirez les émotions qui vous déstabilisent. Votre souffle devient un pont entre votre monde intérieur et l'harmonie que vous recherchez.`,
+            `Let your breathing balance your emotions. Inhale stability and inner peace, exhale the emotions that destabilize you. Your breath becomes a bridge between your inner world and the harmony you seek.`,
         
         respiration_consciente: () => 
-            `Prenez simplement conscience de votre respiration, sans chercher à la modifier. Observez le va-et-vient naturel de votre souffle, cette danse constante qui vous maintient en vie et vous connecte à l'instant présent.`
+            `Simply become aware of your breathing, without trying to change it. Observe the natural back-and-forth of your breath, this constant dance that keeps you alive and connects you to the present moment.`
     },
 
     // Scan corporel
     body_scan: {
         relachement_tension: () => 
-            `Parcourez maintenant votre corps avec bienveillance, en commençant par le sommet de votre tête. Détendez votre front, vos joues, votre mâchoire. Relâchez vos épaules qui portent tant de tensions. Descendez le long de vos bras, détendez votre poitrine, votre dos, votre abdomen. Libérez vos hanches, vos cuisses, vos mollets, jusqu'au bout de vos orteils.`,
+            `Now scan through your body with kindness, starting from the top of your head. Relax your forehead, your cheeks, your jaw. Release your shoulders that carry so much tension. Move down along your arms, relax your chest, your back, your abdomen. Free your hips, your thighs, your calves, down to the tips of your toes.`,
         
         relaxation_progressive: () => 
-            `Invitez chaque partie de votre corps à se détendre profondément. Commencez par contracter légèrement vos muscles faciaux, puis relâchez complètement. Continuez avec vos épaules, vos bras, votre torse. Contractez puis relâchez vos fessiers, vos cuisses, vos mollets. Sentez cette vague de relaxation qui parcourt tout votre être.`,
+            `Invite each part of your body to relax deeply. Start by lightly contracting your facial muscles, then release completely. Continue with your shoulders, your arms, your torso. Contract then release your glutes, your thighs, your calves. Feel this wave of relaxation flowing through your entire being.`,
         
         ancrage_corporel: () => 
-            `Prenez conscience de votre corps comme une base stable pour votre concentration. Sentez vos points d'appui : vos fesses sur la chaise, vos pieds sur le sol. Ressentez la solidité de votre colonne vertébrale, l'ouverture de votre poitrine. Votre corps devient votre allié dans la concentration.`,
+            `Become aware of your body as a stable foundation for your concentration. Feel your support points: your buttocks on the chair, your feet on the floor. Feel the solidity of your spine, the openness of your chest. Your body becomes your ally in concentration.`,
         
         exploration_sensation: () => 
-            `Explorez vos sensations corporelles avec curiosité et bienveillance. Là où vous ressentez de l'inconfort, respirez dans cette zone sans résistance. Imaginez votre souffle comme une lumière douce qui apaise et détend. Accueillez ce que vous ressentez sans jugement.`,
+            `Explore your bodily sensations with curiosity and kindness. Where you feel discomfort, breathe into that area without resistance. Imagine your breath as a gentle light that soothes and relaxes. Welcome what you feel without judgment.`,
         
         ressenti_corporel: () => 
-            `Observez les sensations qui accompagnent vos émotions dans votre corps. Peut-être une tension dans la poitrine, une lourdeur dans le ventre, ou au contraire une légèreté dans le cœur. Accueillez ces ressentis comme des messagers précieux de votre monde intérieur.`,
+            `Observe the sensations that accompany your emotions in your body. Perhaps tension in your chest, heaviness in your belly, or conversely lightness in your heart. Welcome these feelings as precious messengers from your inner world.`,
         
         presence_corporelle: () => 
-            `Habitez pleinement votre corps en cet instant. Ressentez la vie qui pulse en vous, la chaleur de votre peau, la stabilité de votre posture. Votre corps est votre temple, votre véhicule pour expérimenter la beauté de l'instant présent.`
+            `Fully inhabit your body in this moment. Feel the life pulsing within you, the warmth of your skin, the stability of your posture. Your body is your temple, your vehicle for experiencing the beauty of the present moment.`
     },
 
     // Visualisations
     visualization: {
         lieu_paisible: () => 
-            `Visualisez maintenant un lieu qui évoque pour vous la paix et la sérénité. Peut-être une plage au coucher du soleil, une forêt silencieuse, un jardin secret. Explorez ce lieu avec tous vos sens : les couleurs, les sons, les odeurs, les textures. Vous êtes en sécurité ici, parfaitement détendu.`,
+            `Now visualize a place that evokes peace and serenity for you. Perhaps a beach at sunset, a silent forest, a secret garden. Explore this place with all your senses: the colors, sounds, scents, textures. You are safe here, perfectly relaxed.`,
         
         endormissement: () => 
-            `Imaginez-vous flottant sur un nuage doux et moelleux, porté par une brise légère vers le pays des rêves. Chaque expiration vous fait sombrer un peu plus dans cette douceur enveloppante. Vos paupières deviennent lourdes, votre corps s'abandonne complètement à la détente.`,
+            `Imagine yourself floating on a soft and fluffy cloud, carried by a gentle breeze toward the land of dreams. Each exhale makes you sink a little deeper into this enveloping softness. Your eyelids become heavy, your body completely surrenders to relaxation.`,
         
         clarte_mentale: () => 
-            `Visualisez votre esprit comme un lac parfaitement calme et limpide. Les pensées parasites sont comme des feuilles qui tombent à la surface et s'éloignent naturellement. Votre attention devient claire et focalisée, comme un rayon de soleil qui perce les nuages.`,
+            `Visualize your mind as a perfectly calm and clear lake. Intrusive thoughts are like leaves that fall on the surface and drift away naturally. Your attention becomes clear and focused, like a ray of sunlight piercing through clouds.`,
         
         guerison_visualisation: () => 
-            `Imaginez une lumière dorée et apaisante qui émane de votre cœur et se diffuse dans tout votre corps. Cette lumière a le pouvoir de soulager, de guérir, de transformer. Dirigez-la vers les zones qui en ont besoin, avec amour et compassion.`,
+            `Imagine a golden and soothing light emanating from your heart and spreading throughout your body. This light has the power to relieve, heal, and transform. Direct it toward areas that need it, with love and compassion.`,
         
         transformation_emotion: () => 
-            `Visualisez vos émotions comme des nuages dans le ciel de votre conscience. Observez-les passer sans vous y attacher. Les émotions difficiles se transforment en nuages gris qui s'éloignent, remplacés par des nuages blancs et lumineux porteurs de paix et d'équilibre.`,
+            `Visualize your emotions as clouds in the sky of your consciousness. Watch them pass without attachment. Difficult emotions transform into gray clouds that drift away, replaced by white and luminous clouds bearing peace and balance.`,
         
         bien_etre_general: () => 
-            `Imaginez-vous baigné dans une lumière dorée de bien-être. Cette lumière nourrit chaque cellule de votre corps, apaise votre mental, réchauffe votre cœur. Vous êtes exactement où vous devez être, en parfaite harmonie avec vous-même et le monde qui vous entoure.`
+            `Imagine yourself bathed in a golden light of well-being. This light nourishes every cell of your body, soothes your mind, warms your heart. You are exactly where you need to be, in perfect harmony with yourself and the world around you.`
     },
 
     // Conclusions
     conclusion: {
         retour_calme: () => 
-            `Prenez quelques instants pour savourer cette paix que vous avez cultivée. Portez cette sérénité avec vous dans votre journée, sachant que vous pouvez toujours revenir à cet état de calme intérieur.`,
+            `Take a few moments to savor this peace you have cultivated. Carry this serenity with you throughout your day, knowing you can always return to this state of inner calm.`,
         
         transition_sommeil: () => 
-            `Laissez-vous maintenant glisser naturellement vers le sommeil, en gardant cette sensation de détente profonde. Votre corps sait comment se reposer, votre esprit peut se relâcher en toute confiance.`,
+            `Now let yourself naturally drift toward sleep, keeping this sensation of deep relaxation. Your body knows how to rest, your mind can release with complete confidence.`,
         
         integration_focus: () => 
-            `Revenez progressivement à votre environnement en conservant cette clarté mentale. Bougez doucement vos doigts, vos orteils, ouvrez les yeux quand vous vous sentez prêt. Votre concentration affûtée vous accompagne maintenant.`,
+            `Gradually return to your environment while maintaining this mental clarity. Gently move your fingers, your toes, open your eyes when you feel ready. Your sharpened concentration now accompanies you.`,
         
         integration_apaisement: () => 
-            `Gardez précieusement cette sensation d'apaisement que vous avez créée. Revenez doucement à l'instant présent, en mouvement doux et bienveillants envers vous-même.`,
+            `Carefully preserve this sensation of peace you have created. Gently return to the present moment, with gentle and kind movements toward yourself.`,
         
         integration_equilibre: () => 
-            `Intégrez maintenant cet équilibre émotionnel dans votre être. Revenez progressivement à votre journée avec cette nouvelle harmonie intérieure, plus fort et plus centré.`,
+            `Now integrate this emotional balance into your being. Gradually return to your day with this new inner harmony, stronger and more centered.`,
         
         retour_present: () => 
-            `Revenez en douceur à l'instant présent, enrichi de cette expérience de bien-être. Bougez délicatement, étirez-vous si vous en ressentez le besoin, et ouvrez les yeux quand vous êtes prêt.`
+            `Gently return to the present moment, enriched by this well-being experience. Move delicately, stretch if you feel the need, and open your eyes when you're ready.`
     }
 } as const;
 
