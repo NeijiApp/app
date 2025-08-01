@@ -1,0 +1,20 @@
+[providers]
+  nodejs = "18"
+
+[variables]
+  NODE_ENV = "production"
+
+[phases.setup]
+  nixPkgs = ["nodejs_18", "npm", "ffmpeg"]
+
+[phases.build]
+  cmds = [
+    "cd assembly-service", 
+    "npm install --only=production"
+  ]
+
+[phases.start]
+  cmd = "cd assembly-service && npm start"
+
+[phases.install]
+  cmd = "echo 'Skipping root install, using assembly-service only'"

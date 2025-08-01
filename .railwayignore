@@ -21,3 +21,8 @@ tailwind.config.js
 postcss.config.js
 tsconfig.json
 drizzle.config.ts
+
+# Force npm detection - ignore all non-assembly files
+*
+!assembly-service/
+!assembly-service/**
