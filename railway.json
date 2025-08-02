@@ -2,13 +2,20 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "Dockerfile",
-    "watchPatterns": ["assembly-service/**"]
+    "dockerfilePath": "./Dockerfile.assembly"
   },
   "deploy": {
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
+  },
+  "environments": {
+    "production": {
+      "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "./Dockerfile.assembly"
+      }
+    }
   }
 }

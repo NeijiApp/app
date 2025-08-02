@@ -1,0 +1,16 @@
+# Railway configuration to force Docker usage
+# This file has higher priority than railway.json
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "./Dockerfile.assembly"
+
+# Explicitly set environment variable
+[[build.env]]
+RAILWAY_DOCKERFILE_PATH = "./Dockerfile.assembly"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

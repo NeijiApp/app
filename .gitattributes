@@ -1,0 +1,8 @@
+# Git attributes for deployment platforms
+
+# Tell Railway to ignore pnpm files
+pnpm-lock.yaml export-ignore
+.pnpmfile.cjs export-ignore
+
+# Ensure assembly service files are included
+assembly-service/** -export-ignore
