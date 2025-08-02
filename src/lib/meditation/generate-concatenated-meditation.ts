@@ -46,24 +46,23 @@ export async function generateConcatenatedMeditation(
 	// Assemblage avec le service assembly externe
 	try {
 		const assemblyServiceUrl = env.ASSEMBLY_SERVICE_URL;
-		const assemblyUploadsDir = join(process.cwd(), 'assembly-service', 'temp', 'uploads');
 		
-		// S'assurer que le dossier uploads existe
-		await mkdir(assemblyUploadsDir, { recursive: true });
-		
-		// Copier les fichiers vers le dossier uploads du service assembly
+		// Préparer les segments avec les données de fichiers
 		const assemblySegments = [];
 		for (let i = 0; i < audioFiles.length; i++) {
 			const file = audioFiles[i]!;
 			const fileName = `segment-${Date.now()}-${i}.mp3`;
-			const targetPath = join(assemblyUploadsDir, fileName);
 			
-			await copyFile(file.localPath, targetPath);
-			console.log(`📁 Copied ${file.localPath} to ${targetPath}`);
+			// Lire le fichier audio en base64 pour l'envoyer au service distant
+			const audioBuffer = await readFile(file.localPath);
+			const audioBase64 = audioBuffer.toString('base64');
+			
+			console.log(`📁 Prepared ${file.localPath} for remote assembly (${audioBuffer.length} bytes)`);
 			
 			assemblySegments.push({
 				id: `segment-${i}`,
-				audioUrl: fileName, // Juste le nom du fichier
+				audioUrl: fileName,
+				audioData: audioBase64, // Données du fichier en base64
 				duration: 30, // Durée estimée en secondes
 				silenceAfter: file.silenceAfter || 0
 			});

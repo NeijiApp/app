@@ -162,28 +162,42 @@ app.post('/api/assembly/create', async (req, res) => {
     const downloadedSegments = [];
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i];
-      if (!segment.audioUrl) {
-        throw new Error(`Segment ${i} sans audioUrl`);
-      }
-
+      
       let localPath;
       
-      // Si c'est juste un nom de fichier, chercher dans le dossier uploads
-      if (!segment.audioUrl.includes('/') && !segment.audioUrl.includes('\\') && !segment.audioUrl.startsWith('http')) {
-        localPath = path.join(__dirname, 'temp', 'uploads', segment.audioUrl);
-        console.log(`📁 Fichier local: ${localPath}`);
+      // Si le segment contient des données base64, les écrire sur disque
+      if (segment.audioData) {
+        localPath = path.join(__dirname, 'temp', 'uploads', `${jobId}_segment_${i}.mp3`);
+        console.log(`📁 Écriture des données base64 vers: ${localPath}`);
         
-        // Vérifier que le fichier existe
+        try {
+          // Décoder les données base64 et écrire le fichier
+          const audioBuffer = Buffer.from(segment.audioData, 'base64');
+          await fs.writeFile(localPath, audioBuffer);
+          console.log(`✅ Segment ${i} écrit (${audioBuffer.length} bytes): ${path.basename(localPath)}`);
+        } catch (error) {
+          throw new Error(`Erreur lors de l'écriture du segment ${i}: ${error.message}`);
+        }
+      }
+      // Fallback: si c'est juste un nom de fichier, chercher dans le dossier uploads (pour compatibilité)
+      else if (segment.audioUrl && !segment.audioUrl.includes('/') && !segment.audioUrl.includes('\\') && !segment.audioUrl.startsWith('http')) {
+        localPath = path.join(__dirname, 'temp', 'uploads', segment.audioUrl);
+        console.log(`📁 Fichier local (mode compatibilité): ${localPath}`);
+        
         try {
           await fs.access(localPath);
           console.log(`✅ Fichier trouvé: ${segment.audioUrl}`);
         } catch (error) {
           throw new Error(`Fichier local non trouvé: ${segment.audioUrl}`);
         }
-      } else {
-        // Sinon, télécharger depuis l'URL
+      }
+      // Fallback: télécharger depuis l'URL
+      else if (segment.audioUrl && segment.audioUrl.startsWith('http')) {
         localPath = path.join(__dirname, 'temp', 'uploads', `${jobId}_segment_${i}.mp3`);
         await downloadFile(segment.audioUrl, localPath);
+      }
+      else {
+        throw new Error(`Segment ${i} sans audioData ni audioUrl valide`);
       }
       
       downloadedSegments.push({
