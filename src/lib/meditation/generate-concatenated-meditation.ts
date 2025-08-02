@@ -2,6 +2,7 @@ import { mkdtemp, writeFile, readFile, copyFile, mkdir } from 'node:fs/promises'
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { generateParagraphAudioWithRouter } from './tts-router';
+import { env } from "~/env.js";
 
 type Segment = { type: 'text'; content: string } | { type: 'pause'; duration: number };
 
@@ -44,7 +45,7 @@ export async function generateConcatenatedMeditation(
 	const outputPath = join(tempDir, 'meditation-final.mp3');
 	// Assemblage avec le service assembly externe
 	try {
-		const assemblyServiceUrl = process.env.ASSEMBLY_SERVICE_URL || 'http://localhost:3001';
+		const assemblyServiceUrl = env.ASSEMBLY_SERVICE_URL;
 		const assemblyUploadsDir = join(process.cwd(), 'assembly-service', 'temp', 'uploads');
 		
 		// S'assurer que le dossier uploads existe
