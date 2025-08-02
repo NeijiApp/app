@@ -12,7 +12,7 @@ export const env = createEnv({
 		ELEVENLABS_API_KEY: z.string().optional(),
 		OPENROUTER_API_KEY: z.string().optional(),
 		TTS_PROVIDER: z.enum(["openai", "elevenlabs"]).optional().default("openai"),
-		ASSEMBLY_SERVICE_URL: z.string().url().optional().default("http://localhost:3001"),
+		ASSEMBLY_SERVICE_URL: z.string().url(),
 		ASSEMBLY_API_KEY: z.string().optional().default("dev-key-123"),
 		ASSEMBLY_TIMEOUT: z.string().optional().default("60000"),
 		NODE_ENV: z
