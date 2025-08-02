@@ -5,7 +5,24 @@
 		"clientKind": "git",
 		"useIgnoreFile": true
 	},
-	"files": { "ignoreUnknown": false, "ignore": [] },
+	"files": { 
+		"ignoreUnknown": false, 
+		"ignore": [
+			"assembly-service/**/*",
+			"debug-scripts/**/*",
+			"test-*.js",
+			"debug-*.js",
+			"*.sql",
+			"table-test.json",
+			"meditation-test.json",
+			"final-test.json",
+			"pooler-test.json",
+			"racing-thoughts-test/**/*",
+			".claude/**/*",
+			"*.mp3",
+			"*.log"
+		] 
+	},
 	"formatter": { "enabled": true },
 	"organizeImports": { "enabled": true },
 	"linter": {

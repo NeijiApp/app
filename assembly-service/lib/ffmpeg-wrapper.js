@@ -6,7 +6,7 @@ const fs = require('fs').promises;
  * Assemble plusieurs segments audio avec FFmpeg
  * @param {Array<{localPath: string, silenceAfter?: number, duration?: number}>} segments - Liste des segments avec localPath, duration, silenceAfter
  * @param {string} outputPath - Chemin de sortie du fichier final
- * @param {{format?: string, quality?: string, normalize?: boolean, fadeIn?: number, fadeOut?: number}} [options] - Options d'assemblage
+ * @param {{format?: string, quality?: string, normalize?: boolean, fadeIn?: number, fadeOut?: number, timeout?: number}} [options] - Options d'assemblage
  */
 async function assembleAudioSegments(segments, outputPath, options = {}) {
   return new Promise((resolve, reject) => {
