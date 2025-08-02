@@ -61,6 +61,7 @@ app.get('/api/health', async (req, res) => {
       const tempDir = path.join(__dirname, 'temp');
       await fs.mkdir(path.join(tempDir, 'uploads'), { recursive: true });
       await fs.mkdir(path.join(tempDir, 'output'), { recursive: true });
+      await fs.mkdir(path.join(tempDir, 'processing'), { recursive: true });
       health.checks.storage = { status: 'ok' };
     } catch (error) {
       health.checks.storage = { status: 'error', error: error.message };
@@ -287,11 +288,23 @@ app.use('*', (req, res) => {
   });
 });
 
+// Memory monitoring for Railway deployment
+function logMemoryUsage() {
+  const used = process.memoryUsage();
+  console.log(`💾 Memory Usage: RSS: ${Math.round(used.rss / 1024 / 1024)}MB, Heap: ${Math.round(used.heapUsed / 1024 / 1024)}MB`);
+}
+
+// Log memory usage every 30 seconds in production
+if (process.env.NODE_ENV === 'production') {
+  setInterval(logMemoryUsage, 30000);
+}
+
 // Démarrage du serveur
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🎵 Assembly Service démarré sur le port ${PORT}`);
   console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
   console.log(`🎯 Ready to assemble audio segments!`);
+  logMemoryUsage(); // Initial memory log
 });
 
 module.exports = app; 

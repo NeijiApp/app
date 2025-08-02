@@ -18,8 +18,15 @@ async function assembleAudioSegments(segments, outputPath, options = {}) {
         quality = '320k',
         normalize = true,
         fadeIn = 0,
-        fadeOut = 0
+        fadeOut = 0,
+        timeout = 300000 // 5 minutes timeout for Railway
       } = options;
+
+      // Set up timeout for Railway deployment
+      const timeoutId = setTimeout(() => {
+        console.error('⏰ FFmpeg timeout after 5 minutes');
+        reject(new Error('FFmpeg operation timed out'));
+      }, timeout);
 
       // Créer la commande FFmpeg
       let command = ffmpeg();
@@ -119,11 +126,13 @@ async function assembleAudioSegments(segments, outputPath, options = {}) {
         })
         .on('end', () => {
           console.log('✅ FFmpeg terminé avec succès');
+          clearTimeout(timeoutId);
           resolve(outputPath);
         })
         .on('error', (err, stdout, stderr) => {
           console.error('❌ Erreur FFmpeg:', err.message);
           console.error('📝 STDERR:', stderr);
+          clearTimeout(timeoutId);
           reject(new Error(`Erreur FFmpeg: ${err.message}`));
         });
 
@@ -132,6 +141,7 @@ async function assembleAudioSegments(segments, outputPath, options = {}) {
 
     } catch (error) {
       console.error('❌ Erreur lors de la préparation FFmpeg:', error);
+      if (timeoutId) clearTimeout(timeoutId);
       reject(error);
     }
   });
