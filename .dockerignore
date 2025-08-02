@@ -1,8 +1,14 @@
+# CRITICAL: Ignore root package files to prevent auto-detection
+package.json
+pnpm-lock.yaml
+node_modules/
+.pnpm-store/
+
 # Ignore everything except assembly-service
 *
 !assembly-service/
 
-# Ignore node_modules, temp files, and pnpm files within assembly-service
+# Ignore problematic files within assembly-service
 assembly-service/node_modules/
 assembly-service/temp/
 assembly-service/.env*
@@ -10,8 +16,9 @@ assembly-service/*.log
 assembly-service/assembly.log
 assembly-service/pnpm-lock.yaml
 
-# Keep package files and source code
+# Keep only essential assembly-service files
 !assembly-service/package.json
 !assembly-service/package-lock.json
 !assembly-service/serveur-assemblage.js
 !assembly-service/lib/
+!assembly-service/lib/**
