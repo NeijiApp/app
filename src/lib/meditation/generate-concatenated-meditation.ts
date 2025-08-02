@@ -45,7 +45,16 @@ export async function generateConcatenatedMeditation(
 	const outputPath = join(tempDir, 'meditation-final.mp3');
 	// Assemblage avec le service assembly externe
 	try {
-		const assemblyServiceUrl = env.ASSEMBLY_SERVICE_URL;
+		// Validation runtime de l'URL du service assembly
+		const assemblyServiceUrl = env.ASSEMBLY_SERVICE_URL || process.env.ASSEMBLY_SERVICE_URL;
+		
+		if (!assemblyServiceUrl) {
+			throw new Error('ASSEMBLY_SERVICE_URL environment variable is required but not set. Please configure it in your deployment settings.');
+		}
+		
+		if (assemblyServiceUrl === 'http://localhost:3001' && process.env.NODE_ENV === 'production') {
+			throw new Error('ASSEMBLY_SERVICE_URL is still set to localhost in production. Please set it to your Railway service URL.');
+		}
 		
 		// Préparer les segments avec les données de fichiers
 		const assemblySegments = [];
