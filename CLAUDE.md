@@ -99,16 +99,24 @@ Key tables in `src/server/db/schema.ts`:
 - Integration with meditation generation pipeline
 
 ### Environment Setup
-1. Copy `.env.example` to `.env` and configure:
+1. **For Local Development**: Run `./restore-dev-files.sh` to restore package files
+2. Copy `.env.example` to `.env` and configure:
    - Supabase credentials (DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY)
    - OpenAI API keys for AI generation
    - OpenRouter credentials for alternative AI providers
    - Assembly service settings (ASSEMBLY_SERVICE_URL, ASSEMBLY_API_KEY, ASSEMBLY_TIMEOUT)
-2. Start Supabase locally: `pnpm run supabase:local`
-3. Push database schema: `pnpm run db:push`
-4. Start both services: `pnpm run dev:full` OR start individually:
+3. Start Supabase locally: `pnpm run supabase:local`
+4. Push database schema: `pnpm run db:push`
+5. Start both services: `pnpm run dev:full` OR start individually:
    - Main app: `pnpm run dev`
    - Assembly service: `pnpm run assembly:start`
+
+### Deployment Setup
+- **Vercel**: Deploy main Next.js application (uses root project files when restored)
+- **Railway**: Deploy assembly-service only (uses Docker with assembly-service/)
+- **Deployment Scripts**:
+  - `./prepare-railway-deploy.sh` - Hide root package files for Railway deployment  
+  - `./restore-dev-files.sh` - Restore root package files for local development
 
 ### Development Workflow
 - Use Biome for code formatting and linting (replaces ESLint/Prettier)

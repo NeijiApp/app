@@ -1,6 +1,26 @@
+# Force Railway to only use assembly-service
+# Ignore all root project files to prevent auto-detection
+
+# Root Next.js project files
 node_modules/
 .next/
 .vercel/
+src/
+components/
+pages/
+public/
+styles/
+package.json*
+package-lock.json
+pnpm-lock.yaml*
+next.config.js
+tailwind.config.js
+postcss.config.js
+tsconfig.json
+drizzle.config.ts
+biome.jsonc
+
+# Development and debug files
 .env*
 *.log
 .git/
@@ -8,21 +28,17 @@ node_modules/
 README.md
 docs/
 debug-scripts/
-src/
-components/
-pages/
-public/
-styles/
-package.json
-package-lock.json
-pnpm-lock.yaml
-next.config.js
-tailwind.config.js
-postcss.config.js
-tsconfig.json
-drizzle.config.ts
+test-*.js
+debug-*.mp3
+*.sql
+racing-thoughts-test/
+supabase/
+.claude/
 
-# Force npm detection - ignore all non-assembly files
+# Only include assembly-service and deployment files
 *
 !assembly-service/
 !assembly-service/**
+!Dockerfile
+!railway.json
+!.railwayignore
