@@ -14,7 +14,8 @@ import {
   Moon,
   Waves,
   ChevronsDown,
-  ChevronsUp
+  ChevronsUp,
+  Zap
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import {
@@ -72,9 +73,44 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
     background: 'silence',
     goal: 'calm'
   });
+  const [isTestGenerating, setIsTestGenerating] = useState(false);
 
   const handleGenerate = () => {
     onGenerate(params);
+  };
+
+  const handleTestGenerate = async () => {
+    setIsTestGenerating(true);
+    
+    try {
+      const response = await fetch('/api/test-meditation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          voiceId: params.gender === 'male' ? 'GUDYcgRAONiI1nXDcNQQ' : 'g6xIsTj2HwM6VR4iXFCw',
+          gender: params.gender,
+        }),
+      });
+
+      if (!response.ok) throw new Error(await response.text());
+      
+      const audioBlob = await response.blob();
+      if (audioBlob.size === 0) throw new Error('Received empty audio file');
+      
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      // Create audio element and play
+      const audio = new Audio(audioUrl);
+      audio.play();
+      
+      console.log('✅ Test meditation generated and playing!');
+      
+    } catch (error) {
+      console.error('❌ Test meditation error:', error);
+      alert('Test meditation failed. Check console for details.');
+    } finally {
+      setIsTestGenerating(false);
+    }
   };
 
   const CompactView = () => (
@@ -259,11 +295,11 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
         
         {isExpanded ? <ExpandedView /> : <CompactView />}
 
-        {/* Generate Button */}
-        <div className="p-3 border-t border-orange-200">
+        {/* Generate Buttons */}
+        <div className="p-3 border-t border-orange-200 space-y-2">
           <Button
             onClick={handleGenerate}
-            disabled={isGenerating}
+            disabled={isGenerating || isTestGenerating}
             className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 text-base font-medium"
             size="lg"
           >
@@ -276,6 +312,26 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
               <>
                 <Play className="size-4 mr-2" />
                 Generate Meditation
+              </>
+            )}
+          </Button>
+          
+          <Button
+            onClick={handleTestGenerate}
+            disabled={isGenerating || isTestGenerating}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 text-sm font-medium"
+            size="sm"
+            variant="outline"
+          >
+            {isTestGenerating ? (
+              <>
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500 mr-2" />
+                Testing...
+              </>
+            ) : (
+              <>
+                <Zap className="size-3 mr-2" />
+                Quick Test (1 sentence)
               </>
             )}
           </Button>
