@@ -179,7 +179,7 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 			)}>
 				<div className={cn(
 					"transition-all duration-500 ease-in-out overflow-hidden",
-					meditationMode ? (isExpanded ? "h-[500px]" : "h-[250px]") : "h-0"
+					meditationMode ? (isExpanded ? "h-[550px]" : "h-[300px]") : "h-0"
 				)}>
 					<div className="pt-4 px-4">
 						<MeditationPanel 
