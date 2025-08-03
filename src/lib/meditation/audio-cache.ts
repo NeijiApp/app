@@ -277,6 +277,16 @@ export async function findBestCachedSegment(
     similar: SimilaritySearchResult[];
     recommendation: 'use_exact' | 'use_similar' | 'create_new';
 }> {
+    // Désactiver complètement toute recherche de cache sur Vercel pour éviter SASL_SIGNATURE_MISMATCH
+    if (process.env.VERCEL === '1') {
+        console.log('🚫 Recherche de cache complètement désactivée sur Vercel pour éviter les erreurs SASL');
+        return {
+            exact: null,
+            similar: [],
+            recommendation: 'create_new'
+        };
+    }
+    
     const {
         useSemanticSearch = true,
         semanticThreshold = 0.9,

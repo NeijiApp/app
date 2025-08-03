@@ -190,6 +190,12 @@ export async function findSimilarSegmentsByEmbedding(
         language?: string;
     } = {}
 ): Promise<SimilaritySearchResult[]> {
+    // Désactiver complètement la recherche sémantique sur Vercel pour éviter SASL_SIGNATURE_MISMATCH
+    if (process.env.VERCEL === '1') {
+        console.log('🚫 Recherche sémantique désactivée sur Vercel pour éviter les erreurs SASL');
+        return [];
+    }
+    
     const {
         limit = 5,
         threshold = EMBEDDINGS_CONFIG.similarityThreshold,
