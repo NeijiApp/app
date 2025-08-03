@@ -280,7 +280,7 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
 
   return (
     <TooltipProvider>
-      <div className="w-full max-w-2xl mx-auto bg-gradient-to-br from-orange-50/95 to-orange-100/95 border border-orange-200 rounded-lg shadow-lg backdrop-blur-md">
+      <div className="w-full max-w-2xl mx-auto bg-gradient-to-br from-orange-50/95 to-orange-100/95 border border-orange-200 rounded-lg shadow-lg backdrop-blur-md mb-20">
         {/* Header */}
         <div className="text-center p-3 border-b border-orange-200 flex justify-between items-center">
           <div/>
