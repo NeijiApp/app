@@ -27,6 +27,12 @@ export async function findCachedAudioSegment(
     voiceId: string,
     voiceStyle: string
 ): Promise<SelectAudioSegmentsCache | null> {
+    // Désactiver temporairement le cache en production Vercel pour éviter SASL_SIGNATURE_MISMATCH
+    if (process.env.VERCEL === '1') {
+        console.log('🚫 Cache désactivé sur Vercel pour éviter les erreurs SASL');
+        return null;
+    }
+    
     const textHash = generateTextHash(text);
     
     try {
@@ -102,6 +108,12 @@ export async function saveAudioSegmentToCache(
     fileSize?: number,
     language: string = 'en-US'
 ): Promise<SelectAudioSegmentsCache | null> {
+    // Désactiver temporairement le cache en production Vercel pour éviter SASL_SIGNATURE_MISMATCH
+    if (process.env.VERCEL === '1') {
+        console.log('🚫 Sauvegarde de cache désactivée sur Vercel pour éviter les erreurs SASL');
+        return null;
+    }
+    
     const textHash = generateTextHash(text);
     
     // D'abord, essayer de mettre à jour si existe
