@@ -277,7 +277,7 @@ export default function QuestionnaireInteractivePage() {
 			const completionMessage: QuestionnaireMessage = {
 				id: Date.now(),
 				sender: "bot",
-				text: "Parfait ! J'ai maintenant une bien meilleure compréhension de ta personnalité. Ces informations m'aideront à adapter mes réponses et conseils selon ton profil unique.",
+				text: "Perfect! I now have a much better understanding of your personality. This information will help me adapt my responses and advice according to your unique profile.",
 				avatar: ppBot,
 				senderName: "Neiji",
 				isTyping: true,

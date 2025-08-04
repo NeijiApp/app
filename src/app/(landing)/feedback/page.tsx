@@ -47,7 +47,7 @@ export default function Feedback() {
 
 	useEffect(() => {
 		if (submitted) {
-			alert("Merci pour votre feedback !");
+			alert("Thank you for your feedback!");
 			setSubmitted(false);
 		}
 	}, [submitted]);

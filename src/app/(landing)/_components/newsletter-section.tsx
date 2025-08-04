@@ -71,8 +71,8 @@ export function NewsletterSection() {
 								className="w-full rounded-lg bg-orange-500 px-6 py-3 text-white transition hover:bg-orange-600 disabled:opacity-50"
 							>
 								{status === "loading"
-									? "Inscription en cours..."
-									: "S'inscrire"}
+									? "Subscribing..."
+									: "Subscribe"}
 							</button>
 							<StatePopup
 								isOpen={isPopupOpen}

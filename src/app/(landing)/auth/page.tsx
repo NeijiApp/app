@@ -444,7 +444,7 @@ function AuthLogic() {
 					setAuthData((prev) => ({ ...prev, isExistingUser: true }));
 					addMessage(
 						"assistant",
-						`Bonjour ! Je vous reconnais. Quel est votre mot de passe ?`,
+						`Hello! I recognize you. What is your password?`,
 					);
 					setAuthStep("password");
 				} else {
@@ -455,7 +455,7 @@ function AuthLogic() {
 					setAuthData((prev) => ({ ...prev, isExistingUser: false }));
 					addMessage(
 						"assistant",
-						`Je ne vous connais pas encore ! Créons votre compte. Choisissez un mot de passe sécurisé (au moins 8 caractères avec lettres et chiffres).`,
+						`I don't know you yet! Let's create your account. Choose a secure password (at least 8 characters with letters and numbers).`,
 					);
 					setAuthStep("signup");
 				}
@@ -468,7 +468,7 @@ function AuthLogic() {
 				if (error) {
 					addMessage(
 						"assistant",
-						"Oups ! Ce mot de passe ne correspond pas. Pouvez-vous réessayer ?",
+						"Oops! This password doesn't match. Can you try again?",
 					);
 				} else {
 					addMessage(
@@ -524,7 +524,7 @@ function AuthLogic() {
 					setTimeout(() => {
 						addMessage(
 							"assistant",
-							`Un email de confirmation a été envoyé à ${authData.email}. Veuillez cliquer sur le lien dans l'email pour activer votre compte et accéder au chat ! 📧`,
+							`A confirmation email has been sent to ${authData.email}. Please click the link in the email to activate your account and access the chat! 📧`,
 						);
 					}, 1500);
 					setTimeout(() => {

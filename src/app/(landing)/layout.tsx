@@ -157,7 +157,7 @@ function Header() {
 								onClick={() => setIsMenuOpen(false)}
 								className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"
 							>
-								Connexion
+								Sign In
 							</Link>
 						</motion.nav>
 					)}

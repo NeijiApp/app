@@ -134,7 +134,7 @@ export function AuthChat({
 				} else {
 					addMessage(
 						"assistant",
-						'Aucun problème ! Vous pouvez utiliser le chat en mode invité. Si vous changez d\'avis, tapez "connexion" à tout moment.',
+						'No problem! You can use the chat as a guest. If you change your mind, type "signin" at any time.',
 					);
 				}
 			} else if (authStep === "email") {
@@ -162,7 +162,7 @@ export function AuthChat({
 					setAuthData((prev) => ({ ...prev, isExistingUser: true }));
 					addMessage(
 						"assistant",
-						`Bonjour ! Je vous reconnais. Quel est votre mot de passe ?`,
+						`Hello! I recognize you. What is your password?`,
 					);
 					setAuthStep("password");
 				} else {
@@ -170,7 +170,7 @@ export function AuthChat({
 					setAuthData((prev) => ({ ...prev, isExistingUser: false }));
 					addMessage(
 						"assistant",
-						`Je ne vous connais pas encore ! Créons votre compte. Choisissez un mot de passe sécurisé (au moins 8 caractères avec lettres et chiffres).`,
+						`I don't know you yet! Let's create your account. Choose a secure password (at least 8 characters with letters and numbers).`,
 					);
 					setAuthStep("signup");
 				}
@@ -184,7 +184,7 @@ export function AuthChat({
 				if (error) {
 					addMessage(
 						"assistant",
-						"Oups ! Ce mot de passe ne correspond pas. Pouvez-vous réessayer ?",
+						"Oops! This password doesn't match. Can you try again?",
 					);
 				} else {
 					addMessage(

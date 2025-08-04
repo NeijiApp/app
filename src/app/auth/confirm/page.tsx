@@ -78,10 +78,10 @@ export default function ConfirmPage() {
 						<div className="text-center">
 							<div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent"></div>
 							<h1 className="font-semibold text-gray-800 text-xl">
-								Confirmation en cours...
+								Confirmation in progress...
 							</h1>
 							<p className="mt-2 text-gray-600">
-								Veuillez patienter pendant que nous confirmons votre email.
+								Please wait while we confirm your email.
 							</p>
 						</div>
 					)}
