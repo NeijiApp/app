@@ -200,14 +200,14 @@ export function AuthChat({
 				if (input.length < 8) {
 					addMessage(
 						"assistant",
-						"Ce mot de passe est trop court. Il doit contenir au moins 8 caractères. Essayez encore !",
+						"This password is too short. It must contain at least 8 characters. Try again!",
 					);
 					return;
 				}
 				if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(input)) {
 					addMessage(
 						"assistant",
-						"Votre mot de passe doit contenir à la fois des lettres et des chiffres pour plus de sécurité. Réessayez !",
+						"Your password must contain both letters and numbers for better security. Try again!",
 					);
 					return;
 				}
@@ -236,7 +236,7 @@ export function AuthChat({
 		} catch (error) {
 			addMessage(
 				"assistant",
-				"Oups ! Il y a eu un petit problème technique. Pouvez-vous réessayer ?",
+									"Oops! There was a small technical problem. Can you try again?",
 			);
 		} finally {
 			setIsLoading(false);

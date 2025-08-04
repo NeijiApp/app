@@ -138,7 +138,7 @@ export default function ConfirmPage() {
 								onClick={() => router.push("/auth/signup")}
 								className="mt-4 rounded bg-orange-500 px-4 py-2 text-white transition-colors hover:bg-orange-600"
 							>
-								Retour à l'inscription
+								Back to signup
 							</button>
 						</div>
 					)}

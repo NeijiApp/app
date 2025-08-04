@@ -25,7 +25,7 @@ export default function Feedback() {
 	const handleSubmit = async () => {
 		if (!rating || feedback.length > 300) {
 			alert(
-				"Veuillez donner une note et un commentaire de moins de 300 caractères.",
+				"Please provide a rating and a comment of less than 300 characters.",
 			);
 			return;
 		}
