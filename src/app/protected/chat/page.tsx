@@ -88,7 +88,7 @@ function ChatLogic() {
 							height={120}
 						/>
 						<p className="mx-auto max-w-md px-4 text-lg text-muted-foreground">
-							Chargement de votre historique...
+							Loading your history...
 						</p>
 					</div>
 				) : allMessages.length === 0 ? (

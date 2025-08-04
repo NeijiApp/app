@@ -438,7 +438,7 @@ export default function QuestionnaireInteractivePage() {
 	if (isLoading) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-white via-orange-100 to-orange-200">
-				<div className="text-lg">Chargement de votre questionnaire...</div>
+				<div className="text-lg">Loading your questionnaire...</div>
 			</div>
 		);
 	}
@@ -562,7 +562,7 @@ export default function QuestionnaireInteractivePage() {
 						onKeyPress={handleKeyPress}
 						placeholder={
 							isCompleted
-								? "Questionnaire terminé - Voir ton profil !"
+								? "Questionnaire completed - View your profile!"
 								: isBotTyping
 									? "Attends que Neiji finisse d'écrire..."
 									: questionnaireStarted
@@ -631,7 +631,7 @@ export default function QuestionnaireInteractivePage() {
 							onClick={() => router.push("/protected/profile")}
 							className="rounded-full bg-orange-500 px-6 py-2 text-white transition-all hover:bg-orange-600"
 						>
-							Voir mon Profil
+							View My Profile
 						</button>
 					</div>
 				)}{" "}

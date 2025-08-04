@@ -260,7 +260,7 @@ export function AuthChat({
 						message={{
 							id: "loading",
 							role: "assistant",
-							content: "En train de réfléchir...",
+							content: "Thinking...",
 						}}
 					/>
 				</div>
@@ -275,14 +275,14 @@ export function AuthChat({
 						isPassword={authStep === "password" || authStep === "signup"}
 						placeholder={
 							authStep === "welcome"
-								? "Tapez 'oui' pour vous connecter..."
+								? "Type 'yes' to sign in..."
 								: authStep === "email"
-									? "Votre adresse email..."
+									? "Your email address..."
 									: authStep === "password"
-										? "Votre mot de passe..."
+										? "Your password..."
 										: authStep === "signup"
-											? "Choisissez un mot de passe..."
-											: "Tapez votre message..."
+											? "Choose a password..."
+											: "Type your message..."
 						}
 					/>
 				</div>

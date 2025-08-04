@@ -113,7 +113,7 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
 	if (loading) {
 		return (
 			<div className="flex min-h-screen items-center justify-center">
-				<div className="text-lg">Chargement...</div>
+									<div className="text-lg">Loading...</div>
 			</div>
 		);
 	}
@@ -191,14 +191,14 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
 							href="/protected/profile"
 							className="text-gray-600 hover:text-orange-500"
 						>
-							Profil
+							Profile
 						</Link>
 						<button
 							type="button"
 							onClick={handleSignOut}
 							className="text-gray-600 hover:text-orange-500"
 						>
-							Déconnexion
+							Sign out
 						</button>
 					</div>
 					{/* Mobile Menu */}
@@ -231,7 +231,7 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
 									onClick={() => setIsMenuOpen(false)}
 									className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"
 								>
-									Profil
+									Profile
 								</Link>
 								<button
 									type="button"
@@ -241,7 +241,7 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
 									}}
 									className="block w-full text-left font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"
 								>
-									Déconnexion
+									Sign out
 								</button>
 							</motion.nav>
 						)}

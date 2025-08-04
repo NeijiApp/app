@@ -1,19 +1,19 @@
 /**
- * Page de connexion pour l'authentification des utilisateurs
+ * Login page for user authentication
  *
- * Cette page permet aux utilisateurs existants de se connecter à leur compte
- * en utilisant leur email et mot de passe. Après une connexion réussie,
- * l'utilisateur est redirigé vers l'espace protégé de l'application.
+ * This page allows existing users to sign in to their account
+ * using their email and password. After successful authentication,
+ * the user is redirected to the protected area of the application.
  *
- * Fonctionnalités :
- * - Formulaire de connexion avec validation
- * - Gestion des erreurs d'authentification
- * - Redirection automatique après connexion
- * - Lien vers la page d'inscription
+ * Features:
+ * - Login form with validation
+ * - Authentication error handling
+ * - Automatic redirection after login
+ * - Link to signup page
  *
  * @component
  * @example
- * // Utilisé automatiquement par Next.js pour la route /auth/login
+ * // Used automatically by Next.js for the /auth/login route
  * <LoginPage />
  */
 "use client";
@@ -25,42 +25,42 @@ import { Input } from "~/components/ui/input";
 import { createClient } from "~/utils/supabase/client";
 
 /**
- * Composant de page de connexion
- * Gère l'authentification des utilisateurs via Supabase Auth
+ * Login page component
+ * Handles user authentication via Supabase Auth
  */
 export default function LoginPage() {
-	// États pour gérer les données du formulaire
+	// States to manage form data
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [emailError, setEmailError] = useState("");
 
-	// Hooks pour la navigation et l'authentification
+	// Hooks for navigation and authentication
 	const router = useRouter();
 	const supabase = createClient();
 
 	/**
-	 * Valide le format de l'email
+	 * Validates email format
 	 *
-	 * @param email - Email à valider
-	 * @returns string - Message d'erreur ou chaîne vide si valide
+	 * @param email - Email to validate
+	 * @returns string - Error message or empty string if valid
 	 */
 	const validateEmail = (email: string): string => {
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!email) {
-			return "L'email est requis";
+			return "Email is required";
 		}
 		if (!emailRegex.test(email)) {
-			return "Veuillez entrer un email valide";
+			return "Please enter a valid email";
 		}
 		return "";
 	};
 
 	/**
-	 * Gère le changement d'email avec validation en temps réel
+	 * Handles email change with real-time validation
 	 *
-	 * @param value - Nouvelle valeur de l'email
+	 * @param value - New email value
 	 */
 	const handleEmailChange = (value: string) => {
 		setEmail(value);
@@ -68,16 +68,16 @@ export default function LoginPage() {
 	};
 
 	/**
-	 * Gère la soumission du formulaire de connexion
+	 * Handles login form submission
 	 *
-	 * @param e - Événement de soumission du formulaire
+	 * @param e - Form submission event
 	 * @returns Promise<void>
 	 */ const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsLoading(true);
 		setError("");
 
-		// Validation de l'email avant soumission
+		// Email validation before submission
 		const emailValidationError = validateEmail(email);
 		if (emailValidationError) {
 			setEmailError(emailValidationError);
@@ -86,7 +86,7 @@ export default function LoginPage() {
 		}
 
 		try {
-			// Tentative de connexion avec Supabase Auth
+			// Login attempt with Supabase Auth
 			const { data, error } = await supabase.auth.signInWithPassword({
 				email,
 				password,
@@ -95,11 +95,11 @@ export default function LoginPage() {
 			if (error) {
 				setError(error.message);
 			} else {
-				// Redirection vers l'espace protégé après connexion réussie
+				// Redirect to protected area after successful login
 				router.push("/protected");
 			}
 		} catch (err) {
-			setError("Une erreur s'est produite");
+			setError("An error occurred");
 		} finally {
 			setIsLoading(false);
 		}
@@ -108,7 +108,7 @@ export default function LoginPage() {
 	return (
 		<div className="flex min-h-screen items-center justify-center">
 			<div className="w-full max-w-md space-y-6 rounded-lg border p-6">
-				<h1 className="text-center font-bold text-2xl">Connexion</h1>
+				<h1 className="text-center font-bold text-2xl">Login</h1>
 				<form onSubmit={handleLogin} className="space-y-4">
 					<div>
 						<Input
@@ -126,7 +126,7 @@ export default function LoginPage() {
 					<div>
 						<Input
 							type="password"
-							placeholder="Mot de passe"
+							placeholder="Password"
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
 							required
@@ -140,13 +140,13 @@ export default function LoginPage() {
 						className="w-full"
 						disabled={isLoading || emailError !== ""}
 					>
-						{isLoading ? "Connexion..." : "Se connecter"}
+						{isLoading ? "Signing in..." : "Sign in"}
 					</Button>
 				</form>
 
 				<div className="text-center">
 					<a href="/auth/signup" className="text-blue-500 hover:underline">
-						Pas de compte ? S'inscrire
+						No account? Sign up
 					</a>
 				</div>
 			</div>

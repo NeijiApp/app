@@ -1,20 +1,20 @@
 /**
- * Page d'inscription pour la création de nouveaux comptes utilisateurs
+ * Signup page for creating new user accounts
  *
- * Cette page permet aux nouveaux utilisateurs de créer un compte
- * en fournissant un email et un mot de passe. Un profil utilisateur
- * est automatiquement créé dans la base de données après l'inscription.
+ * This page allows new users to create an account
+ * by providing an email and password. A user profile
+ * is automatically created in the database after signup.
  *
- * Fonctionnalités :
- * - Formulaire d'inscription avec validation
- * - Création automatique du profil utilisateur
- * - Gestion des erreurs d'inscription
- * - Confirmation par email requise
- * - Lien vers la page de connexion
+ * Features:
+ * - Signup form with validation
+ * - Automatic user profile creation
+ * - Signup error handling
+ * - Email confirmation required
+ * - Link to login page
  *
  * @component
  * @example
- * // Utilisé automatiquement par Next.js pour la route /auth/signup
+ * // Used automatically by Next.js for the /auth/signup route
  * <SignupPage />
  */
 "use client";
@@ -26,11 +26,11 @@ import { Input } from "~/components/ui/input";
 import { createClient } from "~/utils/supabase/client";
 
 /**
- * Composant de page d'inscription
- * Gère la création de nouveaux comptes utilisateurs via Supabase Auth
+ * Signup page component
+ * Handles creation of new user accounts via Supabase Auth
  */
 export default function SignupPage() {
-	// États pour gérer les données du formulaire et les messages
+	// States to manage form data and messages
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
@@ -39,52 +39,52 @@ export default function SignupPage() {
 	const [passwordError, setPasswordError] = useState("");
 	const [emailError, setEmailError] = useState("");
 
-	// Hooks pour la navigation et l'authentification
+	// Hooks for navigation and authentication
 	const router = useRouter();
 	const supabase = createClient();
 
 	/**
-	 * Valide le format de l'email
+	 * Validates email format
 	 *
-	 * @param email - Email à valider
-	 * @returns string - Message d'erreur ou chaîne vide si valide
+	 * @param email - Email to validate
+	 * @returns string - Error message or empty string if valid
 	 */
 	const validateEmail = (email: string): string => {
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!email) {
-			return "L'email est requis";
+			return "Email is required";
 		}
 		if (!emailRegex.test(email)) {
-			return "Veuillez entrer un email valide";
+			return "Please enter a valid email";
 		}
 		return "";
 	};
 
 	/**
-	 * Valide le format du mot de passe selon les critères définis
+	 * Validates password format according to defined criteria
 	 *
-	 * @param password - Mot de passe à valider
-	 * @returns string - Message d'erreur ou chaîne vide si valide
+	 * @param password - Password to validate
+	 * @returns string - Error message or empty string if valid
 	 */
 	const validatePassword = (password: string): string => {
 		if (password.length < 6) {
-			return "Le mot de passe doit contenir au moins 6 caractères";
+			return "Password must contain at least 6 characters";
 		}
 		if (!/(?=.*[a-z])/.test(password)) {
-			return "Le mot de passe doit contenir au moins une lettre minuscule";
+			return "Password must contain at least one lowercase letter";
 		}
 		if (!/(?=.*[A-Z])/.test(password)) {
-			return "Le mot de passe doit contenir au moins une lettre majuscule";
+			return "Password must contain at least one uppercase letter";
 		}
 		if (!/(?=.*\d)/.test(password)) {
-			return "Le mot de passe doit contenir au moins un chiffre";
+			return "Password must contain at least one number";
 		}
 		return "";
 	};
 	/**
-	 * Gère le changement de mot de passe avec validation en temps réel
+	 * Handles password change with real-time validation
 	 *
-	 * @param value - Nouvelle valeur du mot de passe
+	 * @param value - New password value
 	 */
 	const handlePasswordChange = (value: string) => {
 		setPassword(value);
@@ -92,9 +92,9 @@ export default function SignupPage() {
 	};
 
 	/**
-	 * Gère le changement d'email avec validation en temps réel
+	 * Handles email change with real-time validation
 	 *
-	 * @param value - Nouvelle valeur de l'email
+	 * @param value - New email value
 	 */
 	const handleEmailChange = (value: string) => {
 		setEmail(value);
@@ -102,10 +102,10 @@ export default function SignupPage() {
 	};
 
 	/**
-	 * Gère la soumission du formulaire d'inscription
-	 * Crée un nouveau compte utilisateur et son profil associé
+	 * Handles signup form submission
+	 * Creates a new user account and its associated profile
 	 *
-	 * @param e - Événement de soumission du formulaire
+	 * @param e - Form submission event
 	 * @returns Promise<void>
 	 */
 	const handleSignup = async (e: React.FormEvent) => {
@@ -114,7 +114,7 @@ export default function SignupPage() {
 		setError("");
 		setMessage("");
 
-		// Validation des champs avant soumission
+		// Field validation before submission
 		const emailValidationError = validateEmail(email);
 		const passwordValidationError = validatePassword(password);
 
@@ -130,7 +130,7 @@ export default function SignupPage() {
 			return;
 		}
 		try {
-			// Création du compte utilisateur avec Supabase Auth
+			// User account creation with Supabase Auth
 			const { data, error } = await supabase.auth.signUp({
 				email,
 				password,
@@ -139,53 +139,53 @@ export default function SignupPage() {
 			if (error) {
 				setError(error.message);
 			} else {
-				// Création du profil utilisateur dans la base de données
+				// User profile creation in the database
 				if (data.user) {
 					await createUserProfile(data.user.email!);
 				}
-				// Redirection automatique vers le questionnaire après inscription réussie
+				// Automatic redirection to questionnaire after successful signup
 				setMessage(
-					"Création du compte réussie. Redirection vers le questionnaire...",
+					"Account created successfully. Redirecting to questionnaire...",
 				);
 				router.push("/protected/questionnaire");
 			}
 		} catch (err) {
-			setError("Une erreur s'est produite");
+			setError("An error occurred");
 		} finally {
 			setIsLoading(false);
 		}
 	};
 	/**
-	 * Crée un profil utilisateur dans la table users_table
-	 * Initialise les champs de mémoire IA pour le nouveau utilisateur
+	 * Creates a user profile in the users_table
+	 * Initializes AI memory fields for the new user
 	 *
-	 * @param email - Email de l'utilisateur pour lequel créer le profil
+	 * @param email - Email of the user for whom to create the profile
 	 * @returns Promise<void>
 	 */ const createUserProfile = async (email: string) => {
 		try {
-			// Insertion du profil utilisateur avec les champs de mémoire IA initialisés
+			// User profile insertion with initialized AI memory fields
 			const { error } = await supabase.from("users_table").insert([
 				{
 					email,
-					memory_L0: "", // Mémoire immédiate
-					memory_L1: "", // Mémoire court terme
-					memory_L2: "", // Mémoire long terme
-					questionnaire: {}, // Profil de personnalité pour l'entraînement de l'IA (objet JSON vide)
+											memory_L0: "", // Immediate memory
+						memory_L1: "", // Short-term memory
+						memory_L2: "", // Long-term memory
+						questionnaire: {}, // Personality profile for AI training (empty JSON object)
 				},
 			]);
 
 			if (error) {
-				console.error("Erreur lors de la création du profil:", error);
+				console.error("Error creating profile:", error);
 			}
 		} catch (err) {
-			console.error("Erreur:", err);
+			console.error("Error:", err);
 		}
 	};
 
 	return (
 		<div className="flex min-h-screen items-center justify-center">
 			<div className="w-full max-w-md space-y-6 rounded-lg border p-6">
-				<h1 className="text-center font-bold text-2xl">Inscription</h1>
+				<h1 className="text-center font-bold text-2xl">Sign Up</h1>
 				<form onSubmit={handleSignup} className="space-y-4">
 					<div>
 						<Input
@@ -202,7 +202,7 @@ export default function SignupPage() {
 					<div>
 						<Input
 							type="password"
-							placeholder="Mot de passe"
+							placeholder="Password"
 							value={password}
 							onChange={(e) => handlePasswordChange(e.target.value)}
 							required
@@ -211,8 +211,8 @@ export default function SignupPage() {
 							<div className="mt-1 text-red-500 text-xs">{passwordError}</div>
 						)}
 						<div className="mt-1 text-gray-500 text-xs">
-							Le mot de passe doit contenir au moins 6 caractères, une
-							majuscule, une minuscule et un chiffre
+							Password must contain at least 6 characters, one
+							uppercase letter, one lowercase letter and one number
 						</div>
 					</div>
 					{error && <div className="text-red-500 text-sm">{error}</div>}
@@ -222,13 +222,13 @@ export default function SignupPage() {
 						className="w-full"
 						disabled={isLoading || passwordError !== "" || emailError !== ""}
 					>
-						{isLoading ? "Inscription..." : "S'inscrire"}
+						{isLoading ? "Signing up..." : "Sign up"}
 					</Button>
 				</form>
 
 				<div className="text-center">
 					<a href="/auth/login" className="text-blue-500 hover:underline">
-						Déjà un compte ? Se connecter
+						Already have an account? Sign in
 					</a>
 				</div>
 			</div>

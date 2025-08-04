@@ -118,7 +118,7 @@ export default function ProtectedPage() {
 	if (loading) {
 		return (
 			<div className="flex min-h-screen items-center justify-center">
-				Chargement...
+				Loading...
 			</div>
 		);
 	}
@@ -130,7 +130,7 @@ export default function ProtectedPage() {
 				<div className="mb-8 flex items-center justify-between">
 					<h1 className="font-bold text-3xl">Tableau de bord Neiji</h1>
 					<Button onClick={handleLogout} variant="outline">
-						Déconnexion
+						Sign out
 					</Button>
 				</div>
 				<div className="grid gap-6">

@@ -167,7 +167,7 @@ export default function ProfilePage() {
 	if (isLoading) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-white via-orange-100 to-orange-200">
-				<div className="text-lg">Chargement de votre profil...</div>
+				<div className="text-lg">Loading your profile...</div>
 			</div>
 		);
 	}
@@ -176,7 +176,7 @@ export default function ProfilePage() {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-white via-orange-100 to-orange-200">
 				<div className="text-lg text-red-600">
-					Erreur lors du chargement du profil
+					Error loading profile
 				</div>
 			</div>
 		);
@@ -194,7 +194,7 @@ export default function ProfilePage() {
 							className="h-full w-full object-contain"
 						/>
 					</div>
-					<h1 className="mb-2 font-bold text-3xl text-gray-800">Mon Profil</h1>
+					<h1 className="mb-2 font-bold text-3xl text-gray-800">My Profile</h1>
 					<p className="text-gray-600">
 						Voici un récapitulatif de tes informations
 					</p>

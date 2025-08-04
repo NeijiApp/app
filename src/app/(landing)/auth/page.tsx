@@ -611,16 +611,16 @@ function AuthLogic() {
 				isPassword={authStep === "password" || authStep === "signup"}
 				placeholder={
 					authStep === "welcome"
-						? "Tapez 'oui' pour vous connecter..."
+						? "Type 'yes' to sign in..."
 						: authStep === "email"
-							? "Votre adresse email..."
+							? "Your email address..."
 							: authStep === "password"
-								? "Votre mot de passe..."
+								? "Your password..."
 								: authStep === "signup"
-									? "Choisissez un mot de passe..."
+									? "Choose a password..."
 									: authStep === "email-sent"
-										? "Vérifiez vos emails pour continuer..."
-										: "Tapez votre message..."
+										? "Check your emails to continue..."
+										: "Type your message..."
 				}
 				onFocus={() => {
 					if (authMessages.length === 1) {
