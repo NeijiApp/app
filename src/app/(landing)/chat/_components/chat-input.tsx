@@ -202,24 +202,26 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 				</CustomDrawer>
 			</div>
 
-			{/* Meditation Panel - positioned above input bar */}
+			{/* Meditation Panel - drawer that slides up from behind input bar */}
 			<div
 				className={cn(
-					"fixed right-1/2 bottom-20 z-20 w-full max-w-xl translate-x-1/2 transition-all duration-300 ease-in-out",
+					"fixed right-1/2 bottom-18 z-5 w-full max-w-xl translate-x-1/2 transition-all duration-300 ease-in-out",
 					meditationMode
 						? isExpanded
-							? "max-h-[70vh] opacity-100"
-							: "max-h-[35vh] opacity-100"
-						: "max-h-0 opacity-0 overflow-hidden",
+							? "h-[70vh]"
+							: "h-[40vh]"
+						: "h-0",
 				)}
 			>
-				<div className="h-full overflow-y-auto px-4 pt-2 pb-4">
-					<MeditationPanel
-						onGenerate={handleMeditationGenerate}
-						isGenerating={isGeneratingMeditation}
-						isExpanded={isExpanded}
-						toggleExpand={() => setIsExpanded(!isExpanded)}
-					/>
+				<div className="h-full overflow-hidden">
+					<div className="h-full overflow-y-auto px-4 py-4">
+						<MeditationPanel
+							onGenerate={handleMeditationGenerate}
+							isGenerating={isGeneratingMeditation}
+							isExpanded={isExpanded}
+							toggleExpand={() => setIsExpanded(!isExpanded)}
+						/>
+					</div>
 				</div>
 			</div>
 			

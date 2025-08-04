@@ -208,7 +208,7 @@ export function MeditationPanel({
 			{/* Quick Actions: Duration & Goal */}
 			<div className="flex gap-2">
 				<div className="grid flex-1 grid-cols-3 gap-1.5">
-					{DURATION_OPTIONS.slice(0, 3).map((duration) => (
+					{[0.5, 3, 10].map((duration) => (
 						<Tooltip key={duration} delayDuration={0}>
 							<TooltipTrigger asChild>
 								<Button
@@ -247,18 +247,18 @@ export function MeditationPanel({
 									variant={
 										params.gender === gender.value ? "default" : "outline"
 									}
-									size="icon"
+									size="sm"
 									onClick={() =>
 										setParams((prev) => ({ ...prev, gender: gender.value }))
 									}
 									className={cn(
-										"h-9 w-full",
+										"h-9 w-full text-xs",
 										params.gender === gender.value
 											? "bg-orange-500 text-white"
 											: "border-orange-300 text-orange-700",
 									)}
 								>
-									<User className="size-4" />
+									{gender.label}
 								</Button>
 							</TooltipTrigger>
 							<TooltipContent>
@@ -492,9 +492,9 @@ export function MeditationPanel({
 
 	return (
 		<TooltipProvider>
-			<div className="mx-auto w-full max-w-2xl rounded-lg border border-orange-200 bg-gradient-to-br from-orange-50/95 to-orange-100/95 shadow-lg backdrop-blur-md">
+			<div className="mx-auto w-full max-w-2xl rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50/95 to-orange-100/95 shadow-lg backdrop-blur-md overflow-hidden">
 				{/* Header */}
-				<div className="flex items-center justify-between border-orange-200 border-b p-3 text-center bg-gradient-to-br from-orange-50/95 to-orange-100/95">
+				<div className="flex items-center justify-between border-orange-200 border-b p-3 text-center bg-gradient-to-br from-orange-50/95 to-orange-100/95 rounded-t-2xl">
 					<div className="w-8" />
 					<h2 className="flex items-center justify-center gap-2 font-bold text-base text-orange-800">
 						<Target className="size-4" />
@@ -517,7 +517,7 @@ export function MeditationPanel({
 				{isExpanded ? <ExpandedView /> : <CompactView />}
 
 				{/* Generate Buttons */}
-				<div className="space-y-2 border-orange-200 border-t p-3 mt-2 bg-gradient-to-br from-orange-50/95 to-orange-100/95">
+				<div className="space-y-2 border-orange-200 border-t p-3 mt-2 bg-gradient-to-br from-orange-50/95 to-orange-100/95 rounded-b-2xl">
 					<Button
 						onClick={handleGenerate}
 						disabled={isGenerating || isTestGenerating}

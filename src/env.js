@@ -9,7 +9,7 @@ export const env = createEnv({
 	server: {
 		DATABASE_URL: z.string().url(),
 		OPENAI_API_KEY: z.string(),
-		ELEVENLABS_API_KEY: z.string().optional(),
+		ELEVENLABS_API_KEY: z.string(),
 		OPENROUTER_API_KEY: z.string().optional(),
 		TTS_PROVIDER: z.enum(["openai", "elevenlabs"]).optional().default("openai"),
 		ASSEMBLY_SERVICE_URL: z.string().url(),
