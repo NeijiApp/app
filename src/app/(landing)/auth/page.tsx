@@ -422,7 +422,7 @@ function AuthLogic() {
 				if (!emailRegex.test(input)) {
 					addMessage(
 						"assistant",
-						"Hmm, cet email ne semble pas valide. Pouvez-vous le retaper ? (exemple: nom@exemple.com)",
+						"Hmm, this email doesn't seem valid. Can you retype it? (example: name@example.com)",
 					);
 					return;
 				}
