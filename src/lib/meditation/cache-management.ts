@@ -301,7 +301,7 @@ export class CacheAdministration {
     try {
       const segments = await db.select().from(audioSegmentsCache);
       
-      const embeddings = segments.map(s => ({
+      const embeddings = segments.map((s: SelectAudioSegmentsCache) => ({
         id: s.id,
         embedding: s.embedding ? JSON.parse(s.embedding) : null,
         similarity_threshold: s.similarityThreshold,

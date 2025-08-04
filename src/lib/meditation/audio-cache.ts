@@ -30,10 +30,23 @@ export async function findCachedAudioSegment(
 	voiceId: string,
 	voiceStyle: string,
 ): Promise<SelectAudioSegmentsCache | null> {
-	// 🎯 UTILISER LE NOUVEAU SYSTÈME HYBRIDE ROBUSTE
-	const { hybridCache } = await import("./cache-management");
-	const result = await hybridCache.findCachedSegment(text, voiceId, voiceStyle);
-	return result.exact;
+	// 🎯 UTILISER LE SYSTÈME COMPATIBLE BUILD
+	try {
+		if (process.env.USE_ROBUST_DB === "true") {
+			// Tenter le système hybride
+			const { hybridCache } = await import("./cache-management");
+			const result = await hybridCache.findCachedSegment(text, voiceId, voiceStyle);
+			return result.exact;
+		} else {
+			// Utiliser système simple compatible
+			const { simpleCache } = await import("./cache-management-compatible");
+			return await simpleCache.findCachedSegment(text, voiceId, voiceStyle);
+		}
+	} catch (error) {
+		console.warn("⚠️ Fallback vers système simple:", error);
+		const { simpleCache } = await import("./cache-management-compatible");
+		return await simpleCache.findCachedSegment(text, voiceId, voiceStyle);
+	}
 	
 	// Désactiver temporairement le cache en production Vercel pour éviter SASL_SIGNATURE_MISMATCH
 	if (process.env.VERCEL === "1") {
@@ -118,12 +131,31 @@ export async function saveAudioSegmentToCache(
 	fileSize?: number,
 	language = "en-US",
 ): Promise<SelectAudioSegmentsCache | null> {
-	// 🎯 UTILISER LE NOUVEAU SYSTÈME HYBRIDE ROBUSTE
-	const { hybridCache } = await import("./cache-management");
-	return await hybridCache.saveSegment(
-		text, voiceId, voiceGender, voiceStyle, audioUrl,
-		audioDuration, fileSize, language
-	);
+	// 🎯 UTILISER LE SYSTÈME COMPATIBLE BUILD
+	try {
+		if (process.env.USE_ROBUST_DB === "true") {
+			// Tenter le système hybride
+			const { hybridCache } = await import("./cache-management");
+			return await hybridCache.saveSegment(
+				text, voiceId, voiceGender, voiceStyle, audioUrl,
+				audioDuration, fileSize, language
+			);
+		} else {
+			// Utiliser système simple compatible
+			const { simpleCache } = await import("./cache-management-compatible");
+			return await simpleCache.saveSegment(
+				text, voiceId, voiceGender, voiceStyle, audioUrl,
+				audioDuration, fileSize, language
+			);
+		}
+	} catch (error) {
+		console.warn("⚠️ Fallback vers système simple:", error);
+		const { simpleCache } = await import("./cache-management-compatible");
+		return await simpleCache.saveSegment(
+			text, voiceId, voiceGender, voiceStyle, audioUrl,
+			audioDuration, fileSize, language
+		);
+	}
 	
 	// Désactiver temporairement le cache en production Vercel pour éviter SASL_SIGNATURE_MISMATCH
 	if (process.env.VERCEL === "1") {
@@ -281,7 +313,7 @@ export async function findSimilarAudioSegments(
 
 		// Filtrer par similarité de texte
 		return segments.filter(
-			(segment) =>
+			(segment: SelectAudioSegmentsCache) =>
 				calculateTextSimilarity(text, segment.textContent) >=
 				similarityThreshold,
 		);
@@ -308,19 +340,44 @@ export async function findBestCachedSegment(
 	similar: SimilaritySearchResult[];
 	recommendation: "use_exact" | "use_similar" | "create_new";
 }> {
-	// 🎯 UTILISER LE NOUVEAU SYSTÈME HYBRIDE ROBUSTE
-	const { hybridCache } = await import("./cache-management");
-	const result = await hybridCache.findCachedSegment(text, voiceId, voiceStyle, {
-		useSemanticSearch: options.useSemanticSearch,
-		threshold: options.semanticThreshold,
-		language: options.language,
-	});
-	
-	return {
-		exact: result.exact,
-		similar: result.similar,
-		recommendation: result.recommendation,
-	};
+	// 🎯 UTILISER LE SYSTÈME COMPATIBLE BUILD
+	try {
+		if (process.env.USE_ROBUST_DB === "true") {
+			// Tenter le système hybride avec recherche sémantique
+			const { hybridCache } = await import("./cache-management");
+			const result = await hybridCache.findCachedSegment(text, voiceId, voiceStyle, {
+				useSemanticSearch: options.useSemanticSearch,
+				threshold: options.semanticThreshold,
+				language: options.language,
+			});
+			
+			return {
+				exact: result.exact,
+				similar: result.similar,
+				recommendation: result.recommendation,
+			};
+		} else {
+			// Système simple (recherche exacte seulement)
+			const { simpleCache } = await import("./cache-management-compatible");
+			const exact = await simpleCache.findCachedSegment(text, voiceId, voiceStyle);
+			
+			return {
+				exact,
+				similar: [],
+				recommendation: exact ? "use_exact" : "create_new",
+			};
+		}
+	} catch (error) {
+		console.warn("⚠️ Fallback vers système simple:", error);
+		const { simpleCache } = await import("./cache-management-compatible");
+		const exact = await simpleCache.findCachedSegment(text, voiceId, voiceStyle);
+		
+		return {
+			exact,
+			similar: [],
+			recommendation: exact ? "use_exact" : "create_new",
+		};
+	}
 	
 	// Désactiver complètement toute recherche de cache sur Vercel pour éviter SASL_SIGNATURE_MISMATCH
 	if (process.env.VERCEL === "1") {
@@ -346,9 +403,11 @@ export async function findBestCachedSegment(
 
 		if (exactMatch) {
 			console.log("🎯 Correspondance exacte trouvée");
-			await incrementUsageCount(exactMatch.id);
+			// Type assertion pour résoudre le problème TypeScript
+			const segment = exactMatch as SelectAudioSegmentsCache;
+			await incrementUsageCount(segment.id);
 			return {
-				exact: exactMatch,
+				exact: segment,
 				similar: [],
 				recommendation: "use_exact",
 			};
@@ -374,14 +433,16 @@ export async function findBestCachedSegment(
 		let recommendation: "use_exact" | "use_similar" | "create_new" =
 			"create_new";
 
-		if (similarResults.length > 0) {
-			const bestMatch = similarResults[0];
-			if (bestMatch && bestMatch.similarity >= semanticThreshold) {
+		for (const similarResult of similarResults) {
+			if (similarResult && similarResult.similarity >= semanticThreshold) {
 				console.log(
-					`🎯 Segment similaire trouvé (${(bestMatch.similarity * 100).toFixed(1)}% de similarité)`,
+					`🎯 Segment similaire trouvé (${(similarResult.similarity * 100).toFixed(1)}% de similarité)`,
 				);
-				await incrementUsageCount(bestMatch.segment.id);
+				// Type assertion pour résoudre le problème TypeScript
+				const segment = similarResult.segment as SelectAudioSegmentsCache;
+				await incrementUsageCount(segment.id);
 				recommendation = "use_similar";
+				break; // Prendre seulement le premier
 			}
 		}
 

@@ -336,8 +336,8 @@ export async function updateMissingEmbeddings(
 		// Traiter par batch
 		for (let i = 0; i < segmentsToProcess.length; i += batchSize) {
 			const batch = segmentsToProcess.slice(i, i + batchSize);
-			const texts = batch.map((s) => s.textContent);
-			const ids = batch.map((s) => s.id);
+					const texts = batch.map((s: { id: number; textContent: string }) => s.textContent);
+		const ids = batch.map((s: { id: number; textContent: string }) => s.id);
 
 			try {
 				console.log(
