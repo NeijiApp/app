@@ -30,9 +30,10 @@ export async function findCachedAudioSegment(
 	voiceId: string,
 	voiceStyle: string,
 ): Promise<SelectAudioSegmentsCache | null> {
-	// URGENT: Désactiver cache temporairement à cause de l'erreur pooler Supabase XX000
-	console.log("🚫 Cache temporairement désactivé - Erreur pooler Supabase (XX000)");
-	return null;
+	// 🎯 UTILISER LE NOUVEAU SYSTÈME HYBRIDE ROBUSTE
+	const { hybridCache } = await import("./cache-management");
+	const result = await hybridCache.findCachedSegment(text, voiceId, voiceStyle);
+	return result.exact;
 	
 	// Désactiver temporairement le cache en production Vercel pour éviter SASL_SIGNATURE_MISMATCH
 	if (process.env.VERCEL === "1") {
@@ -117,9 +118,12 @@ export async function saveAudioSegmentToCache(
 	fileSize?: number,
 	language = "en-US",
 ): Promise<SelectAudioSegmentsCache | null> {
-	// URGENT: Désactiver cache temporairement à cause de l'erreur pooler Supabase XX000
-	console.log("🚫 Cache sauvegarde temporairement désactivé - Erreur pooler Supabase (XX000)");
-	return null;
+	// 🎯 UTILISER LE NOUVEAU SYSTÈME HYBRIDE ROBUSTE
+	const { hybridCache } = await import("./cache-management");
+	return await hybridCache.saveSegment(
+		text, voiceId, voiceGender, voiceStyle, audioUrl,
+		audioDuration, fileSize, language
+	);
 	
 	// Désactiver temporairement le cache en production Vercel pour éviter SASL_SIGNATURE_MISMATCH
 	if (process.env.VERCEL === "1") {
@@ -304,12 +308,18 @@ export async function findBestCachedSegment(
 	similar: SimilaritySearchResult[];
 	recommendation: "use_exact" | "use_similar" | "create_new";
 }> {
-	// URGENT: Désactiver cache temporairement à cause de l'erreur pooler Supabase XX000
-	console.log("🚫 Recherche cache temporairement désactivée - Erreur pooler Supabase (XX000)");
+	// 🎯 UTILISER LE NOUVEAU SYSTÈME HYBRIDE ROBUSTE
+	const { hybridCache } = await import("./cache-management");
+	const result = await hybridCache.findCachedSegment(text, voiceId, voiceStyle, {
+		useSemanticSearch: options.useSemanticSearch,
+		threshold: options.semanticThreshold,
+		language: options.language,
+	});
+	
 	return {
-		exact: null,
-		similar: [],
-		recommendation: "create_new",
+		exact: result.exact,
+		similar: result.similar,
+		recommendation: result.recommendation,
 	};
 	
 	// Désactiver complètement toute recherche de cache sur Vercel pour éviter SASL_SIGNATURE_MISMATCH
