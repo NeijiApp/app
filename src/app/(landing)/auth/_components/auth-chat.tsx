@@ -189,7 +189,7 @@ export function AuthChat({
 				} else {
 					addMessage(
 						"assistant",
-						"Parfait ! Connexion réussie. Bienvenue dans votre espace personnel ! 🎉",
+						"Perfect! Login successful. Welcome to your personal space! 🎉",
 					);
 					setTimeout(() => {
 						router.push("/protected/chat");
@@ -226,7 +226,7 @@ export function AuthChat({
 				} else {
 					addMessage(
 						"assistant",
-						"Excellent ! Votre compte a été créé. Bienvenue dans la communauté Neiji ! 🌟",
+						"Excellent! Your account has been created. Welcome to the Neiji community! 🌟",
 					);
 					setTimeout(() => {
 						router.push("/protected/chat");

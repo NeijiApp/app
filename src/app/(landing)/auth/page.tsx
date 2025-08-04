@@ -400,7 +400,7 @@ function AuthLogic() {
 					);
 					addMessage(
 						"assistant",
-						"Très bien ! Je vous redirige vers le chat principal. À bientôt ! 👋",
+						"Very well! I'm redirecting you to the main chat. See you soon! 👋",
 					);
 					setTimeout(() => {
 						router.push("/chat");
@@ -473,7 +473,7 @@ function AuthLogic() {
 				} else {
 					addMessage(
 						"assistant",
-						"Parfait ! Connexion réussie. Bienvenue dans votre espace personnel ! 🎉",
+						"Perfect! Login successful. Welcome to your personal space! 🎉",
 					);
 					setTimeout(() => {
 						router.push("/protected/chat");
@@ -519,7 +519,7 @@ function AuthLogic() {
 					// Message pour demander de vérifier l'email
 					addMessage(
 						"assistant",
-						"Parfait ! Votre compte a été créé avec succès ! 🎉",
+						"Perfect! Your account has been created successfully! 🎉",
 					);
 					setTimeout(() => {
 						addMessage(
