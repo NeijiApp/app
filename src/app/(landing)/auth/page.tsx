@@ -67,7 +67,7 @@ function AuthLogic() {
 
 	const addMessage = (role: "user" | "assistant", content: string) => {
 		const newMessage = {
-			id: `auth-${Date.now()}-${Math.random()}`,
+			id: `auth-${authMessages.length}-${role}-${Date.now()}`,
 			role,
 			content,
 		};
