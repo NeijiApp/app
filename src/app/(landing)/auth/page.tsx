@@ -17,7 +17,7 @@ function AuthLogic() {
 	const supabase = createClient();
 	const [authStep, setAuthStep] = useState<
 		"welcome" | "email" | "password" | "signup" | "email-sent"
-	>("welcome");
+	>("email");
 	const [authData, setAuthData] = useState({
 		email: "",
 		password: "",
@@ -37,7 +37,7 @@ function AuthLogic() {
 			id: "auth-welcome",
 			role: "assistant" as const,
 			content:
-				"Bonjour ! Je suis Neiji, votre assistant de méditation. Pour accéder à toutes les fonctionnalités, souhaitez-vous vous connecter ?",
+				"Hello! I'm Neiji, your meditation assistant. To access all features, please provide your email address to sign in.",
 		},
 	]);
 
@@ -372,7 +372,7 @@ function AuthLogic() {
 					);
 					addMessage(
 						"assistant",
-						"Très bien ! Je vous redirige vers le chat principal. À bientôt ! 👋",
+						"Very well! I'm redirecting you to the main chat. See you soon! 👋",
 					);
 					setTimeout(() => {
 						router.push("/chat");
@@ -388,7 +388,7 @@ function AuthLogic() {
 					console.log(
 						"🎯 DETECTION DIRECTE: réponse positive trouvée - passage à email",
 					);
-					addMessage("assistant", "Parfait ! Quelle est votre adresse email ?");
+					addMessage("assistant", "Perfect! What is your email address?");
 					setAuthStep("email");
 					return;
 				}
@@ -408,13 +408,13 @@ function AuthLogic() {
 					return;
 				} else if (isPositive) {
 					console.log("✅ POSITIVE détecté par fonction - passage à email");
-					addMessage("assistant", "Parfait ! Quelle est votre adresse email ?");
+					addMessage("assistant", "Perfect! What is your email address?");
 					setAuthStep("email");
 				} else {
 					console.log("❓ NEITHER détecté - demande clarification");
 					addMessage(
 						"assistant",
-						'Je n\'ai pas bien compris votre réponse. Souhaitez-vous vous connecter ? Répondez par "oui" pour vous connecter ou "non" pour continuer en mode invité.',
+						'I didn\'t understand your response. Would you like to sign in? Please provide your email address to continue, or type "no" to continue as a guest.',
 					);
 				}
 			} else if (authStep === "email") {
@@ -581,7 +581,7 @@ function AuthLogic() {
 				<div className="container mx-auto px-4 pb-4">
 					<div className="rounded-lg border border-orange-200 bg-orange-100 p-4 text-center">
 						<p className="text-orange-800 text-sm">
-							Vous n'avez pas reçu l'email ? Vérifiez vos spams ou{" "}
+							Didn't receive the email? Check your spam folder or{" "}
 							<button
 								onClick={async () => {
 									const { error } = await supabase.auth.resend({
@@ -589,15 +589,15 @@ function AuthLogic() {
 										email: authData.email,
 									});
 									if (!error) {
-										addMessage(
-											"assistant",
-											"Email de confirmation renvoyé ! 📧",
-										);
+																			addMessage(
+										"assistant",
+										"Confirmation email resent! 📧",
+									);
 									}
 								}}
 								className="text-orange-600 underline hover:text-orange-700"
 							>
-								cliquez ici pour le renvoyer
+								click here to resend it
 							</button>
 						</p>
 					</div>
