@@ -7,35 +7,43 @@ import { createClient } from "~/utils/supabase/server";
 export const authRouter = createTRPCRouter({
 	// Créer un profil utilisateur après inscription
 	createProfile: publicProcedure
-		.input(z.object({
-			email: z.string().email(),
-		}))
+		.input(
+			z.object({
+				email: z.string().email(),
+			}),
+		)
 		.mutation(async ({ ctx, input }) => {
 			const supabase = await createClient();
-			
+
 			// Vérifier que l'utilisateur est authentifié
-			const { data: { user } } = await supabase.auth.getUser();
+			const {
+				data: { user },
+			} = await supabase.auth.getUser();
 			if (!user || user.email !== input.email) {
 				throw new Error("Non autorisé");
 			}
 
 			// Créer le profil utilisateur
-            await ctx.db.insert(usersTable).values({
-                email: input.email,
-            });
-        }),
+			await ctx.db.insert(usersTable).values({
+				email: input.email,
+			});
+		}),
 
 	// Mettre à jour les mémoires
 	updateMemory: publicProcedure
-		.input(z.object({
-			level: z.enum(["memory_L0", "memory_L1", "memory_L2"]),
-			content: z.string(),
-		}))
+		.input(
+			z.object({
+				level: z.enum(["memory_L0", "memory_L1", "memory_L2"]),
+				content: z.string(),
+			}),
+		)
 		.mutation(async ({ ctx, input }) => {
 			const supabase = await createClient();
-			
+
 			// Vérifier que l'utilisateur est authentifié
-			const { data: { user } } = await supabase.auth.getUser();
+			const {
+				data: { user },
+			} = await supabase.auth.getUser();
 			if (!user) {
 				throw new Error("Non autorisé");
 			}
@@ -48,23 +56,24 @@ export const authRouter = createTRPCRouter({
 		}),
 
 	// Récupérer le profil utilisateur
-	getProfile: publicProcedure
-		.query(async ({ ctx }) => {
-			const supabase = await createClient();
-			
-			// Vérifier que l'utilisateur est authentifié
-			const { data: { user } } = await supabase.auth.getUser();
-			if (!user) {
-				throw new Error("Non autorisé");
-			}
+	getProfile: publicProcedure.query(async ({ ctx }) => {
+		const supabase = await createClient();
 
-			// Récupérer le profil
-			const profile = await ctx.db
-				.select()
-				.from(usersTable)
-				.where(eq(usersTable.email, user.email!))
-				.limit(1);
+		// Vérifier que l'utilisateur est authentifié
+		const {
+			data: { user },
+		} = await supabase.auth.getUser();
+		if (!user) {
+			throw new Error("Non autorisé");
+		}
 
-			return profile[0] || null;
-		}),
+		// Récupérer le profil
+		const profile = await ctx.db
+			.select()
+			.from(usersTable)
+			.where(eq(usersTable.email, user.email!))
+			.limit(1);
+
+		return profile[0] || null;
+	}),
 });

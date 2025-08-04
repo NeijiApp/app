@@ -5,8 +5,8 @@
 		"clientKind": "git",
 		"useIgnoreFile": true
 	},
-	"files": { 
-		"ignoreUnknown": false, 
+	"files": {
+		"ignoreUnknown": false,
 		"ignore": [
 			"assembly-service/**/*",
 			"debug-scripts/**/*",
@@ -21,7 +21,7 @@
 			".claude/**/*",
 			"*.mp3",
 			"*.log"
-		] 
+		]
 	},
 	"formatter": { "enabled": true },
 	"organizeImports": { "enabled": true },

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ArrowLeft, Eye, EyeOff, SendHorizonal } from "lucide-react";
 import Link from "next/link";
-import { ArrowLeft, SendHorizonal, Eye, EyeOff } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 
@@ -14,20 +14,21 @@ interface AuthInputProps {
 	onFocus?: () => void;
 }
 
-export function AuthInput({ 
-	onSend, 
-	disabled, 
-	placeholder, 
-	isPassword = false, 
-	onFocus 
-}: AuthInputProps) {	const [input, setInput] = useState("");
+export function AuthInput({
+	onSend,
+	disabled,
+	placeholder,
+	isPassword = false,
+	onFocus,
+}: AuthInputProps) {
+	const [input, setInput] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
-	
+
 	// Réinitialiser la visibilité du mot de passe quand isPassword change
 	useEffect(() => {
 		setShowPassword(false);
 	}, [isPassword]);
-	
+
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (input.trim() && !disabled) {
@@ -44,18 +45,19 @@ export function AuthInput({
 		<>
 			{/* Zone de saisie avec structure identique au ChatInput */}
 			<div className="fixed right-1/2 bottom-0 z-10 w-full max-w-xl translate-x-1/2 self-center transition-all duration-500 ease-in-out">
-				<div className="bg-gradient-to-r from-white/90 to-orange-100/90 p-4 backdrop-blur-md rounded-t-2xl">
+				<div className="rounded-t-2xl bg-gradient-to-r from-white/90 to-orange-100/90 p-4 backdrop-blur-md">
 					<div className="flex items-center gap-3">
 						{/* Bouton de retour (même style que le bouton User du chat) */}
 						<Link href="/chat">
 							<Button
 								type="button"
 								size="icon"
-								className="size-11 flex-shrink-0 rounded-full p-2 text-white bg-orange-500 hover:bg-orange-600 transition-all"
+								className="size-11 flex-shrink-0 rounded-full bg-orange-500 p-2 text-white transition-all hover:bg-orange-600"
 							>
 								<ArrowLeft className="size-6" />
 							</Button>
-						</Link>						<form onSubmit={handleSubmit} className="relative flex-1">
+						</Link>{" "}
+						<form onSubmit={handleSubmit} className="relative flex-1">
 							<Input
 								disabled={disabled}
 								type={isPassword && !showPassword ? "password" : "text"}
@@ -80,7 +82,7 @@ export function AuthInput({
 									type="button"
 									size="icon"
 									onClick={togglePasswordVisibility}
-									className="-translate-y-1/2 absolute top-1/2 right-14 z-10 size-8 rounded-full p-1 text-gray-500 hover:text-gray-700 bg-transparent hover:bg-gray-100 transition-all duration-300"
+									className="-translate-y-1/2 absolute top-1/2 right-14 z-10 size-8 rounded-full bg-transparent p-1 text-gray-500 transition-all duration-300 hover:bg-gray-100 hover:text-gray-700"
 								>
 									{showPassword ? (
 										<EyeOff className="size-4" />
@@ -94,13 +96,14 @@ export function AuthInput({
 								disabled={disabled || input.length === 0}
 								type="submit"
 								size="icon"
-								className="-translate-y-1/2 absolute top-1/2 right-1.5 z-10 size-11 rounded-full p-2 text-white bg-orange-500 hover:bg-orange-600 transition-all duration-300"
+								className="-translate-y-1/2 absolute top-1/2 right-1.5 z-10 size-11 rounded-full bg-orange-500 p-2 text-white transition-all duration-300 hover:bg-orange-600"
 							>
 								<SendHorizonal className="size-6" />
 							</Button>
 						</form>
 					</div>
 				</div>
-			</div>		</>
+			</div>{" "}
+		</>
 	);
 }

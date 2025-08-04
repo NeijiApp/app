@@ -53,7 +53,6 @@ function Header() {
 						<span className="font-bold text-4xl text-orange-500">Neiji</span>
 					</a>
 				</div>
-
 				{/* Mobile Version */}
 				<div className="flex w-full items-center justify-between md:hidden">
 					<button
@@ -87,7 +86,8 @@ function Header() {
 
 					{/* Empty div to maintain spacing */}
 					<div className="w-8" />
-				</div>				{/* Desktop Navigation Links */}
+				</div>{" "}
+				{/* Desktop Navigation Links */}
 				<div className="hidden space-x-8 md:flex">
 					<Link
 						href="/manifesto"
@@ -114,7 +114,6 @@ function Header() {
 						Connexion
 					</Link>
 				</div>
-
 				{/* Mobile Menu */}
 				<AnimatePresence>
 					{isMenuOpen && (
@@ -145,7 +144,8 @@ function Header() {
 								className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"
 							>
 								Contact
-							</Link>							<Link
+							</Link>{" "}
+							<Link
 								href="/#newsletter"
 								onClick={() => setIsMenuOpen(false)}
 								className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"

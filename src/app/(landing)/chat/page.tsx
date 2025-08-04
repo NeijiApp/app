@@ -21,8 +21,8 @@ function ChatLogic() {
 	// Combine regular chat messages and custom meditation messages
 	const allMessages = [...messages, ...customMessages].sort((a, b) => {
 		// Sort by timestamp if available, otherwise by creation order
-		const aTime = parseInt(a.id.split('-')[1] || '0');
-		const bTime = parseInt(b.id.split('-')[1] || '0');
+		const aTime = Number.parseInt(a.id.split("-")[1] || "0");
+		const bTime = Number.parseInt(b.id.split("-")[1] || "0");
 		return aTime - bTime;
 	});
 
@@ -51,7 +51,8 @@ function ChatLogic() {
 				clearInterval(intervalId);
 			}
 		};
-	}, [status]);	return (
+	}, [status]);
+	return (
 		<Chat>
 			<div className="container relative z-0 mx-auto space-y-4 px-4 pt-8 pb-30 sm:px-6">
 				{allMessages.length === 0 ? (
@@ -75,7 +76,11 @@ function ChatLogic() {
 							);
 						}
 
-						if (status === "streaming" && index === allMessages.length - 1 && !('audioUrl' in message)) {
+						if (
+							status === "streaming" &&
+							index === allMessages.length - 1 &&
+							!("audioUrl" in message)
+						) {
 							return null;
 						}
 

@@ -21,20 +21,34 @@ function ChatLogic() {
 
 	// Debug logs
 	useEffect(() => {
-		console.log('🎯 [PAGE] État du chat - messages:', messages.length, 'customMessages:', customMessages.length, 'isLoadingHistory:', isLoadingHistory);
+		console.log(
+			"🎯 [PAGE] État du chat - messages:",
+			messages.length,
+			"customMessages:",
+			customMessages.length,
+			"isLoadingHistory:",
+			isLoadingHistory,
+		);
 	}, [messages, customMessages, isLoadingHistory]);
 
-	console.log('🎯 [PAGE] Rendu ChatLogic - messages:', messages.length, 'customMessages:', customMessages.length, 'isLoadingHistory:', isLoadingHistory);
+	console.log(
+		"🎯 [PAGE] Rendu ChatLogic - messages:",
+		messages.length,
+		"customMessages:",
+		customMessages.length,
+		"isLoadingHistory:",
+		isLoadingHistory,
+	);
 
 	// Combine regular chat messages and custom meditation messages
 	const allMessages = [...messages, ...customMessages].sort((a, b) => {
 		// Sort by timestamp if available, otherwise by creation order
-		const aTime = parseInt(a.id.split('-')[1] || '0');
-		const bTime = parseInt(b.id.split('-')[1] || '0');
+		const aTime = Number.parseInt(a.id.split("-")[1] || "0");
+		const bTime = Number.parseInt(b.id.split("-")[1] || "0");
 		return aTime - bTime;
 	});
-	
-	console.log('📊 [PAGE] AllMessages après tri:', allMessages.length);
+
+	console.log("📊 [PAGE] AllMessages après tri:", allMessages.length);
 
 	// Auto-scroll interval effect
 	useEffect(() => {
@@ -61,7 +75,9 @@ function ChatLogic() {
 				clearInterval(intervalId);
 			}
 		};
-	}, [status]);	return (		<Chat>
+	}, [status]);
+	return (
+		<Chat>
 			<div className="container relative z-0 mx-auto space-y-4 px-4 pt-8 pb-30 sm:px-6">
 				{isLoadingHistory ? (
 					<div className="flex h-full flex-col items-center justify-center gap-4 pt-40 text-center">
@@ -96,14 +112,19 @@ function ChatLogic() {
 							);
 						}
 
-						if (status === "streaming" && index === allMessages.length - 1 && !('audioUrl' in message)) {
+						if (
+							status === "streaming" &&
+							index === allMessages.length - 1 &&
+							!("audioUrl" in message)
+						) {
 							return null;
 						}
 
 						return <BotMessage key={message.id} message={message} />;
 					})
 				)}
-			</div>			<ChatInput
+			</div>{" "}
+			<ChatInput
 				onChatFocus={() => {
 					if (allMessages.length === 0 && !isLoadingHistory) {
 						setMessages([

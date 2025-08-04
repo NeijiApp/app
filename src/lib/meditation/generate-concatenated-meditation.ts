@@ -1,10 +1,18 @@
-import { mkdtemp, writeFile, readFile, copyFile, mkdir } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { generateParagraphAudioWithRouter } from './tts-router';
+import {
+	copyFile,
+	mkdir,
+	mkdtemp,
+	readFile,
+	writeFile,
+} from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { env } from "~/env.js";
+import { generateParagraphAudioWithRouter } from "./tts-router";
 
-type Segment = { type: 'text'; content: string } | { type: 'pause'; duration: number };
+type Segment =
+	| { type: "text"; content: string }
+	| { type: "pause"; duration: number };
 
 /**
  * Génère et assemble localement tous les segments de méditation en un seul fichier audio MP3.
@@ -12,20 +20,20 @@ type Segment = { type: 'text'; content: string } | { type: 'pause'; duration: nu
 export async function generateConcatenatedMeditation(
 	segments: Segment[],
 	voiceId?: string,
-	voiceGender?: 'male' | 'female',
+	voiceGender?: "male" | "female",
 ): Promise<ReadableStream<Uint8Array>> {
 	// Répertoire temporaire pour cette requête
-	const tempDir = await mkdtemp(join(tmpdir(), 'meditation-'));
+	const tempDir = await mkdtemp(join(tmpdir(), "meditation-"));
 	const audioFiles: Array<{ localPath: string; silenceAfter?: number }> = [];
 
 	// Générer les fichiers audio pour chaque segment
 	for (let i = 0; i < segments.length; i++) {
 		const seg = segments[i]!;
-		if (seg.type === 'text') {
+		if (seg.type === "text") {
 			const stream = await generateParagraphAudioWithRouter(seg.content, {
 				voice_id: voiceId!,
 				voice_gender: voiceGender,
-				voice_style: 'calm',
+				voice_style: "calm",
 			});
 			// Lire le flux et écrire en fichier
 			const buffer = await new Response(stream).arrayBuffer();
@@ -42,75 +50,93 @@ export async function generateConcatenatedMeditation(
 	}
 
 	// Chemin de sortie final
-	const outputPath = join(tempDir, 'meditation-final.mp3');
+	const outputPath = join(tempDir, "meditation-final.mp3");
 	// Assemblage avec le service assembly externe
 	try {
 		// Validation runtime de l'URL du service assembly
-		const assemblyServiceUrl = env.ASSEMBLY_SERVICE_URL || process.env.ASSEMBLY_SERVICE_URL;
-		
+		const assemblyServiceUrl =
+			env.ASSEMBLY_SERVICE_URL || process.env.ASSEMBLY_SERVICE_URL;
+
 		if (!assemblyServiceUrl) {
-			throw new Error('ASSEMBLY_SERVICE_URL environment variable is required but not set. Please configure it in your deployment settings.');
+			throw new Error(
+				"ASSEMBLY_SERVICE_URL environment variable is required but not set. Please configure it in your deployment settings.",
+			);
 		}
-		
-		if (assemblyServiceUrl === 'http://localhost:3001' && process.env.NODE_ENV === 'production') {
-			throw new Error('ASSEMBLY_SERVICE_URL is still set to localhost in production. Please set it to your Railway service URL.');
+
+		if (
+			assemblyServiceUrl === "http://localhost:3001" &&
+			process.env.NODE_ENV === "production"
+		) {
+			throw new Error(
+				"ASSEMBLY_SERVICE_URL is still set to localhost in production. Please set it to your Railway service URL.",
+			);
 		}
-		
+
 		// Préparer les segments avec les données de fichiers
 		const assemblySegments = [];
 		for (let i = 0; i < audioFiles.length; i++) {
 			const file = audioFiles[i]!;
 			const fileName = `segment-${Date.now()}-${i}.mp3`;
-			
+
 			// Lire le fichier audio en base64 pour l'envoyer au service distant
 			const audioBuffer = await readFile(file.localPath);
-			const audioBase64 = audioBuffer.toString('base64');
-			
-			console.log(`📁 Prepared ${file.localPath} for remote assembly (${audioBuffer.length} bytes)`);
-			
+			const audioBase64 = audioBuffer.toString("base64");
+
+			console.log(
+				`📁 Prepared ${file.localPath} for remote assembly (${audioBuffer.length} bytes)`,
+			);
+
 			assemblySegments.push({
 				id: `segment-${i}`,
 				audioUrl: fileName,
 				audioData: audioBase64, // Données du fichier en base64
 				duration: 30, // Durée estimée en secondes
-				silenceAfter: file.silenceAfter || 0
+				silenceAfter: file.silenceAfter || 0,
 			});
 		}
 
-		console.log(`🔧 Calling assembly service at ${assemblyServiceUrl} with ${assemblySegments.length} segments`);
+		console.log(
+			`🔧 Calling assembly service at ${assemblyServiceUrl} with ${assemblySegments.length} segments`,
+		);
 
 		const response = await fetch(`${assemblyServiceUrl}/api/assembly/create`, {
-			method: 'POST',
+			method: "POST",
 			headers: {
-				'Content-Type': 'application/json'
+				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				segments: assemblySegments
-			})
+				segments: assemblySegments,
+			}),
 		});
 
 		if (!response.ok) {
 			const errorText = await response.text();
-			throw new Error(`Assembly service error: ${response.status} ${response.statusText} - ${errorText}`);
+			throw new Error(
+				`Assembly service error: ${response.status} ${response.statusText} - ${errorText}`,
+			);
 		}
 
 		const result = await response.json();
 		console.log(`✅ Assembly completed: ${result.jobId}`);
 
 		// Télécharger le fichier assemblé
-		const downloadResponse = await fetch(`${assemblyServiceUrl}${result.downloadUrl}`);
+		const downloadResponse = await fetch(
+			`${assemblyServiceUrl}${result.downloadUrl}`,
+		);
 		if (!downloadResponse.ok || !downloadResponse.body) {
-			throw new Error('Failed to download assembled audio');
+			throw new Error("Failed to download assembled audio");
 		}
 
 		// Sauvegarder temporairement pour retour
 		const buffer = await new Response(downloadResponse.body).arrayBuffer();
 		await writeFile(outputPath, Buffer.from(buffer));
-		
+
 		console.log(`✅ Assembly service completed successfully`);
 	} catch (error) {
-		console.error('❌ Assembly service failed:', error);
-		throw new Error(`Audio assembly failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		console.error("❌ Assembly service failed:", error);
+		throw new Error(
+			`Audio assembly failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+		);
 	}
 
 	// Lire le fichier final et renvoyer un ReadableStream

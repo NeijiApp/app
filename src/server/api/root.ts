@@ -1,7 +1,7 @@
 import { newsletterRouter } from "~/server/api/routers/newsletter";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
-import { chatRouter } from "./routers/chat";
 import { authRouter } from "./routers/auth";
+import { chatRouter } from "./routers/chat";
 
 /**
  * This is the primary router for your server.

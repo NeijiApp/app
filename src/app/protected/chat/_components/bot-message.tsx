@@ -1,29 +1,29 @@
 import Image from "next/image";
-import { useEffect, useState, type ComponentProps } from "react";
+import { type ComponentProps, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import type { ExtraProps } from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { cn } from "~/lib/utils";
 import { EnhancedAudioPlayer } from "./enhanced-audio-player";
 import type { ExtendedMessage } from "./provider";
-import type { ExtraProps } from "react-markdown";
 
 interface BotMessageProps {
 	message: ExtendedMessage;
 }
 
 export function BotMessage({ message }: BotMessageProps) {
-        const [displayedText, setDisplayedText] = useState("");
-        const [visible, setVisible] = useState(false);
+	const [displayedText, setDisplayedText] = useState("");
+	const [visible, setVisible] = useState(false);
 
-    	useEffect(() => {
-                setVisible(true);
-                if (message.content.trim().length === 0) return;
+	useEffect(() => {
+		setVisible(true);
+		if (message.content.trim().length === 0) return;
 
 		let currentIndex = 0;
 		const text = message.content;
 		let cancelled = false;
-		
+
 		// Réinitialiser le texte affiché
 		setDisplayedText("");
 
@@ -47,7 +47,12 @@ export function BotMessage({ message }: BotMessageProps) {
 	if (message.content.trim().length === 0) return null;
 
 	return (
-                <div className={cn("relative pt-10 transition-opacity duration-500", visible ? "opacity-100" : "opacity-0")}>
+		<div
+			className={cn(
+				"relative pt-10 transition-opacity duration-500",
+				visible ? "opacity-100" : "opacity-0",
+			)}
+		>
 			<div className="absolute top-1 flex items-center gap-1">
 				<Image
 					src="/NeijiHeadLogo1.4.png"
@@ -94,12 +99,12 @@ export function BotMessage({ message }: BotMessageProps) {
 					{displayedText}
 				</ReactMarkdown>
 			</div>
-			
+
 			{/* Enhanced Audio Player for meditation messages */}
 			{message.audioUrl && (
 				<div className="mt-4 max-w-xs lg:max-w-md">
-					<EnhancedAudioPlayer 
-						audioUrl={message.audioUrl} 
+					<EnhancedAudioPlayer
+						audioUrl={message.audioUrl}
 						title="Your Meditation"
 					/>
 				</div>

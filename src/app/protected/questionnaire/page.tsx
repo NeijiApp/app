@@ -1,13 +1,13 @@
 /**
  * @fileoverview Page de questionnaire interactif pour le profil de personnalité
- * 
+ *
  * Cette page présente un questionnaire interactif avec l'interface chat pour
  * collecter les informations de personnalité de l'utilisateur. Elle utilise
  * des questions prédéfinies et sauvegarde les réponses de manière structurée.
- * 
+ *
  * @component QuestionnaireInteractivePage
  * @description Questionnaire interactif avec interface de chat pour profiler l'utilisateur
- * 
+ *
  * Fonctionnalités principales :
  * - Interface de chat interactive pour les questions
  * - Questions prédéfinies stockées en JSON
@@ -16,7 +16,7 @@
  * - Progression séquentielle à travers les questions
  * - Redirection vers chat une fois terminé
  * - Interface responsive et moderne
- * 
+ *
  * @author Neiji Team
  * @version 1.0.0
  * @since 2025
@@ -24,10 +24,10 @@
 
 "use client";
 
+import { useRouter } from "next/navigation";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "~/utils/supabase/client";
-import { useRouter } from "next/navigation";
 
 // Interface pour les messages du questionnaire
 interface QuestionnaireMessage {
@@ -53,90 +53,94 @@ export default function QuestionnaireInteractivePage() {
 	const [messages, setMessages] = useState<QuestionnaireMessage[]>([]);
 	const messagesEndRef = useRef<null | HTMLDivElement>(null);
 	const [questionnaireStarted, setQuestionnaireStarted] = useState(false);
-	const [displayedText, setDisplayedText] = useState<{ [key: number]: string }>({});
+	const [displayedText, setDisplayedText] = useState<{ [key: number]: string }>(
+		{},
+	);
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 	const [answers, setAnswers] = useState<{ [key: string]: string }>({});
-	const [isLoading, setIsLoading] = useState(true);	const [isSaving, setIsSaving] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
+	const [isSaving, setIsSaving] = useState(false);
 	const [isCompleted, setIsCompleted] = useState(false);
 	const [isBotTyping, setIsBotTyping] = useState(false);
 
 	const botAvatar = "/logo-neiji-full.png";
 	const ppBot = "/NeijiHeadLogo1.4.png";
 	const router = useRouter();
-	const supabase = createClient();	// Questions du questionnaire - réorganisées avec tutoiement et plus d'intimité
+	const supabase = createClient(); // Questions du questionnaire - réorganisées avec tutoiement et plus d'intimité
 	const questions: Question[] = [
 		{
 			id: 1,
 			question: "Quel âge as-tu ?",
 			context: "Ton âge m'aide à mieux adapter mes conseils",
-			key: "age"
+			key: "age",
 		},
 		{
 			id: 2,
 			question: "Dans quel domaine tu travailles ou tu étudies ?",
 			context: "Ton domaine professionnel ou d'études",
-			key: "metier"
+			key: "metier",
 		},
 		{
 			id: 3,
 			question: "Quel est ton objectif principal en ce moment ?",
 			context: "Ce que tu cherches à accomplir actuellement",
-			key: "objectif"
+			key: "objectif",
 		},
 		{
 			id: 4,
 			question: "Tu préfères travailler seul(e) ou en équipe ?",
 			context: "Ta préférence de travail et de collaboration",
-			key: "travail_preference"
+			key: "travail_preference",
 		},
 		{
 			id: 5,
 			question: "Tu es plutôt du matin ou du soir ?",
 			context: "Tes habitudes et ton rythme de vie",
-			key: "rythme"
+			key: "rythme",
 		},
 		{
 			id: 6,
 			question: "Comment tu décrirais ta personnalité en quelques mots ?",
 			context: "Tes traits de caractère principaux",
-			key: "personnalite"
+			key: "personnalite",
 		},
 		{
 			id: 7,
 			question: "Tu te considères plutôt introverti(e) ou extraverti(e) ?",
 			context: "Ta relation aux autres et à la socialisation",
-			key: "intro_extro"
+			key: "intro_extro",
 		},
 		{
 			id: 8,
 			question: "Quel style de communication tu préfères ?",
 			context: "Direct, diplomatique, détaillé, concis...",
-			key: "communication"
+			key: "communication",
 		},
 		{
 			id: 9,
 			question: "Qu'est-ce qui te motive le plus dans la vie ?",
 			context: "Tes valeurs et ce qui te pousse à agir",
-			key: "motivation"
+			key: "motivation",
 		},
 		{
 			id: 10,
 			question: "Comment tu gères le stress ?",
 			context: "Tes mécanismes pour faire face aux situations difficiles",
-			key: "gestion_stress"
+			key: "gestion_stress",
 		},
 		{
 			id: 11,
 			question: "Comment tu prends tes décisions importantes ?",
 			context: "Ton processus de prise de décision",
-			key: "prise_decision"
+			key: "prise_decision",
 		},
 		{
 			id: 12,
-			question: "Y a-t-il autre chose d'important que je devrais savoir sur toi ?",
+			question:
+				"Y a-t-il autre chose d'important que je devrais savoir sur toi ?",
 			context: "Tout détail que tu juges pertinent pour mieux te comprendre",
-			key: "autre"
-		}
+			key: "autre",
+		},
 	];
 
 	// Défilement auto
@@ -148,7 +152,7 @@ export default function QuestionnaireInteractivePage() {
 		if (questionnaireStarted) {
 			scrollToBottom();
 		}
-	}, [scrollToBottom, questionnaireStarted, messages]);	// Fonction pour simuler l'effet de frappe (encore plus rapide)
+	}, [scrollToBottom, questionnaireStarted, messages]); // Fonction pour simuler l'effet de frappe (encore plus rapide)
 	const typeMessage = (messageId: number, fullText: string) => {
 		let currentText = "";
 		setDisplayedText((prev) => ({ ...prev, [messageId]: "" }));
@@ -170,12 +174,15 @@ export default function QuestionnaireInteractivePage() {
 				setIsBotTyping(false); // Le bot a fini d'écrire
 			}
 		}, 15); // Réduit de 20ms à 15ms pour une écriture encore plus rapide
-	};	// Chargement des données existantes et démarrage automatique
+	}; // Chargement des données existantes et démarrage automatique
 	useEffect(() => {
 		const loadExistingData = async () => {
 			try {
-				const { data: { user }, error: userError } = await supabase.auth.getUser();
-				
+				const {
+					data: { user },
+					error: userError,
+				} = await supabase.auth.getUser();
+
 				if (userError || !user) {
 					router.push("/auth/login");
 					return;
@@ -186,12 +193,13 @@ export default function QuestionnaireInteractivePage() {
 					.from("users_table")
 					.select("questionnaire")
 					.eq("email", user.email)
-					.single();				if (error && error.code !== 'PGRST116') {
+					.single();
+				if (error && error.code !== "PGRST116") {
 					console.error("Erreur lors du chargement:", error);
 				} else if (data?.questionnaire) {
 					// Plus besoin de JSON.parse car questionnaire est déjà un objet JSON
 					const existingAnswers = data.questionnaire;
-					if (existingAnswers && typeof existingAnswers === 'object') {
+					if (existingAnswers && typeof existingAnswers === "object") {
 						setAnswers(existingAnswers);
 						// Si toutes les questions ont des réponses, rediriger vers profile
 						if (Object.keys(existingAnswers).length === questions.length) {
@@ -262,7 +270,7 @@ export default function QuestionnaireInteractivePage() {
 			setMessages((prev) => [...prev, questionMessage]);
 			typeMessage(questionMessage.id, questionMessage.text);
 		}, 1000);
-	};	// Fonction appelée quand le questionnaire est terminé
+	}; // Fonction appelée quand le questionnaire est terminé
 	const handleQuestionnaireComplete = () => {
 		setIsCompleted(true);
 		setTimeout(() => {
@@ -276,7 +284,7 @@ export default function QuestionnaireInteractivePage() {
 			};
 			setMessages((prev) => [...prev, completionMessage]);
 			typeMessage(completionMessage.id, completionMessage.text);
-					// Message de redirection après 3 secondes
+			// Message de redirection après 3 secondes
 			setTimeout(() => {
 				const redirectMessage: QuestionnaireMessage = {
 					id: Date.now() + 1,
@@ -288,27 +296,33 @@ export default function QuestionnaireInteractivePage() {
 				};
 				setMessages((prev) => [...prev, redirectMessage]);
 				typeMessage(redirectMessage.id, redirectMessage.text);
-				
+
 				// Redirection vers le profil après 10 secondes supplémentaires
 				setTimeout(() => {
 					router.push("/protected/profile");
 				}, 10000);
 			}, 3000);
 		}, 1000);
-	};	// Sauvegarde des réponses avec gestion d'erreurs améliorée
+	}; // Sauvegarde des réponses avec gestion d'erreurs améliorée
 	const saveAnswers = async (newAnswers: { [key: string]: string }) => {
 		try {
 			setIsSaving(true);
-			
+
 			// DEBUG: Log de démarrage
 			console.log("🔧 DEBUG QUESTIONNAIRE - Début de sauvegarde");
 			console.log("🔧 DEBUG - Données à sauvegarder:", newAnswers);
 			console.log("🔧 DEBUG - Type des données:", typeof newAnswers);
-			console.log("🔧 DEBUG - Nombre de réponses:", Object.keys(newAnswers).length);
+			console.log(
+				"🔧 DEBUG - Nombre de réponses:",
+				Object.keys(newAnswers).length,
+			);
 			console.log("🔧 DEBUG - Clés des réponses:", Object.keys(newAnswers));
-			
-			const { data: { user }, error: userError } = await supabase.auth.getUser();
-			
+
+			const {
+				data: { user },
+				error: userError,
+			} = await supabase.auth.getUser();
+
 			if (userError || !user) {
 				console.error("🔧 DEBUG - Erreur d'authentification:", userError);
 				router.push("/auth/login");
@@ -325,14 +339,17 @@ export default function QuestionnaireInteractivePage() {
 				.single();
 
 			console.log("🔧 DEBUG - Utilisateur existant trouvé:", existingUser);
-			console.log("🔧 DEBUG - Questionnaire existant:", existingUser?.questionnaire);
+			console.log(
+				"🔧 DEBUG - Questionnaire existant:",
+				existingUser?.questionnaire,
+			);
 			console.log("🔧 DEBUG - Erreur de vérification:", checkError);
 
 			// Utiliser update au lieu d'upsert pour plus de fiabilité
 			const { data, error } = await supabase
 				.from("users_table")
 				.update({
-					questionnaire: newAnswers // Objet JSON direct
+					questionnaire: newAnswers, // Objet JSON direct
 				})
 				.eq("email", user.email)
 				.select();
@@ -354,10 +371,15 @@ export default function QuestionnaireInteractivePage() {
 				.single();
 
 			console.log("🔧 DEBUG - Vérification post-sauvegarde:", verification);
-			console.log("🔧 DEBUG - Questionnaire sauvegardé:", verification?.questionnaire);
-			console.log("🔧 DEBUG - Type du questionnaire sauvegardé:", typeof verification?.questionnaire);
+			console.log(
+				"🔧 DEBUG - Questionnaire sauvegardé:",
+				verification?.questionnaire,
+			);
+			console.log(
+				"🔧 DEBUG - Type du questionnaire sauvegardé:",
+				typeof verification?.questionnaire,
+			);
 			console.log("🔧 DEBUG - Erreur de vérification:", verifyError);
-
 		} catch (err) {
 			console.error("🔧 DEBUG - Erreur lors de la sauvegarde:", err);
 		} finally {
@@ -381,13 +403,14 @@ export default function QuestionnaireInteractivePage() {
 			// Premier message = démarrage du questionnaire
 			setQuestionnaireStarted(true);
 			setMessage("");
-			askNextQuestion();		} else {
+			askNextQuestion();
+		} else {
 			// Sauvegarde de la réponse à la question actuelle avec la clé descriptive
-			const currentQuestion = questions[currentQuestionIndex-1];
+			const currentQuestion = questions[currentQuestionIndex - 1];
 			if (currentQuestion) {
 				const newAnswers = {
 					...answers,
-					[currentQuestion.key]: message.trim() // Utiliser la clé descriptive
+					[currentQuestion.key]: message.trim(), // Utiliser la clé descriptive
 				};
 				setAnswers(newAnswers);
 				await saveAnswers(newAnswers);
@@ -395,7 +418,7 @@ export default function QuestionnaireInteractivePage() {
 
 			setMessage("");
 			const nextQuestionIndex = currentQuestionIndex + 1;
-			setCurrentQuestionIndex(nextQuestionIndex);			// Passer à la question suivante ou terminer
+			setCurrentQuestionIndex(nextQuestionIndex); // Passer à la question suivante ou terminer
 			setTimeout(() => {
 				if (nextQuestionIndex >= questions.length) {
 					handleQuestionnaireComplete();
@@ -418,7 +441,8 @@ export default function QuestionnaireInteractivePage() {
 				<div className="text-lg">Chargement de votre questionnaire...</div>
 			</div>
 		);
-	}	return (
+	}
+	return (
 		<div className="relative flex min-h-screen flex-col bg-gradient-to-br from-white via-orange-100 to-orange-200 p-4">
 			{/* --- Contenu Principal (Conditionnel) --- */}
 			<div className="flex w-full flex-grow flex-col items-center overflow-hidden">
@@ -435,7 +459,9 @@ export default function QuestionnaireInteractivePage() {
 							/>
 						</div>
 						{/* Texte de présentation */}
-						<div className="mb-20 max-w-sm text-center">							<div className="mb-20 max-w-sm text-center">
+						<div className="mb-20 max-w-sm text-center">
+							{" "}
+							<div className="mb-20 max-w-sm text-center">
 								<p className="font-medium text-gray-800 text-lg">
 									Salut ! Je suis Neiji, ton coach personnel.
 									<br />
@@ -443,7 +469,8 @@ export default function QuestionnaireInteractivePage() {
 								</p>
 								{isCompleted && (
 									<p className="mt-4 font-medium text-orange-600 text-sm">
-										Tu as déjà complété le questionnaire. Tu peux aller au chat !
+										Tu as déjà complété le questionnaire. Tu peux aller au chat
+										!
 									</p>
 								)}
 							</div>
@@ -529,24 +556,35 @@ export default function QuestionnaireInteractivePage() {
 						type="text"
 						value={message}
 						onChange={(e) => setMessage(e.target.value)}
-						onClick={!questionnaireStarted ? handleStartQuestionnaire : undefined}
-						onKeyPress={handleKeyPress}						placeholder={
-							isCompleted 
+						onClick={
+							!questionnaireStarted ? handleStartQuestionnaire : undefined
+						}
+						onKeyPress={handleKeyPress}
+						placeholder={
+							isCompleted
 								? "Questionnaire terminé - Voir ton profil !"
 								: isBotTyping
 									? "Attends que Neiji finisse d'écrire..."
-									: questionnaireStarted 
-										? "Ta réponse..." 
+									: questionnaireStarted
+										? "Ta réponse..."
 										: "Commencer le questionnaire"
-						}className={`message-input flex-1 cursor-pointer rounded-full px-6 py-3 text-lg shadow-lg transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-2 ${
+						}
+						className={`message-input flex-1 cursor-pointer rounded-full px-6 py-3 text-lg shadow-lg transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-2 ${
 							isCompleted || isBotTyping
 								? "cursor-not-allowed bg-gray-100 text-gray-400 focus:ring-gray-300"
 								: "bg-white focus:ring-orange-500"
 						}`}
 						disabled={isCompleted || isBotTyping}
-					/>					<button
+					/>{" "}
+					<button
 						type="button"
-						onClick={questionnaireStarted && !isCompleted && !isBotTyping ? handleSendMessage : (!questionnaireStarted ? handleStartQuestionnaire : undefined)}
+						onClick={
+							questionnaireStarted && !isCompleted && !isBotTyping
+								? handleSendMessage
+								: !questionnaireStarted
+									? handleStartQuestionnaire
+									: undefined
+						}
 						className={`send-button -translate-y-1/2 absolute top-1/2 right-2 transform rounded-full p-2 text-white transition-all ${
 							isCompleted || isBotTyping
 								? "cursor-not-allowed bg-gray-400"
@@ -570,21 +608,23 @@ export default function QuestionnaireInteractivePage() {
 						</svg>
 					</button>
 				</div>
-				
 				{/* Indicateur de progression */}
 				{questionnaireStarted && !isCompleted && (
 					<div className="mt-3 text-center">
 						<p className="text-orange-700 text-sm">
-							Question {currentQuestionIndex } sur {questions.length}
+							Question {currentQuestionIndex} sur {questions.length}
 						</p>
 						<div className="mx-auto mt-2 h-2 max-w-xs overflow-hidden rounded-full bg-orange-200">
-							<div 
+							<div
 								className="h-full bg-orange-500 transition-all duration-300 ease-out"
-								style={{ width: `${((currentQuestionIndex ) / questions.length) * 100}%` }}
+								style={{
+									width: `${(currentQuestionIndex / questions.length) * 100}%`,
+								}}
 							/>
 						</div>
 					</div>
-				)}				{/* Bouton pour aller au profil si terminé */}
+				)}{" "}
+				{/* Bouton pour aller au profil si terminé */}
 				{isCompleted && (
 					<div className="mt-3 text-center">
 						<button
@@ -594,7 +634,8 @@ export default function QuestionnaireInteractivePage() {
 							Voir mon Profil
 						</button>
 					</div>
-				)}				{/* Indicateur de sauvegarde */}
+				)}{" "}
+				{/* Indicateur de sauvegarde */}
 				{isSaving && (
 					<div className="mt-2 text-center text-orange-600 text-sm">
 						Sauvegarde en cours...

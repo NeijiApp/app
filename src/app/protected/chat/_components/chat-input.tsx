@@ -1,12 +1,12 @@
 "use client";
 
-import { Ban, SendHorizonal, Brain, Sparkles } from "lucide-react";
+import { Ban, Brain, SendHorizonal, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { AskRegistrationDrawerContent, CustomDrawer } from "./custom-drawer";
-import { useDrawer, useChatState } from "./provider";
 import { MeditationPanel, type MeditationParams } from "./meditation-panel";
+import { useChatState, useDrawer } from "./provider";
 
 import { cn } from "~/lib/utils";
 
@@ -16,7 +16,15 @@ interface ChatInputProps {
 
 export function ChatInput({ onChatFocus }: ChatInputProps) {
 	const {
-		chat: { messages, input, handleInputChange, handleSubmit, status, stop, setInput },
+		chat: {
+			messages,
+			input,
+			handleInputChange,
+			handleSubmit,
+			status,
+			stop,
+			setInput,
+		},
 		meditationMode,
 		setMeditationMode,
 		addCustomMessage,
@@ -27,34 +35,39 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 	const [isExpanded, setIsExpanded] = useState(false);
 
 	const isLoading = useMemo(
-		() => status === "streaming" || status === "submitted" || isGeneratingMeditation,
+		() =>
+			status === "streaming" ||
+			status === "submitted" ||
+			isGeneratingMeditation,
 		[status, isGeneratingMeditation],
 	);
 
 	const { isOpen, toggleDrawer } = useDrawer();
 
-	const getVoiceId = (gender: 'male' | 'female'): string => {
-		return gender === 'female' ? 'g6xIsTj2HwM6VR4iXFCw' : 'GUDYcgRAONiI1nXDcNQQ';
+	const getVoiceId = (gender: "male" | "female"): string => {
+		return gender === "female"
+			? "g6xIsTj2HwM6VR4iXFCw"
+			: "GUDYcgRAONiI1nXDcNQQ";
 	};
 
 	const generatePrompt = (params: MeditationParams): string => {
 		const guidanceInstructions = {
 			beginner: "Provide detailed, step-by-step guidance.",
 			confirmed: "Provide balanced guidance.",
-			expert: "Provide minimal guidance, with long pauses."
+			expert: "Provide minimal guidance, with long pauses.",
 		};
 		const goalInstructions = {
 			morning: "Create an energizing morning meditation.",
 			focus: "Create a concentration meditation.",
 			calm: "Create a calming meditation.",
-			sleep: "Create a sleep meditation."
+			sleep: "Create a sleep meditation.",
 		};
 		return `Create a ${params.duration}-minute ${params.goal} meditation. ${goalInstructions[params.goal]} ${guidanceInstructions[params.guidance]} Use a ${params.gender} voice.`;
 	};
 
 	const handleMeditationGenerate = async (params: MeditationParams) => {
 		setIsGeneratingMeditation(true);
-		
+
 		const prompt = generatePrompt(params);
 		const voiceId = getVoiceId(params.gender);
 
@@ -72,9 +85,9 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 		});
 
 		try {
-			const response = await fetch('/api/meditation', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+			const response = await fetch("/api/meditation", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					prompt,
 					duration: params.duration,
@@ -87,10 +100,10 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 			});
 
 			if (!response.ok) throw new Error(await response.text());
-			
+
 			const audioBlob = await response.blob();
-			if (audioBlob.size === 0) throw new Error('Received empty audio file');
-			
+			if (audioBlob.size === 0) throw new Error("Received empty audio file");
+
 			const audioUrl = URL.createObjectURL(audioBlob);
 
 			addCustomMessage({
@@ -99,12 +112,12 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 				role: "assistant",
 				audioUrl,
 			});
-
 		} catch (error) {
-			console.error('Error generating meditation:', error);
+			console.error("Error generating meditation:", error);
 			addCustomMessage({
 				id: `error-${Date.now()}`,
-				content: "Sorry, I couldn't generate your meditation. Please try again.",
+				content:
+					"Sorry, I couldn't generate your meditation. Please try again.",
 				role: "assistant",
 			});
 		} finally {
@@ -117,36 +130,44 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 		if (!input.trim()) return;
 
 		const currentInput = input;
-		setInput('');
+		setInput("");
 
 		setIsGeneratingMeditation(true);
 
-		addCustomMessage({ id: `user-${Date.now()}`, content: currentInput, role: "user" });
+		addCustomMessage({
+			id: `user-${Date.now()}`,
+			content: currentInput,
+			role: "user",
+		});
 		const loadingId = `loading-${Date.now()}`;
-		addCustomMessage({ id: loadingId, content: "🧘‍♀️ Generating your personalized meditation from prompt...", role: "assistant" });
+		addCustomMessage({
+			id: loadingId,
+			content: "🧘‍♀️ Generating your personalized meditation from prompt...",
+			role: "assistant",
+		});
 
 		try {
 			// Use default meditation parameters when generating from prompt
-			const defaultVoiceId = getVoiceId('female'); // Default to female voice
-			const response = await fetch('/api/meditation', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ 
+			const defaultVoiceId = getVoiceId("female"); // Default to female voice
+			const response = await fetch("/api/meditation", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
 					prompt: currentInput,
 					voiceId: defaultVoiceId,
-					gender: 'female',
+					gender: "female",
 					duration: 5,
-					background: 'silence',
-					guidance: 'confirmed',
-					goal: 'calm'
+					background: "silence",
+					guidance: "confirmed",
+					goal: "calm",
 				}),
 			});
 
 			if (!response.ok) throw new Error(await response.text());
-			
+
 			const audioBlob = await response.blob();
-			if (audioBlob.size === 0) throw new Error('Received empty audio file');
-			
+			if (audioBlob.size === 0) throw new Error("Received empty audio file");
+
 			const audioUrl = URL.createObjectURL(audioBlob);
 
 			addCustomMessage({
@@ -156,74 +177,98 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 				audioUrl,
 			});
 		} catch (error) {
-			console.error('Error generating meditation from prompt:', error);
-			addCustomMessage({ id: `error-${Date.now()}`, content: "Sorry, I couldn't generate from your prompt.", role: "assistant" });
+			console.error("Error generating meditation from prompt:", error);
+			addCustomMessage({
+				id: `error-${Date.now()}`,
+				content: "Sorry, I couldn't generate from your prompt.",
+				role: "assistant",
+			});
 		} finally {
 			setIsGeneratingMeditation(false);
 		}
 	};
-	
-	const finalHandleSubmit = meditationMode ? handleMeditationSubmitFromInput : handleSubmit;
+
+	const finalHandleSubmit = meditationMode
+		? handleMeditationSubmitFromInput
+		: handleSubmit;
 
 	return (
 		<>
 			<div className="mb-16">
 				<CustomDrawer isOpen={isOpen}>
-					<AskRegistrationDrawerContent onClose={() => useDrawer().closeDrawer()} />
+					<AskRegistrationDrawerContent
+						onClose={() => useDrawer().closeDrawer()}
+					/>
 				</CustomDrawer>
 			</div>
+
+			{/* Meditation Panel - positioned above input bar */}
+			<div
+				className={cn(
+					"fixed right-1/2 bottom-20 z-20 w-full max-w-xl translate-x-1/2 transition-all duration-300 ease-in-out",
+					meditationMode
+						? isExpanded
+							? "max-h-[70vh] opacity-100"
+							: "max-h-[35vh] opacity-100"
+						: "max-h-0 opacity-0 overflow-hidden",
+				)}
+			>
+				<div className="h-full overflow-y-auto px-4 pt-2 pb-4">
+					<MeditationPanel
+						onGenerate={handleMeditationGenerate}
+						isGenerating={isGeneratingMeditation}
+						isExpanded={isExpanded}
+						toggleExpand={() => setIsExpanded(!isExpanded)}
+					/>
+				</div>
+			</div>
 			
-			<div className={cn(
-				"fixed right-1/2 bottom-0 z-10 w-full max-w-xl translate-x-1/2 self-center transition-all duration-500 ease-in-out",
-				meditationMode ? "pb-[20px]" : "pb-0" // Padding to lift input bar
-			)}>
-				<div className={cn(
-					"transition-all duration-500 ease-in-out overflow-hidden",
-					meditationMode ? (isExpanded ? "h-[550px]" : "h-[300px]") : "h-0"
-				)}>
-					<div className="pt-4 px-4">
-						<MeditationPanel 
-							onGenerate={handleMeditationGenerate}
-							isGenerating={isGeneratingMeditation}
-							isExpanded={isExpanded}
-							toggleExpand={() => setIsExpanded(!isExpanded)}
-						/>
-					</div>
-				</div>				<div className="bg-gradient-to-r from-white/90 to-orange-100/90 p-4 backdrop-blur-md rounded-t-2xl">					<div className="flex items-center gap-3">						{/* Bouton Méditation amélioré */}
-						<div className="relative group">							<Button
+			{/* Input Bar - positioned at bottom */}
+			<div className="fixed right-1/2 bottom-0 z-10 w-full max-w-xl translate-x-1/2 self-center">
+				<div className="rounded-t-2xl bg-gradient-to-r from-white/90 to-orange-100/90 p-4 backdrop-blur-md shadow-lg">
+					{" "}
+					<div className="flex items-center gap-3">
+						{" "}
+						{/* Bouton Méditation amélioré */}
+						<div className="group relative">
+							{" "}
+							<Button
 								onClick={() => {
 									setMeditationMode(!meditationMode);
 									if (meditationMode) setIsExpanded(false);
 								}}
 								size="icon"
 								className={cn(
-									"size-12 flex-shrink-0 rounded-full transition-all duration-300 shadow-lg border-2",
-									meditationMode 
-										? "bg-gradient-to-br from-orange-300 to-orange-500 border-orange-200 text-white shadow-orange-100 hover:from-orange-400 hover:to-orange-600 hover:shadow-xl hover:scale-105" 
-										: "bg-gradient-to-br from-white to-orange-50 border-orange-200 text-orange-500 shadow-orange-100 hover:from-orange-50 hover:to-orange-100 hover:border-orange-300 hover:shadow-xl hover:scale-105"
+									"size-12 flex-shrink-0 rounded-full border-2 shadow-lg transition-all duration-300",
+									meditationMode
+										? "border-orange-200 bg-gradient-to-br from-orange-300 to-orange-500 text-white shadow-orange-100 hover:scale-105 hover:from-orange-400 hover:to-orange-600 hover:shadow-xl"
+										: "border-orange-200 bg-gradient-to-br from-white to-orange-50 text-orange-500 shadow-orange-100 hover:scale-105 hover:border-orange-300 hover:from-orange-50 hover:to-orange-100 hover:shadow-xl",
 								)}
 							>
-								<Brain className={cn(
-									"transition-all duration-300",
-									meditationMode ? "size-7" : "size-6"
-								)} />
+								<Brain
+									className={cn(
+										"transition-all duration-300",
+										meditationMode ? "size-7" : "size-6",
+									)}
+								/>
 							</Button>
-									{/* Indicateur de statut élégant */}
+							{/* Indicateur de statut élégant */}
 							{meditationMode && (
-								<div className="absolute -top-1 -right-1 size-4 bg-gradient-to-br from-orange-200 to-orange-400 rounded-full border-2 border-white shadow-sm">
-									<div className="size-full bg-gradient-to-br from-orange-100 to-orange-300 rounded-full animate-pulse opacity-75"></div>
+								<div className="-top-1 -right-1 absolute size-4 rounded-full border-2 border-white bg-gradient-to-br from-orange-200 to-orange-400 shadow-sm">
+									<div className="size-full animate-pulse rounded-full bg-gradient-to-br from-orange-100 to-orange-300 opacity-75"></div>
 								</div>
 							)}
-									{/* Tooltip personnalisé qui apparaît au hover */}
-							<div className={cn(
-								"absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-700 text-white text-sm rounded-lg transition-all duration-200 whitespace-nowrap shadow-lg",
-								"before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-4 before:border-transparent before:border-t-gray-700",
-								"opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transform group-hover:-translate-y-1"
-							)}>
+							{/* Tooltip personnalisé qui apparaît au hover */}
+							<div
+								className={cn(
+									"-top-12 -translate-x-1/2 absolute left-1/2 whitespace-nowrap rounded-lg bg-gray-700 px-3 py-1.5 text-sm text-white shadow-lg transition-all duration-200",
+									"before:-translate-x-1/2 before:absolute before:top-full before:left-1/2 before:border-4 before:border-transparent before:border-t-gray-700",
+									"group-hover:-translate-y-1 pointer-events-none transform opacity-0 group-hover:pointer-events-auto group-hover:opacity-100",
+								)}
+							>
 								{meditationMode ? "Mode Chat" : "Mode Méditation"}
 							</div>
 						</div>
-
 						<form onSubmit={finalHandleSubmit} className="relative flex-1">
 							<Input
 								disabled={isLoading}
@@ -238,10 +283,10 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 								}}
 								onFocus={onChatFocus}
 								placeholder={
-									meditationMode 
-										? "Describe your meditation..." 
-										: messages.length === 0 
-											? "Ask Neiji" 
+									meditationMode
+										? "Describe your meditation..."
+										: messages.length === 0
+											? "Ask Neiji"
 											: "Message"
 								}
 								className="h-14 w-full rounded-full border-none bg-white pr-14 pl-5 text-base focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/50 md:text-md"
@@ -253,7 +298,7 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 								size="icon"
 								className="-translate-y-1/2 absolute top-1/2 right-1.5 z-10 size-11 rounded-full p-2 text-white transition-all duration-300"
 								style={{
-									backgroundColor: meditationMode ? '#f97316' : '#3b82f6',
+									backgroundColor: meditationMode ? "#f97316" : "#3b82f6",
 								}}
 							>
 								{isLoading ? (

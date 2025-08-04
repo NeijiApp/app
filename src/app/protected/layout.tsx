@@ -1,20 +1,20 @@
 /**
  * @fileoverview Layout de protection pour les pages authentifiées de l'application Neiji
- * 
+ *
  * Ce composant fournit un layout protégé qui vérifie l'authentification de l'utilisateur
  * avant d'afficher le contenu. Il inclut également une barre de navigation avec les
  * principales sections de l'application et un menu utilisateur avec déconnexion.
- * 
+ *
  * @component ProtectedLayout
  * @description Layout wrapper qui assure la protection par authentification
- * 
+ *
  * Fonctionnalités principales :
  * - Vérification automatique de l'authentification utilisateur
  * - Redirection vers login si non authentifié
  * - Navigation principale avec liens vers Dashboard, Chat et Ask
  * - Menu utilisateur avec email affiché et bouton de déconnexion
  * - Interface responsive avec affichage conditionnel sur mobile
- * 
+ *
  * @author Neiji Team
  * @version 1.0.0
  * @since 2025
@@ -22,14 +22,14 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "~/utils/supabase/client";
-import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { AnimatePresence, motion } from "framer-motion";
+import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createClient } from "~/utils/supabase/client";
 
 /**
  * Interface pour les props du ProtectedLayout
@@ -42,14 +42,12 @@ interface ProtectedLayoutProps {
  * Composant de layout pour l'espace protégé
  * Gère l'authentification et fournit la structure de navigation
  */
-export default function ProtectedLayout({
-	children,
-}: ProtectedLayoutProps) {
+export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
 	// États pour gérer l'utilisateur et le chargement
 	const [user, setUser] = useState<User | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-	
+
 	// Hooks pour la navigation et l'authentification
 	const router = useRouter();
 	const supabase = createClient();
@@ -58,16 +56,16 @@ export default function ProtectedLayout({
 		 * Vérifie l'authentification de l'utilisateur
 		 * Redirige vers la page de connexion si non authentifié
 		 * Bypass pour développeurs en mode développement
-		 */		
+		 */
 		const getUser = async () => {
 			// Bypass pour développeurs en mode développement
-			if (process.env.NODE_ENV === 'development') {
+			if (process.env.NODE_ENV === "development") {
 				// Vous pouvez créer un utilisateur mockup pour le développement
-				const isDeveloper = localStorage.getItem('neiji_dev_mode') === 'true';
+				const isDeveloper = localStorage.getItem("neiji_dev_mode") === "true";
 				if (isDeveloper) {
 					setUser({
-						id: 'dev-user',
-						email: 'dev@neiji.com',
+						id: "dev-user",
+						email: "dev@neiji.com",
 						// ...autres propriétés mockées
 					} as User);
 					setLoading(false);
@@ -76,8 +74,10 @@ export default function ProtectedLayout({
 			}
 
 			// Récupération des données utilisateur depuis Supabase
-			const { data: { user } } = await supabase.auth.getUser();
-			
+			const {
+				data: { user },
+			} = await supabase.auth.getUser();
+
 			// Redirection si utilisateur non authentifié - utilise notre système d'auth conversationnel
 			if (!user) {
 				router.push("/auth");
@@ -89,7 +89,7 @@ export default function ProtectedLayout({
 		};
 
 		getUser();
-	}, [router, supabase]);	/**
+	}, [router, supabase]); /**
 	 * Gère la déconnexion de l'utilisateur
 	 * Supprime la session et redirige vers la page d'accueil
 	 */
@@ -116,7 +116,8 @@ export default function ProtectedLayout({
 				<div className="text-lg">Chargement...</div>
 			</div>
 		);
-	}	return (
+	}
+	return (
 		<div className="min-h-screen">
 			<header className="fixed z-50 w-full bg-white/90 backdrop-blur-md">
 				<nav className="flex h-30 items-center justify-between px-10">
@@ -138,7 +139,6 @@ export default function ProtectedLayout({
 							<span className="font-bold text-4xl text-orange-500">Neiji</span>
 						</a>
 					</div>
-
 					{/* Mobile Version */}
 					<div className="flex w-full items-center justify-between md:hidden">
 						<button
@@ -172,7 +172,8 @@ export default function ProtectedLayout({
 
 						{/* Empty div to maintain spacing */}
 						<div className="w-8" />
-					</div>					{/* Desktop Navigation Links */}
+					</div>{" "}
+					{/* Desktop Navigation Links */}
 					<div className="hidden space-x-8 md:flex">
 						<Link
 							href="/protected"
@@ -185,7 +186,8 @@ export default function ProtectedLayout({
 							className="text-gray-600 hover:text-orange-500"
 						>
 							Chat
-						</Link>						<Link
+						</Link>{" "}
+						<Link
 							href="/protected/profile"
 							className="text-gray-600 hover:text-orange-500"
 						>
@@ -199,7 +201,6 @@ export default function ProtectedLayout({
 							Déconnexion
 						</button>
 					</div>
-
 					{/* Mobile Menu */}
 					<AnimatePresence>
 						{isMenuOpen && (
@@ -209,7 +210,9 @@ export default function ProtectedLayout({
 								exit={{ opacity: 0, y: -10 }}
 								transition={{ duration: 0.3 }}
 								className="fixed top-24 right-0 left-0 z-50 mx-4 space-y-3 rounded-xl bg-white px-4 pb-6 shadow-md md:hidden"
-							>								<Link
+							>
+								{" "}
+								<Link
 									href="/protected"
 									onClick={() => setIsMenuOpen(false)}
 									className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"
@@ -222,7 +225,8 @@ export default function ProtectedLayout({
 									className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"
 								>
 									Chat
-								</Link>								<Link
+								</Link>{" "}
+								<Link
 									href="/protected/profile"
 									onClick={() => setIsMenuOpen(false)}
 									className="block font-medium text-gray-800 transition-colors duration-200 hover:text-orange-500"

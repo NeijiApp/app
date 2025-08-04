@@ -15,25 +15,30 @@ import { AuthInput } from "./_components/auth-input";
 function AuthLogic() {
 	const router = useRouter();
 	const supabase = createClient();
-		const [authStep, setAuthStep] = useState<'welcome' | 'email' | 'password' | 'signup' | 'email-sent'>('welcome');
+	const [authStep, setAuthStep] = useState<
+		"welcome" | "email" | "password" | "signup" | "email-sent"
+	>("welcome");
 	const [authData, setAuthData] = useState({
-		email: '',
-		password: '',
-		isExistingUser: false
+		email: "",
+		password: "",
+		isExistingUser: false,
 	});
 	const [isLoading, setIsLoading] = useState(false);
-	
+
 	// Messages d'authentification (équivalent à allMessages)
-	const [authMessages, setAuthMessages] = useState<Array<{
-		id: string;
-		role: 'user' | 'assistant';
-		content: string;
-	}>>([
+	const [authMessages, setAuthMessages] = useState<
+		Array<{
+			id: string;
+			role: "user" | "assistant";
+			content: string;
+		}>
+	>([
 		{
-			id: 'auth-welcome',
-			role: 'assistant' as const,
-			content: 'Bonjour ! Je suis Neiji, votre assistant de méditation. Pour accéder à toutes les fonctionnalités, souhaitez-vous vous connecter ?'
-		}
+			id: "auth-welcome",
+			role: "assistant" as const,
+			content:
+				"Bonjour ! Je suis Neiji, votre assistant de méditation. Pour accéder à toutes les fonctionnalités, souhaitez-vous vous connecter ?",
+		},
 	]);
 
 	// Auto-scroll (même logique que le chat)
@@ -60,55 +65,90 @@ function AuthLogic() {
 		};
 	}, [isLoading]);
 
-	const addMessage = (role: 'user' | 'assistant', content: string) => {
+	const addMessage = (role: "user" | "assistant", content: string) => {
 		const newMessage = {
 			id: `auth-${Date.now()}-${Math.random()}`,
 			role,
-			content
+			content,
 		};
 		setAuthMessages((prev) => [...prev, newMessage]);
 		return newMessage;
-	};	// Fonction pour détecter si l'utilisateur veut se connecter
+	}; // Fonction pour détecter si l'utilisateur veut se connecter
 	const detectPositiveResponse = (input: string): boolean => {
 		const normalizedInput = input.toLowerCase().trim();
-		console.log('✅ === DEBUG DETECTION POSITIVE ===');
-		console.log('✅ Input reçu:', `"${input}"`);
-		console.log('✅ Input normalisé:', `"${normalizedInput}"`);
-		
+		console.log("✅ === DEBUG DETECTION POSITIVE ===");
+		console.log("✅ Input reçu:", `"${input}"`);
+		console.log("✅ Input normalisé:", `"${normalizedInput}"`);
+
 		// Test le plus simple d'abord - juste "oui"
-		if (normalizedInput === 'oui') {
+		if (normalizedInput === "oui") {
 			console.log('✅ ✨ MATCH DIRECT "oui" trouvé !');
 			return true;
 		}
-		
+
 		// Tests individuels pour debug
-		if (normalizedInput === 'ouais') {
+		if (normalizedInput === "ouais") {
 			console.log('✅ ✨ MATCH DIRECT "ouais" trouvé !');
 			return true;
 		}
-		
-		if (normalizedInput === 'ouai') {
+
+		if (normalizedInput === "ouai") {
 			console.log('✅ ✨ MATCH DIRECT "ouai" trouvé !');
 			return true;
 		}
-		
+
 		// Variantes de "oui" en français (sans les mots ambigus)
 		const positiveVariants = [
-			'ui', 'oiu', 'ouaip', 'ok', 'okay', 'okey',
-			'yes', 'yep', 'yeah', 'yess', 'ye', 'bien', 'parfait',
-			'daccord', "d'accord", 'dacord', 'vas-y', 'vas y', 'go', 'gogogo',
-			'connect', 'connexion', 'connecter', 'login', 'signin', 'sign in',
-			'connecte', 'connecté', 'je veux', 'jveux', 'allons-y', 'allez',
-			'bien sur', 'bien sûr', 'evidemment', 'évidemment', 'of course',
-			'pourquoi pas', 'why not', 'avec plaisir', 'volontiers', 'banco'
+			"ui",
+			"oiu",
+			"ouaip",
+			"ok",
+			"okay",
+			"okey",
+			"yes",
+			"yep",
+			"yeah",
+			"yess",
+			"ye",
+			"bien",
+			"parfait",
+			"daccord",
+			"d'accord",
+			"dacord",
+			"vas-y",
+			"vas y",
+			"go",
+			"gogogo",
+			"connect",
+			"connexion",
+			"connecter",
+			"login",
+			"signin",
+			"sign in",
+			"connecte",
+			"connecté",
+			"je veux",
+			"jveux",
+			"allons-y",
+			"allez",
+			"bien sur",
+			"bien sûr",
+			"evidemment",
+			"évidemment",
+			"of course",
+			"pourquoi pas",
+			"why not",
+			"avec plaisir",
+			"volontiers",
+			"banco",
 		];
 
-		console.log('✅ Test des variantes...');
-		
+		console.log("✅ Test des variantes...");
+
 		// Vérifier si l'input correspond à une variante
 		for (const variant of positiveVariants) {
 			console.log(`✅ Test variant: "${variant}" vs "${normalizedInput}"`);
-			
+
 			if (normalizedInput === variant) {
 				console.log(`✅ ✨ MATCH EXACT trouvé: "${variant}"`);
 				return true;
@@ -123,40 +163,79 @@ function AuthLogic() {
 				return true;
 			}
 		}
-		
-		console.log('✅ ❌ Aucun match positif trouvé');
-		console.log('✅ === FIN DEBUG DETECTION POSITIVE ===');
+
+		console.log("✅ ❌ Aucun match positif trouvé");
+		console.log("✅ === FIN DEBUG DETECTION POSITIVE ===");
 		return false;
-	};// Fonction pour détecter si l'utilisateur refuse de se connecter
+	}; // Fonction pour détecter si l'utilisateur refuse de se connecter
 	const detectNegativeResponse = (input: string): boolean => {
 		const normalizedInput = input.toLowerCase().trim();
-		console.log('🚫 === DEBUG DETECTION NEGATIVE ===');
-		console.log('🚫 Input reçu:', `"${input}"`);
-		console.log('🚫 Input normalisé:', `"${normalizedInput}"`);
-		
+		console.log("🚫 === DEBUG DETECTION NEGATIVE ===");
+		console.log("🚫 Input reçu:", `"${input}"`);
+		console.log("🚫 Input normalisé:", `"${normalizedInput}"`);
+
 		// Test le plus simple d'abord - juste "non"
-		if (normalizedInput === 'non') {
+		if (normalizedInput === "non") {
 			console.log('🚫 ✨ MATCH DIRECT "non" trouvé !');
 			return true;
 		}
-		
+
 		// Variantes de "non" en français et anglais - vérification stricte d'abord
 		const negativeVariants = [
-			'no', 'nop', 'nope', 'nn', 'nah', 'nan', 'naan', 'niet', 'nein',
-			'pas', 'jamais', 'never', 'pas question', 'hors de question', 'aucun',
-			'refuse', 'refus', 'decline', 'skip', 'passer', 'plus tard',
-			'later', 'not now', 'pas maintenant', 'pas envie', 'bof', 'mouais',
-			'non merci', 'no thanks', 'no thank you', 'ça va', 'ca va', 'ça ira',
-			'leave', 'quit', 'exit', 'sortir', 'partir', 'retour', 'back',
-			'annuler', 'cancel', 'abort', 'stop', 'arrêt', 'arret'
+			"no",
+			"nop",
+			"nope",
+			"nn",
+			"nah",
+			"nan",
+			"naan",
+			"niet",
+			"nein",
+			"pas",
+			"jamais",
+			"never",
+			"pas question",
+			"hors de question",
+			"aucun",
+			"refuse",
+			"refus",
+			"decline",
+			"skip",
+			"passer",
+			"plus tard",
+			"later",
+			"not now",
+			"pas maintenant",
+			"pas envie",
+			"bof",
+			"mouais",
+			"non merci",
+			"no thanks",
+			"no thank you",
+			"ça va",
+			"ca va",
+			"ça ira",
+			"leave",
+			"quit",
+			"exit",
+			"sortir",
+			"partir",
+			"retour",
+			"back",
+			"annuler",
+			"cancel",
+			"abort",
+			"stop",
+			"arrêt",
+			"arret",
 		];
 
-		console.log('🚫 Test des variantes...');
+		console.log("🚫 Test des variantes...");
 
 		// Test strict d'abord (correspondance exacte et inclusion)
 		for (const variant of negativeVariants) {
 			console.log(`🚫 Test variant: "${variant}" vs "${normalizedInput}"`);
-			
+
 			if (normalizedInput === variant) {
 				console.log(`🚫 ✨ MATCH EXACT trouvé: "${variant}"`);
 				return true;
@@ -168,34 +247,35 @@ function AuthLogic() {
 		}
 
 		// Puis test avec Levenshtein seulement pour les mots longs
-		console.log('🚫 Test fuzzy matching...');
+		console.log("🚫 Test fuzzy matching...");
 		for (const variant of negativeVariants) {
 			if (variant.length > 3 && isCloseMatch(normalizedInput, variant)) {
 				console.log(`🚫 ✨ MATCH FUZZY trouvé: "${variant}"`);
 				return true;
 			}
 		}
-		
-		console.log('🚫 ❌ Aucun match négatif trouvé');
-		console.log('🚫 === FIN DEBUG DETECTION NEGATIVE ===');
+
+		console.log("🚫 ❌ Aucun match négatif trouvé");
+		console.log("🚫 === FIN DEBUG DETECTION NEGATIVE ===");
 		return false;
 	};
 
 	// Fonction simple pour détecter les fautes de frappe (distance de 1-2 caractères)
 	const isCloseMatch = (input: string, target: string): boolean => {
 		if (Math.abs(input.length - target.length) > 2) return false;
-		
+
 		const shorter = input.length < target.length ? input : target;
 		const longer = input.length >= target.length ? input : target;
-		
+
 		let differences = 0;
-		let i = 0, j = 0;
-		
+		let i = 0,
+			j = 0;
+
 		while (i < shorter.length && j < longer.length) {
 			if (shorter[i] !== longer[j]) {
 				differences++;
 				if (differences > 2) return false;
-				
+
 				// Essayer de sauter un caractère dans la chaîne plus longue
 				if (i + 1 < shorter.length && shorter[i + 1] === longer[j]) {
 					i++;
@@ -210,36 +290,34 @@ function AuthLogic() {
 				j++;
 			}
 		}
-				differences += Math.abs(longer.length - shorter.length);
+		differences += Math.abs(longer.length - shorter.length);
 		return differences <= 2;
 	};
 
 	/**
 	 * Crée un profil utilisateur dans la table users_table
 	 * Initialise les champs de mémoire IA pour le nouveau utilisateur
-	 * 
+	 *
 	 * @param email - Email de l'utilisateur pour lequel créer le profil
 	 * @returns Promise<void>
-	 */	const createUserProfile = async (email: string) => {
+	 */ const createUserProfile = async (email: string) => {
 		try {
-			console.log('🔄 Création du profil utilisateur pour:', email);
+			console.log("🔄 Création du profil utilisateur pour:", email);
 			// Insertion du profil utilisateur avec les champs de mémoire IA initialisés
-			const { error } = await supabase
-				.from("users_table")
-				.insert([
-					{
-						email,
-						memory_L0: "", // Mémoire immédiate
-						memory_L1: "", // Mémoire court terme
-						memory_L2: "", // Mémoire long terme
-						questionnaire: {}, // Profil de personnalité pour l'entraînement de l'IA (objet JSON vide)
-					},
-				]);
+			const { error } = await supabase.from("users_table").insert([
+				{
+					email,
+					memory_L0: "", // Mémoire immédiate
+					memory_L1: "", // Mémoire court terme
+					memory_L2: "", // Mémoire long terme
+					questionnaire: {}, // Profil de personnalité pour l'entraînement de l'IA (objet JSON vide)
+				},
+			]);
 
 			if (error) {
 				console.error("❌ Erreur lors de la création du profil:", error);
 			} else {
-				console.log('✅ Profil utilisateur créé avec succès pour:', email);
+				console.log("✅ Profil utilisateur créé avec succès pour:", email);
 			}
 		} catch (err) {
 			console.error("❌ Erreur:", err);
@@ -247,153 +325,221 @@ function AuthLogic() {
 	};
 	const handleUserInput = async (input: string) => {
 		// Ajouter le message utilisateur (masquer le mot de passe dans le chat)
-		const displayText = (authStep === 'password' || authStep === 'signup') 
-			? '•'.repeat(input.length) 
-			: input;
-		addMessage('user', displayText);
+		const displayText =
+			authStep === "password" || authStep === "signup"
+				? "•".repeat(input.length)
+				: input;
+		addMessage("user", displayText);
 		setIsLoading(true);
 
 		// Debug ultra-détaillé
-		console.log('🔍 === DEBUT DEBUG COMPLET ===');
-		console.log('🔍 Input brut reçu:', input);
-		console.log('🔍 Type de input:', typeof input);
-		console.log('🔍 Longueur input:', input.length);
-		console.log('🔍 Input avec caractères visibles:', JSON.stringify(input));
-		console.log('🔍 AuthStep actuel:', authStep);
-		
+		console.log("🔍 === DEBUT DEBUG COMPLET ===");
+		console.log("🔍 Input brut reçu:", input);
+		console.log("🔍 Type de input:", typeof input);
+		console.log("🔍 Longueur input:", input.length);
+		console.log("🔍 Input avec caractères visibles:", JSON.stringify(input));
+		console.log("🔍 AuthStep actuel:", authStep);
+
 		const normalizedInput = input.toLowerCase().trim();
-		console.log('🔍 Input après normalisation:', JSON.stringify(normalizedInput));
-		console.log('🔍 Longueur après normalisation:', normalizedInput.length);
-		
+		console.log(
+			"🔍 Input après normalisation:",
+			JSON.stringify(normalizedInput),
+		);
+		console.log("🔍 Longueur après normalisation:", normalizedInput.length);
+
 		// Tests directs
-		console.log('🔍 === TESTS DIRECTS ===');
-		console.log('🔍 Test "oui":', normalizedInput === 'oui');
-		console.log('🔍 Test "ouais":', normalizedInput === 'ouais');
-		console.log('🔍 Test "ouai":', normalizedInput === 'ouai');
-		console.log('🔍 Test "yes":', normalizedInput === 'yes');
-		console.log('🔍 Test "non":', normalizedInput === 'non');
-		
+		console.log("🔍 === TESTS DIRECTS ===");
+		console.log('🔍 Test "oui":', normalizedInput === "oui");
+		console.log('🔍 Test "ouais":', normalizedInput === "ouais");
+		console.log('🔍 Test "ouai":', normalizedInput === "ouai");
+		console.log('🔍 Test "yes":', normalizedInput === "yes");
+		console.log('🔍 Test "non":', normalizedInput === "non");
+
 		const isPositive = detectPositiveResponse(input);
 		const isNegative = detectNegativeResponse(input);
-		
-		console.log('🔍 === RESULTATS FINAUX ===');
-		console.log('🔍 Résultat détection positive:', isPositive);
-		console.log('🔍 Résultat détection négative:', isNegative);
-		console.log('🔍 === FIN DEBUG COMPLET ===');
-		
+
+		console.log("🔍 === RESULTATS FINAUX ===");
+		console.log("🔍 Résultat détection positive:", isPositive);
+		console.log("🔍 Résultat détection négative:", isNegative);
+		console.log("🔍 === FIN DEBUG COMPLET ===");
+
 		try {
-			if (authStep === 'welcome') {
+			if (authStep === "welcome") {
 				// Tests ultra-simples en premier
-				if (normalizedInput === 'non') {
-					console.log('🎯 DETECTION DIRECTE: "non" trouvé - redirection immédiate');
-					addMessage('assistant', 'Très bien ! Je vous redirige vers le chat principal. À bientôt ! 👋');
+				if (normalizedInput === "non") {
+					console.log(
+						'🎯 DETECTION DIRECTE: "non" trouvé - redirection immédiate',
+					);
+					addMessage(
+						"assistant",
+						"Très bien ! Je vous redirige vers le chat principal. À bientôt ! 👋",
+					);
 					setTimeout(() => {
-						router.push('/chat');
+						router.push("/chat");
 					}, 2000);
 					return;
 				}
-				
-				if (normalizedInput === 'oui' || normalizedInput === 'ouais' || normalizedInput === 'ouai') {
-					console.log('🎯 DETECTION DIRECTE: réponse positive trouvée - passage à email');
-					addMessage('assistant', 'Parfait ! Quelle est votre adresse email ?');
-					setAuthStep('email');
+
+				if (
+					normalizedInput === "oui" ||
+					normalizedInput === "ouais" ||
+					normalizedInput === "ouai"
+				) {
+					console.log(
+						"🎯 DETECTION DIRECTE: réponse positive trouvée - passage à email",
+					);
+					addMessage("assistant", "Parfait ! Quelle est votre adresse email ?");
+					setAuthStep("email");
 					return;
 				}
-				
+
 				// Puis les détections normales
 				if (isNegative) {
-					console.log('✅ NEGATIVE détecté par fonction - redirection vers chat');
-					addMessage('assistant', 'Très bien ! Je vous redirige vers le chat principal. À bientôt ! 👋');
+					console.log(
+						"✅ NEGATIVE détecté par fonction - redirection vers chat",
+					);
+					addMessage(
+						"assistant",
+						"Très bien ! Je vous redirige vers le chat principal. À bientôt ! 👋",
+					);
 					setTimeout(() => {
-						router.push('/chat');
+						router.push("/chat");
 					}, 2000);
 					return;
 				} else if (isPositive) {
-					console.log('✅ POSITIVE détecté par fonction - passage à email');
-					addMessage('assistant', 'Parfait ! Quelle est votre adresse email ?');
-					setAuthStep('email');
+					console.log("✅ POSITIVE détecté par fonction - passage à email");
+					addMessage("assistant", "Parfait ! Quelle est votre adresse email ?");
+					setAuthStep("email");
 				} else {
-					console.log('❓ NEITHER détecté - demande clarification');
-					addMessage('assistant', 'Je n\'ai pas bien compris votre réponse. Souhaitez-vous vous connecter ? Répondez par "oui" pour vous connecter ou "non" pour continuer en mode invité.');
-				}			}else if (authStep === 'email') {
+					console.log("❓ NEITHER détecté - demande clarification");
+					addMessage(
+						"assistant",
+						'Je n\'ai pas bien compris votre réponse. Souhaitez-vous vous connecter ? Répondez par "oui" pour vous connecter ou "non" pour continuer en mode invité.',
+					);
+				}
+			} else if (authStep === "email") {
 				const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 				if (!emailRegex.test(input)) {
-					addMessage('assistant', 'Hmm, cet email ne semble pas valide. Pouvez-vous le retaper ? (exemple: nom@exemple.com)');
+					addMessage(
+						"assistant",
+						"Hmm, cet email ne semble pas valide. Pouvez-vous le retaper ? (exemple: nom@exemple.com)",
+					);
 					return;
-				}				setAuthData(prev => ({ ...prev, email: input }));
+				}
+				setAuthData((prev) => ({ ...prev, email: input }));
 
 				// Vérifier si l'utilisateur existe dans la table users_table
-				console.log('🔍 Recherche utilisateur pour email:', input);
+				console.log("🔍 Recherche utilisateur pour email:", input);
 				const { data: existingUser, error: dbError } = await supabase
-					.from('users_table')
-					.select('email')
-					.eq('email', input)
+					.from("users_table")
+					.select("email")
+					.eq("email", input)
 					.single();
 
-				console.log('🔍 Résultat recherche:', { existingUser, dbError });
+				console.log("🔍 Résultat recherche:", { existingUser, dbError });
 
 				if (existingUser) {
 					// Utilisateur existant trouvé dans la base de données
-					console.log('✅ Utilisateur existant trouvé');
-					setAuthData(prev => ({ ...prev, isExistingUser: true }));
-					addMessage('assistant', `Bonjour ! Je vous reconnais. Quel est votre mot de passe ?`);
-					setAuthStep('password');
+					console.log("✅ Utilisateur existant trouvé");
+					setAuthData((prev) => ({ ...prev, isExistingUser: true }));
+					addMessage(
+						"assistant",
+						`Bonjour ! Je vous reconnais. Quel est votre mot de passe ?`,
+					);
+					setAuthStep("password");
 				} else {
 					// Utilisateur non trouvé dans la base de données
-					console.log('❌ Utilisateur non trouvé, création d\'un nouveau compte');
-					setAuthData(prev => ({ ...prev, isExistingUser: false }));
-					addMessage('assistant', `Je ne vous connais pas encore ! Créons votre compte. Choisissez un mot de passe sécurisé (au moins 8 caractères avec lettres et chiffres).`);
-					setAuthStep('signup');
+					console.log(
+						"❌ Utilisateur non trouvé, création d'un nouveau compte",
+					);
+					setAuthData((prev) => ({ ...prev, isExistingUser: false }));
+					addMessage(
+						"assistant",
+						`Je ne vous connais pas encore ! Créons votre compte. Choisissez un mot de passe sécurisé (au moins 8 caractères avec lettres et chiffres).`,
+					);
+					setAuthStep("signup");
 				}
-			} else if (authStep === 'password') {
+			} else if (authStep === "password") {
 				const { error } = await supabase.auth.signInWithPassword({
 					email: authData.email,
-					password: input
+					password: input,
 				});
 
 				if (error) {
-					addMessage('assistant', 'Oups ! Ce mot de passe ne correspond pas. Pouvez-vous réessayer ?');
+					addMessage(
+						"assistant",
+						"Oups ! Ce mot de passe ne correspond pas. Pouvez-vous réessayer ?",
+					);
 				} else {
-					addMessage('assistant', 'Parfait ! Connexion réussie. Bienvenue dans votre espace personnel ! 🎉');
+					addMessage(
+						"assistant",
+						"Parfait ! Connexion réussie. Bienvenue dans votre espace personnel ! 🎉",
+					);
 					setTimeout(() => {
-						router.push('/protected/chat');
+						router.push("/protected/chat");
 					}, 2000);
-				}			} else if (authStep === 'signup') {
+				}
+			} else if (authStep === "signup") {
 				if (input.length < 8) {
-					addMessage('assistant', 'Ce mot de passe est trop court. Il doit contenir au moins 8 caractères. Essayez encore !');
+					addMessage(
+						"assistant",
+						"Ce mot de passe est trop court. Il doit contenir au moins 8 caractères. Essayez encore !",
+					);
 					return;
 				}
 				if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(input)) {
-					addMessage('assistant', 'Votre mot de passe doit contenir à la fois des lettres et des chiffres pour plus de sécurité. Réessayez !');
+					addMessage(
+						"assistant",
+						"Votre mot de passe doit contenir à la fois des lettres et des chiffres pour plus de sécurité. Réessayez !",
+					);
 					return;
 				}
-				
+
 				const { error } = await supabase.auth.signUp({
 					email: authData.email,
-					password: input
+					password: input,
 				});
-				
+
 				if (error) {
-					addMessage('assistant', `Désolé, il y a eu un problème : ${error.message}. Pouvez-vous réessayer ?`);				} else {
+					addMessage(
+						"assistant",
+						`Désolé, il y a eu un problème : ${error.message}. Pouvez-vous réessayer ?`,
+					);
+				} else {
 					// Créer le profil utilisateur dans la table users_table
-					console.log('✅ Inscription réussie, création du profil pour:', authData.email);
+					console.log(
+						"✅ Inscription réussie, création du profil pour:",
+						authData.email,
+					);
 					await createUserProfile(authData.email);
-					
+
 					// Passer à l'état "email envoyé"
-					setAuthStep('email-sent');
-					
+					setAuthStep("email-sent");
+
 					// Message pour demander de vérifier l'email
-					addMessage('assistant', 'Parfait ! Votre compte a été créé avec succès ! 🎉');
+					addMessage(
+						"assistant",
+						"Parfait ! Votre compte a été créé avec succès ! 🎉",
+					);
 					setTimeout(() => {
-						addMessage('assistant', `Un email de confirmation a été envoyé à ${authData.email}. Veuillez cliquer sur le lien dans l'email pour activer votre compte et accéder au chat ! 📧`);
+						addMessage(
+							"assistant",
+							`Un email de confirmation a été envoyé à ${authData.email}. Veuillez cliquer sur le lien dans l'email pour activer votre compte et accéder au chat ! 📧`,
+						);
 					}, 1500);
 					setTimeout(() => {
-						addMessage('assistant', 'Une fois votre email confirmé, vous pourrez profiter de toutes les fonctionnalités de méditation personnalisées ! ✨');
+						addMessage(
+							"assistant",
+							"Une fois votre email confirmé, vous pourrez profiter de toutes les fonctionnalités de méditation personnalisées ! ✨",
+						);
 					}, 3000);
 				}
 			}
 		} catch (error) {
-			addMessage('assistant', 'Oups ! Il y a eu un petit problème technique. Pouvez-vous réessayer ?');
+			addMessage(
+				"assistant",
+				"Oups ! Il y a eu un petit problème technique. Pouvez-vous réessayer ?",
+			);
 		} finally {
 			setIsLoading(false);
 		}
@@ -426,23 +572,27 @@ function AuthLogic() {
 						}
 
 						return <BotMessage key={message.id} message={message} />;
-					})				)}
+					})
+				)}
 			</div>
-			
+
 			{/* Message d'aide pour l'email de confirmation */}
-			{authStep === 'email-sent' && (
+			{authStep === "email-sent" && (
 				<div className="container mx-auto px-4 pb-4">
-					<div className="bg-orange-100 border border-orange-200 rounded-lg p-4 text-center">
+					<div className="rounded-lg border border-orange-200 bg-orange-100 p-4 text-center">
 						<p className="text-orange-800 text-sm">
-							Vous n'avez pas reçu l'email ? Vérifiez vos spams ou{' '}
-							<button 
+							Vous n'avez pas reçu l'email ? Vérifiez vos spams ou{" "}
+							<button
 								onClick={async () => {
 									const { error } = await supabase.auth.resend({
-										type: 'signup',
-										email: authData.email
+										type: "signup",
+										email: authData.email,
 									});
 									if (!error) {
-										addMessage('assistant', 'Email de confirmation renvoyé ! 📧');
+										addMessage(
+											"assistant",
+											"Email de confirmation renvoyé ! 📧",
+										);
 									}
 								}}
 								className="text-orange-600 underline hover:text-orange-700"
@@ -453,19 +603,24 @@ function AuthLogic() {
 					</div>
 				</div>
 			)}
-			
-					{/* AuthInput remplace ChatInput */}
+
+			{/* AuthInput remplace ChatInput */}
 			<AuthInput
 				onSend={handleUserInput}
-				disabled={isLoading || authStep === 'email-sent'}
-				isPassword={authStep === 'password' || authStep === 'signup'}
+				disabled={isLoading || authStep === "email-sent"}
+				isPassword={authStep === "password" || authStep === "signup"}
 				placeholder={
-					authStep === 'welcome' ? "Tapez 'oui' pour vous connecter..." :
-					authStep === 'email' ? "Votre adresse email..." :
-					authStep === 'password' ? "Votre mot de passe..." :
-					authStep === 'signup' ? "Choisissez un mot de passe..." :
-					authStep === 'email-sent' ? "Vérifiez vos emails pour continuer..." :
-					"Tapez votre message..."
+					authStep === "welcome"
+						? "Tapez 'oui' pour vous connecter..."
+						: authStep === "email"
+							? "Votre adresse email..."
+							: authStep === "password"
+								? "Votre mot de passe..."
+								: authStep === "signup"
+									? "Choisissez un mot de passe..."
+									: authStep === "email-sent"
+										? "Vérifiez vos emails pour continuer..."
+										: "Tapez votre message..."
 				}
 				onFocus={() => {
 					if (authMessages.length === 1) {

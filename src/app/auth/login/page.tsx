@@ -1,16 +1,16 @@
 /**
  * Page de connexion pour l'authentification des utilisateurs
- * 
+ *
  * Cette page permet aux utilisateurs existants de se connecter à leur compte
  * en utilisant leur email et mot de passe. Après une connexion réussie,
  * l'utilisateur est redirigé vers l'espace protégé de l'application.
- * 
+ *
  * Fonctionnalités :
  * - Formulaire de connexion avec validation
  * - Gestion des erreurs d'authentification
  * - Redirection automatique après connexion
  * - Lien vers la page d'inscription
- * 
+ *
  * @component
  * @example
  * // Utilisé automatiquement par Next.js pour la route /auth/login
@@ -18,11 +18,11 @@
  */
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createClient } from "~/utils/supabase/client";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { useRouter } from "next/navigation";
+import { createClient } from "~/utils/supabase/client";
 
 /**
  * Composant de page de connexion
@@ -35,14 +35,14 @@ export default function LoginPage() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [emailError, setEmailError] = useState("");
-	
+
 	// Hooks pour la navigation et l'authentification
 	const router = useRouter();
 	const supabase = createClient();
 
 	/**
 	 * Valide le format de l'email
-	 * 
+	 *
 	 * @param email - Email à valider
 	 * @returns string - Message d'erreur ou chaîne vide si valide
 	 */
@@ -59,7 +59,7 @@ export default function LoginPage() {
 
 	/**
 	 * Gère le changement d'email avec validation en temps réel
-	 * 
+	 *
 	 * @param value - Nouvelle valeur de l'email
 	 */
 	const handleEmailChange = (value: string) => {
@@ -69,10 +69,10 @@ export default function LoginPage() {
 
 	/**
 	 * Gère la soumission du formulaire de connexion
-	 * 
+	 *
 	 * @param e - Événement de soumission du formulaire
 	 * @returns Promise<void>
-	 */	const handleLogin = async (e: React.FormEvent) => {
+	 */ const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsLoading(true);
 		setError("");
@@ -108,8 +108,8 @@ export default function LoginPage() {
 	return (
 		<div className="flex min-h-screen items-center justify-center">
 			<div className="w-full max-w-md space-y-6 rounded-lg border p-6">
-				<h1 className="text-center text-2xl font-bold">Connexion</h1>
-						<form onSubmit={handleLogin} className="space-y-4">
+				<h1 className="text-center font-bold text-2xl">Connexion</h1>
+				<form onSubmit={handleLogin} className="space-y-4">
 					<div>
 						<Input
 							type="email"
@@ -119,10 +119,10 @@ export default function LoginPage() {
 							required
 						/>
 						{emailError && (
-							<div className="text-red-500 text-xs mt-1">{emailError}</div>
+							<div className="mt-1 text-red-500 text-xs">{emailError}</div>
 						)}
 					</div>
-					
+
 					<div>
 						<Input
 							type="password"
@@ -133,13 +133,11 @@ export default function LoginPage() {
 						/>
 					</div>
 
-					{error && (
-						<div className="text-red-500 text-sm">{error}</div>
-					)}
+					{error && <div className="text-red-500 text-sm">{error}</div>}
 
-					<Button 
-						type="submit" 
-						className="w-full" 
+					<Button
+						type="submit"
+						className="w-full"
 						disabled={isLoading || emailError !== ""}
 					>
 						{isLoading ? "Connexion..." : "Se connecter"}
