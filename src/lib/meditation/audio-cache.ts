@@ -30,6 +30,10 @@ export async function findCachedAudioSegment(
 	voiceId: string,
 	voiceStyle: string,
 ): Promise<SelectAudioSegmentsCache | null> {
+	// URGENT: Désactiver cache temporairement à cause de l'erreur pooler Supabase XX000
+	console.log("🚫 Cache temporairement désactivé - Erreur pooler Supabase (XX000)");
+	return null;
+	
 	// Désactiver temporairement le cache en production Vercel pour éviter SASL_SIGNATURE_MISMATCH
 	if (process.env.VERCEL === "1") {
 		console.log("🚫 Cache désactivé sur Vercel pour éviter les erreurs SASL");
@@ -113,6 +117,10 @@ export async function saveAudioSegmentToCache(
 	fileSize?: number,
 	language = "en-US",
 ): Promise<SelectAudioSegmentsCache | null> {
+	// URGENT: Désactiver cache temporairement à cause de l'erreur pooler Supabase XX000
+	console.log("🚫 Cache sauvegarde temporairement désactivé - Erreur pooler Supabase (XX000)");
+	return null;
+	
 	// Désactiver temporairement le cache en production Vercel pour éviter SASL_SIGNATURE_MISMATCH
 	if (process.env.VERCEL === "1") {
 		console.log(
@@ -296,6 +304,14 @@ export async function findBestCachedSegment(
 	similar: SimilaritySearchResult[];
 	recommendation: "use_exact" | "use_similar" | "create_new";
 }> {
+	// URGENT: Désactiver cache temporairement à cause de l'erreur pooler Supabase XX000
+	console.log("🚫 Recherche cache temporairement désactivée - Erreur pooler Supabase (XX000)");
+	return {
+		exact: null,
+		similar: [],
+		recommendation: "create_new",
+	};
+	
 	// Désactiver complètement toute recherche de cache sur Vercel pour éviter SASL_SIGNATURE_MISMATCH
 	if (process.env.VERCEL === "1") {
 		console.log(
