@@ -111,7 +111,7 @@ function Header() {
 						href="/auth/login"
 						className="text-gray-600 hover:text-orange-500"
 					>
-						Connexion
+						Sign In
 					</Link>
 				</div>
 				{/* Mobile Menu */}

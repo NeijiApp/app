@@ -129,7 +129,7 @@ export function AuthChat({
 					input.toLowerCase().includes("connect") ||
 					input.toLowerCase().includes("connexion")
 				) {
-					addMessage("assistant", "Parfait ! Quelle est votre adresse email ?");
+					addMessage("assistant", "Perfect! What is your email address?");
 					setAuthStep("email");
 				} else {
 					addMessage(

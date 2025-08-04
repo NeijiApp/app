@@ -556,7 +556,7 @@ function AuthLogic() {
 							height={120}
 						/>
 						<p className="mx-auto max-w-md px-4 text-lg text-muted-foreground">
-							Connexion à votre espace personnel Neiji
+							Sign in to your personal Neiji space
 						</p>
 					</div>
 				) : (
