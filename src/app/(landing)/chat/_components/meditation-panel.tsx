@@ -41,7 +41,7 @@ interface MeditationPanelProps {
 	toggleExpand: () => void;
 }
 
-const DURATION_OPTIONS = [0.5, 2, 3, 5, 7, 10];
+const DURATION_OPTIONS = [2, 3, 5, 7, 10, 15];
 const GENDER_OPTIONS = [
 	{
 		value: "female" as const,
@@ -208,7 +208,7 @@ export function MeditationPanel({
 			{/* Quick Actions: Duration & Goal */}
 			<div className="flex gap-2">
 				<div className="grid flex-1 grid-cols-3 gap-1.5">
-					{[0.5, 3, 10].map((duration) => (
+					{[3, 5, 10].map((duration) => (
 						<Tooltip key={duration} delayDuration={0}>
 							<TooltipTrigger asChild>
 								<Button
@@ -221,20 +221,13 @@ export function MeditationPanel({
 										params.duration === duration
 											? "bg-orange-500 text-white"
 											: "border-orange-300 text-orange-700",
-										duration === 0.5
-											? "border-red-300 bg-red-100 text-red-700 hover:bg-red-200"
-											: "",
 									)}
 								>
-									{duration === 0.5 ? "TEST" : `${duration}m`}
+									{duration}m
 								</Button>
 							</TooltipTrigger>
 							<TooltipContent>
-								<p>
-									{duration === 0.5
-										? "Test 30 secondes (temporaire)"
-										: `${duration} minutes`}
-								</p>
+								<p>{duration} minutes</p>
 							</TooltipContent>
 						</Tooltip>
 					))}
@@ -320,12 +313,9 @@ export function MeditationPanel({
 								params.duration === duration
 									? "bg-orange-500 text-white"
 									: "border-orange-300 text-orange-700",
-								duration === 0.5
-									? "border-red-300 bg-red-100 text-red-700 hover:bg-red-200"
-									: "",
 							)}
 						>
-							{duration === 0.5 ? "TEST" : `${duration}m`}
+							{duration}m
 						</Button>
 					))}
 				</div>

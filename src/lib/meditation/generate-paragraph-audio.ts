@@ -15,6 +15,7 @@ import {
 
 type GenerateParagrapheAudioProps = {
 	voice_id: string;
+	next_text?: string | undefined;
 	voice_style?: string;
 	voice_gender?: "male" | "female";
 };
@@ -23,15 +24,15 @@ const generateParagraphAudio = async (
 	paragraph: string,
 	{
 		voice_id,
+		next_text = ". With a calm and relaxing voice",
 		voice_style = "calm",
 		voice_gender,
 	}: GenerateParagrapheAudioProps,
 ) => {
 	// Ensure API key is present for audio generation
-	// Fallback to hardcoded key if env loading fails (Next.js environment issue)
-	const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY || "sk_ab9cf55c170f7c1a753d598cb11b40aad562c34c15ac9950";
+	const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 	if (!ELEVENLABS_API_KEY) {
-		throw new Error("ELEVENLABS_API_KEY not available");
+		throw new Error("The environment variable ELEVENLABS_API_KEY is not set");
 	}
 
 	// Déduire le genre de la voix à partir de l'ID si pas fourni
@@ -98,6 +99,7 @@ const generateParagraphAudio = async (
 		},
 		body: JSON.stringify({
 			text: paragraph,
+			next_text,
 			model_id: "eleven_turbo_v2_5", // Latest high-quality model with better naturalness
 			output_format: "mp3_44100_192", // Higher quality: 192kbps instead of 128kbps
 			voice_settings: {
