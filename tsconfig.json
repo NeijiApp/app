@@ -40,8 +40,10 @@
 	],
 	"exclude": [
 		"node_modules",
+		"archive/**/*",
 		"assembly-service/**/*",
 		"debug-scripts/**/*",
+		"docs/**/*",
 		"debug-conversation.js",
 		"clean-test-messages.js",
 		"check-tables.js",

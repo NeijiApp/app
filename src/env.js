@@ -15,6 +15,7 @@ export const env = createEnv({
 		ASSEMBLY_SERVICE_URL: z.string().url(),
 		ASSEMBLY_API_KEY: z.string().optional().default("dev-key-123"),
 		ASSEMBLY_TIMEOUT: z.string().optional().default("60000"),
+		SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
@@ -43,6 +44,7 @@ export const env = createEnv({
 		ASSEMBLY_SERVICE_URL: process.env.ASSEMBLY_SERVICE_URL,
 		ASSEMBLY_API_KEY: process.env.ASSEMBLY_API_KEY,
 		ASSEMBLY_TIMEOUT: process.env.ASSEMBLY_TIMEOUT,
+		SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
 		NODE_ENV: process.env.NODE_ENV,
 		NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 		NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
