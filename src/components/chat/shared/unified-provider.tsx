@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 import type * as React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { Message } from "ai";
+type UIMessage = Message;
 import { createClient } from "~/utils/supabase/client";
 import type { ExtendedMessage } from "./bot-message";
 import { conversationHistory } from "~/lib/conversation-history";
@@ -65,7 +66,7 @@ interface ChatStateProviderProps {
 	children: React.ReactNode;
 	isAuthenticated?: boolean;
 	userId?: string;
-	initialMessages?: UIMessage[];
+  initialMessages?: UIMessage[];
 }
 
 /**
