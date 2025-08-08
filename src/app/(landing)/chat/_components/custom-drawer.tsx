@@ -78,7 +78,8 @@ export function AskRegistrationDrawerContent({
 						className="border-orange-200 focus-visible:ring-orange-400"
 					/>
 					<Button
-						className="w-full bg-orange-400 text-white hover:bg-orange-500"
+						variant="orange"
+						className="w-full"
 						onClick={handleSubmitEmail}
 					>
 						Confirmer
@@ -95,16 +96,10 @@ export function AskRegistrationDrawerContent({
 				Veux-tu t'inscrire ?
 			</h2>
 			<div className="flex justify-center gap-4">
-				<Button
-					className="bg-orange-400 text-white hover:bg-orange-500"
-					onClick={handleYesClick}
-				>
+				<Button variant="orange" onClick={handleYesClick}>
 					Oui
 				</Button>
-				<Button
-					className="bg-orange-400 text-white hover:bg-orange-500"
-					onClick={handleNoClick}
-				>
+				<Button variant="orangeOutline" onClick={handleNoClick}>
 					Non
 				</Button>
 			</div>

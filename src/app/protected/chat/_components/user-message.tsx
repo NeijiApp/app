@@ -12,7 +12,7 @@ export function UserMessage({ children }: { children?: React.ReactNode }) {
 		return (
 				<div className="flex justify-end">
 						<div className={cn(
-								"max-w-xs break-all rounded-tl-xl rounded-tr-xl rounded-br-none rounded-bl-xl bg-white px-4 py-2 text-gray-800 shadow lg:max-w-md transition-opacity duration-500",
+								"max-w-xs break-words rounded-tl-xl rounded-tr-xl rounded-br-none rounded-bl-xl bg-white px-4 py-2 text-gray-800 shadow lg:max-w-md transition-opacity duration-500",
 								visible ? "opacity-100" : "opacity-0",
 						)}>
 								{children}

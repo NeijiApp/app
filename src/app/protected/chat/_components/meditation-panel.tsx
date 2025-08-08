@@ -271,4 +271,4 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
   );
 }
 
-export { type MeditationParams }; 
+ 

@@ -87,10 +87,10 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
               <TooltipTrigger asChild>
                 <Button
                   key={duration}
-                  variant={params.duration === duration ? "default" : "outline"}
+                  variant={params.duration === duration ? "orange" : "orangeOutline"}
                   size="sm"
                   onClick={() => setParams(prev => ({ ...prev, duration }))}
-                  className={cn("min-w-[40px] h-9 text-xs", params.duration === duration ? "bg-orange-500 text-white" : "border-orange-300 text-orange-700")}
+                  className={cn("min-w-[40px] h-9 text-xs")}
                 >
                   {duration}m
                 </Button>
@@ -104,10 +104,10 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
               <Tooltip key={gender.value} delayDuration={0}>
                 <TooltipTrigger asChild>
                   <Button
-                    variant={params.gender === gender.value ? "default" : "outline"}
+                    variant={params.gender === gender.value ? "orange" : "orangeOutline"}
                     size="icon"
                     onClick={() => setParams(prev => ({ ...prev, gender: gender.value }))}
-                    className={cn("h-9 w-full", params.gender === gender.value ? "bg-orange-500 text-white" : "border-orange-300 text-orange-700")}
+                    className={cn("h-9 w-full")}
                   >
                     <User className="size-4"/>
                   </Button>
@@ -124,10 +124,10 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
                <Tooltip key={goal.value} delayDuration={0}>
                 <TooltipTrigger asChild>
                   <Button
-                    variant={params.goal === goal.value ? "default" : "outline"}
+                    variant={params.goal === goal.value ? "orange" : "orangeOutline"}
                     size="icon"
                     onClick={() => setParams(prev => ({ ...prev, goal: goal.value }))}
-                    className={cn("h-9 w-full", params.goal === goal.value ? "bg-orange-500 text-white" : "border-orange-300 text-orange-700")}
+                    className={cn("h-9 w-full")}
                   >
                     <Icon className="size-4"/>
                   </Button>
@@ -141,16 +141,16 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
   );
 
   const ExpandedView = () => (
-    <div className="p-6 space-y-6">
+    <div className="p-5 space-y-5">
       {/* Duration Selection */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         <div className="flex items-center gap-2 text-orange-800 font-medium">
           <Clock className="size-4" />
           Duration
         </div>
         <div className="flex gap-2 flex-wrap">
           {DURATION_OPTIONS.map((duration) => (
-            <Button key={duration} variant={params.duration === duration ? "default" : "outline"} size="sm" onClick={() => setParams(prev => ({ ...prev, duration }))} className={cn("min-w-[60px]", params.duration === duration ? "bg-orange-500 text-white" : "border-orange-300 text-orange-700")}>
+            <Button key={duration} variant={params.duration === duration ? "orange" : "orangeOutline"} size="sm" onClick={() => setParams(prev => ({ ...prev, duration }))} className={cn("min-w-[60px]")}>
               {duration}min
             </Button>
           ))}
@@ -158,14 +158,14 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
       </div>
 
       {/* Gender Selection */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         <div className="flex items-center gap-2 text-orange-800 font-medium">
           <User className="size-4" />
           Voice Gender
         </div>
         <div className="flex gap-2">
           {GENDER_OPTIONS.map((gender) => (
-            <Button key={gender.value} variant={params.gender === gender.value ? "default" : "outline"} size="sm" onClick={() => setParams(prev => ({ ...prev, gender: gender.value }))} className={cn("flex-1", params.gender === gender.value ? "bg-orange-500 text-white" : "border-orange-300 text-orange-700")}>
+            <Button key={gender.value} variant={params.gender === gender.value ? "orange" : "orangeOutline"} size="sm" onClick={() => setParams(prev => ({ ...prev, gender: gender.value }))} className={cn("flex-1")}>
               {gender.label}
             </Button>
           ))}
@@ -173,14 +173,14 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
       </div>
 
       {/* Guidance Level */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         <div className="flex items-center gap-2 text-orange-800 font-medium">
           <GraduationCap className="size-4" />
           Guidance Level
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {GUIDANCE_OPTIONS.map((guidance) => (
-            <Button key={guidance.value} variant={params.guidance === guidance.value ? "default" : "outline"} size="sm" onClick={() => setParams(prev => ({ ...prev, guidance: guidance.value }))} className={cn("h-auto p-3 flex flex-col items-center text-center", params.guidance === guidance.value ? "bg-orange-500 text-white" : "border-orange-300 text-orange-700")}>
+            <Button key={guidance.value} variant={params.guidance === guidance.value ? "orange" : "orangeOutline"} size="sm" onClick={() => setParams(prev => ({ ...prev, guidance: guidance.value }))} className={cn("h-auto p-3 flex flex-col items-center text-center")}>
               <span className="font-medium">{guidance.label}</span>
               <span className="text-xs opacity-80">{guidance.description}</span>
             </Button>
@@ -189,7 +189,7 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
       </div>
 
       {/* Background Sound */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         <div className="flex items-center gap-2 text-orange-800 font-medium">
           <Volume2 className="size-4" />
           Background Sound
@@ -198,8 +198,7 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
           {BACKGROUND_OPTIONS.map((background) => {
             const Icon = background.icon;
             return (
-              <Button key={background.value} variant={params.background === background.value ? "default" : "outline"} size="sm" onClick={() => setParams(prev => ({ ...prev, background: background.value }))} className={cn("h-auto p-3 flex flex-col items-center gap-1", params.background === background.value ? "bg-orange-500 text-white" : "border-orange-300 text-orange-700")}>
-                <Icon className="size-4" />
+              <Button key={background.value} variant={params.background === background.value ? "orange" : "orangeOutline"} size="sm" onClick={() => setParams(prev => ({ ...prev, background: background.value }))} className={cn("h-auto p-3 flex flex-col items-center gap-1")}>                <Icon className="size-4" />
                 <span className="text-xs">{background.label}</span>
               </Button>
             );
@@ -208,7 +207,7 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
       </div>
 
       {/* Goal Selection */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         <div className="flex items-center gap-2 text-orange-800 font-medium">
           <Target className="size-4" />
           Meditation Goal
@@ -217,7 +216,7 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
           {GOAL_OPTIONS.map((goal) => {
             const Icon = goal.icon;
             return (
-              <Button key={goal.value} variant={params.goal === goal.value ? "default" : "outline"} size="sm" onClick={() => setParams(prev => ({ ...prev, goal: goal.value }))} className={cn("h-auto p-3 flex items-center gap-2 justify-start", params.goal === goal.value ? "bg-orange-500 text-white" : "border-orange-300 text-orange-700")}>
+              <Button key={goal.value} variant={params.goal === goal.value ? "orange" : "orangeOutline"} size="sm" onClick={() => setParams(prev => ({ ...prev, goal: goal.value }))} className={cn("h-auto p-3 flex items-center gap-2 justify-start")}>
                 <Icon className="size-4" />
                 <span className="text-sm">{goal.label}</span>
               </Button>
@@ -230,7 +229,7 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
 
   return (
     <TooltipProvider>
-      <div className="w-full max-w-2xl mx-auto bg-gradient-to-br from-orange-50/95 to-orange-100/95 border border-orange-200 rounded-lg shadow-lg backdrop-blur-md">
+      <div className="w-full max-w-2xl mx-auto bg-white/80 border border-orange-200 rounded-lg shadow-lg backdrop-blur-md">
         {/* Header */}
         <div className="text-center p-3 border-b border-orange-200 flex justify-between items-center">
           <div/>
@@ -250,8 +249,9 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
           <Button
             onClick={handleGenerate}
             disabled={isGenerating}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 text-base font-medium"
+            className="w-full"
             size="lg"
+            variant="orange"
           >
             {isGenerating ? (
               <>
@@ -271,4 +271,4 @@ export function MeditationPanel({ onGenerate, isGenerating, isExpanded, toggleEx
   );
 }
 
-export { type MeditationParams }; 
+ 

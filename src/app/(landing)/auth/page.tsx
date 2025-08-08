@@ -391,16 +391,16 @@ function AuthLogic() {
 	};
 	return (
 		<Chat>
-			<div className="container relative z-0 mx-auto space-y-4 px-4 pt-8 pb-30 sm:px-6">
+			<div className="container relative z-0 mx-auto space-y-4 px-4 pt-6 sm:px-6">
 				{authMessages.length === 0 ? (
-					<div className="flex h-full flex-col items-center justify-center gap-4 pt-40 text-center">
+					<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
 						<Image
 							src="/logo-neiji-full.png"
 							alt="Neiji Logo"
-							width={120}
-							height={120}
+							width={96}
+							height={96}
 						/>
-						<p className="mx-auto max-w-md px-4 text-lg text-muted-foreground">
+						<p className="mx-auto max-w-md px-4 text-base text-muted-foreground">
 							Connexion à votre espace personnel Neiji
 						</p>
 					</div>
