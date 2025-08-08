@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { UIMessage } from "~/lib/types";
+type UIMessage = { id: string; role: "user" | "assistant" | "system"; content: string };
 import { createClient } from "~/utils/supabase/client";
 import { BaseChatProvider, useBaseChatState } from "./base-provider";
 import type { ExtendedMessage } from "./bot-message";
