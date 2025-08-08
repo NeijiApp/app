@@ -32,8 +32,6 @@ function ChatLogic() {
 	useEffect(() => {
 		bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
 	}, [allMessages.length, status]);
-
-	}, [allMessages.length, status]);
 	return (
 		<Chat>
 			<div className="container relative z-0 mx-auto space-y-4 px-4 pt-6 sm:px-6">
