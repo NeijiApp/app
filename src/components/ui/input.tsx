@@ -5,15 +5,11 @@ import { cn } from "~/lib/utils";
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
     // If a controlled value is provided without onChange, set readOnly to avoid React warnings
     const inputProps: React.ComponentProps<"input"> = { ...props };
-    // @ts-expect-error - runtime guard for React controlled input warning
     if (
         Object.prototype.hasOwnProperty.call(inputProps, "value") &&
-        // @ts-expect-error - may be undefined
         inputProps.onChange === undefined &&
-        // @ts-expect-error - may be undefined
         inputProps.readOnly === undefined
     ) {
-        // @ts-expect-error - assign runtime prop
         inputProps.readOnly = true;
     }
 
