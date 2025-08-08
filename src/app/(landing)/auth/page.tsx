@@ -300,29 +300,32 @@ function AuthLogic() {
 	 *
 	 * @param email - Email de l'utilisateur pour lequel créer le profil
 	 * @returns Promise<void>
-	 */ const createUserProfile = async (email: string) => {
-		try {
-			console.log("🔄 Création du profil utilisateur pour:", email);
-			// Insertion du profil utilisateur avec les champs de mémoire IA initialisés
-			const { error } = await supabase.from("users_table").insert([
-				{
-					email,
-					memory_L0: "", // Mémoire immédiate
-					memory_L1: "", // Mémoire court terme
-					memory_L2: "", // Mémoire long terme
-					questionnaire: {}, // Profil de personnalité pour l'entraînement de l'IA (objet JSON vide)
-				},
-			]);
-
-			if (error) {
-				console.error("❌ Erreur lors de la création du profil:", error);
-			} else {
-				console.log("✅ Profil utilisateur créé avec succès pour:", email);
-			}
-		} catch (err) {
-			console.error("❌ Erreur:", err);
-		}
-	};
+     */ const createUserProfile = async (email: string) => {
+        try {
+            console.log("🔄 Ensure user profile for:", email);
+            const res = await fetch("/api/users/ensure", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+            if (!res.ok) {
+                const payload = await res.json().catch(() => ({}));
+                console.error("❌ Erreur lors de l'ensure du profil:", payload);
+                addMessage(
+                    "assistant",
+                    "We could not finalize your profile automatically. You can still use the chat, and your profile will be created after your first login.",
+                );
+            } else {
+                console.log("✅ Profil utilisateur présent pour:", email);
+            }
+        } catch (err) {
+            console.error("❌ Erreur ensure profil:", err);
+            addMessage(
+                "assistant",
+                "A temporary error occurred while preparing your profile. You can retry later from your profile page.",
+            );
+        }
+    };
 	const handleUserInput = async (input: string) => {
 		// Ajouter le message utilisateur (masquer le mot de passe dans le chat)
 		const displayText =
@@ -511,7 +514,7 @@ function AuthLogic() {
 						"✅ Inscription réussie, création du profil pour:",
 						authData.email,
 					);
-					await createUserProfile(authData.email);
+                    await createUserProfile(authData.email);
 
 					// Passer à l'état "email envoyé"
 					setAuthStep("email-sent");
@@ -577,7 +580,7 @@ function AuthLogic() {
 			</div>
 
 			{/* Message d'aide pour l'email de confirmation */}
-			{authStep === "email-sent" && (
+            {authStep === "email-sent" && (
 				<div className="container mx-auto px-4 pb-4">
 					<div className="rounded-lg border border-orange-200 bg-orange-100 p-4 text-center">
 						<p className="text-orange-800 text-sm">
@@ -600,6 +603,43 @@ function AuthLogic() {
 								click here to resend it
 							</button>
 						</p>
+                        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                            <a
+                                href="https://mail.google.com"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="rounded-full bg-white px-3 py-1 text-sm text-orange-700 shadow-sm hover:bg-orange-50"
+                            >
+                                Open Gmail
+                            </a>
+                            <a
+                                href="https://outlook.office.com/mail/"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="rounded-full bg-white px-3 py-1 text-sm text-orange-700 shadow-sm hover:bg-orange-50"
+                            >
+                                Open Outlook
+                            </a>
+                            <a
+                                href="https://mail.yahoo.com"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="rounded-full bg-white px-3 py-1 text-sm text-orange-700 shadow-sm hover:bg-orange-50"
+                            >
+                                Open Yahoo Mail
+                            </a>
+                            <a
+                                href="https://www.icloud.com/mail/"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="rounded-full bg-white px-3 py-1 text-sm text-orange-700 shadow-sm hover:bg-orange-50"
+                            >
+                                Open iCloud Mail
+                            </a>
+                        </div>
+                        <div className="mt-3 text-xs text-orange-700">
+                            You can continue browsing; your access will unlock once you click the link in your email.
+                        </div>
 					</div>
 				</div>
 			)}

@@ -115,57 +115,13 @@ export function MeditationPanel({
 		goal: "calm",
 	});
 	const [isTestGenerating, setIsTestGenerating] = useState(false);
-	const [currentTTSProvider, setCurrentTTSProvider] = useState<
-		"openai" | "elevenlabs"
-	>("openai");
-	const [isSwitchingTTS, setIsSwitchingTTS] = useState(false);
+	// TTS provider is fixed to ElevenLabs; remove switching UI
 
 	const handleGenerate = () => {
 		onGenerate(params);
 	};
 
-	// Check current TTS provider on mount
-	useEffect(() => {
-		const checkTTSProvider = async () => {
-			try {
-				const response = await fetch("/api/tts");
-				if (response.ok) {
-					const data = await response.json();
-					setCurrentTTSProvider(data.data.current);
-				}
-			} catch (error) {
-				console.error("Failed to check TTS provider:", error);
-			}
-		};
-		checkTTSProvider();
-	}, []);
-
-	const handleSwitchTTS = async () => {
-		setIsSwitchingTTS(true);
-		const newProvider =
-			currentTTSProvider === "openai" ? "elevenlabs" : "openai";
-
-		try {
-			const response = await fetch("/api/tts", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					action: "switch",
-					provider: newProvider,
-				}),
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				setCurrentTTSProvider(newProvider);
-				console.log(`✅ Switched TTS to ${newProvider.toUpperCase()}`);
-			}
-		} catch (error) {
-			console.error("Failed to switch TTS provider:", error);
-		} finally {
-			setIsSwitchingTTS(false);
-		}
-	};
+	// Removed TTS provider switch and status polling
 
 	const handleTestGenerate = async () => {
 		setIsTestGenerating(true);
@@ -547,30 +503,7 @@ export function MeditationPanel({
 						)}
 					</Button>
 
-					<Button
-						onClick={handleSwitchTTS}
-						disabled={isSwitchingTTS}
-						className={cn(
-							"w-full py-1.5 font-medium text-white text-xs",
-							currentTTSProvider === "openai"
-								? "bg-green-600 hover:bg-green-700"
-								: "bg-purple-600 hover:bg-purple-700",
-						)}
-						size="sm"
-						variant="outline"
-					>
-						{isSwitchingTTS ? (
-							<>
-								<div className="mr-1 h-2 w-2 animate-spin rounded-full border-white border-b-2" />
-								Switching...
-							</>
-						) : (
-							<>
-								<RefreshCw className="mr-1 size-3" />
-								TTS: {currentTTSProvider.toUpperCase()}
-							</>
-						)}
-					</Button>
+                    {/* TTS switching button removed */}
 				</div>
 			</div>
 		</TooltipProvider>

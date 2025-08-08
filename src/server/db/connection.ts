@@ -53,22 +53,15 @@ function initializeDatabaseConnection() {
 
 /**
  * Connexion database robuste avec retry
+ * NOTE: Robust mode disabled to prevent SASL_SIGNATURE_MISMATCH errors
  */
 async function createRobustConnection() {
-	// Si le système robuste est disponible
-	if (process.env.USE_ROBUST_DB === "true") {
-		try {
-			console.log("🎯 Chargement du système database robuste...");
-			const { createRobustDb } = await import("~/lib/meditation/database-connection-robust");
-			const robustDb = await createRobustDb();
-			console.log("✅ Système database robuste activé");
-			return robustDb;
-		} catch (error) {
-			console.warn("⚠️ Système robuste indisponible, utilisation standard:", error);
-		}
-	}
-
-	// Fallback vers connexion standard
+	// 🚫 ROBUST MODE DISABLED - using standard connection only
+	// The standard connection works perfectly with prepare: false
+	// Robust mode was causing SASL errors due to URL manipulation
+	console.log("🎯 Using standard connection (robust mode disabled for stability)");
+	
+	// Always use standard connection
 	return initializeDatabaseConnection();
 }
 

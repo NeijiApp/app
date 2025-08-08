@@ -139,10 +139,10 @@ export default function SignupPage() {
 			if (error) {
 				setError(error.message);
 			} else {
-				// User profile creation in the database
-				if (data.user) {
-					await createUserProfile(data.user.email!);
-				}
+                // Ensure user profile exists (server-side to bypass RLS issues)
+                if (data.user?.email) {
+                    await createUserProfile(data.user.email);
+                }
 				// Automatic redirection to questionnaire after successful signup
 				setMessage(
 					"Account created successfully. Redirecting to questionnaire...",
@@ -161,26 +161,21 @@ export default function SignupPage() {
 	 *
 	 * @param email - Email of the user for whom to create the profile
 	 * @returns Promise<void>
-	 */ const createUserProfile = async (email: string) => {
-		try {
-			// User profile insertion with initialized AI memory fields
-			const { error } = await supabase.from("users_table").insert([
-				{
-					email,
-											memory_L0: "", // Immediate memory
-						memory_L1: "", // Short-term memory
-						memory_L2: "", // Long-term memory
-						questionnaire: {}, // Personality profile for AI training (empty JSON object)
-				},
-			]);
-
-			if (error) {
-				console.error("Error creating profile:", error);
-			}
-		} catch (err) {
-			console.error("Error:", err);
-		}
-	};
+     */ const createUserProfile = async (email: string) => {
+        try {
+            const res = await fetch("/api/users/ensure", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+            if (!res.ok) {
+                const payload = await res.json().catch(() => ({}));
+                console.error("Error ensuring profile:", payload);
+            }
+        } catch (err) {
+            console.error("Error ensuring profile:", err);
+        }
+    };
 
 	return (
 		<div className="flex min-h-screen items-center justify-center">

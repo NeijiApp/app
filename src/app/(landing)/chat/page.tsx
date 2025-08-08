@@ -4,11 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
 
-import { BotMessage } from "./_components/bot-message";
-import { Chat } from "./_components/chat";
+import { BotMessage } from "~/components/chat/shared/bot-message";
+import { Chat } from "~/components/chat/shared/chat";
 import { ChatInput } from "./_components/chat-input";
-import { GradientBackground } from "./_components/gradient-background";
-import { UserMessage } from "./_components/user-message";
+import { GradientBackground } from "~/components/chat/shared/gradient-background";
+import { UserMessage } from "~/components/chat/shared/user-message";
 
 import { ChatStateProvider, useChatState } from "./_components/provider";
 

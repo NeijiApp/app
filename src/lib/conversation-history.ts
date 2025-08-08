@@ -117,15 +117,25 @@ export class ConversationHistory {
 				setTimeout(() => reject(new Error("Timeout auth getUser")), 5000),
 			);
 
-			const {
-				data: { user },
-				error: authError,
-			} = (await Promise.race([authPromise, timeoutPromise])) as any;
+            const {
+                data: { user },
+                error: authError,
+            } = (await Promise.race([authPromise, timeoutPromise])) as any;
 
-			if (authError) {
-				console.error("❌ [SERVICE] Erreur auth:", authError);
-				return null;
-			}
+            if (authError) {
+                // Swallow missing session errors to avoid noisy console stack in public chat
+                const message: string = (authError?.message || "").toString();
+                if (
+                    message.includes("Auth session missing") ||
+                    // Some SDKs provide a name
+                    (authError as any)?.name === "AuthSessionMissingError"
+                ) {
+                    console.log("ℹ️ [SERVICE] No auth session - anonymous user");
+                    return null;
+                }
+                console.warn("⚠️ [SERVICE] Auth error:", authError);
+                return null;
+            }
 
 			if (!user) {
 				console.log("❌ [SERVICE] Pas d'utilisateur connecté");

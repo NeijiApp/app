@@ -127,9 +127,9 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 
 	const handleMeditationSubmitFromInput = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!input.trim()) return;
+		if (!((input ?? "").trim())) return;
 
-		const currentInput = input;
+		const currentInput = (input ?? "");
 		setInput("");
 
 		setIsGeneratingMeditation(true);
@@ -296,7 +296,7 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 							<Input
 								disabled={isLoading}
 								type="text"
-								value={input}
+								value={input ?? ""}
 								onChange={handleInputChange}
 								onKeyDown={(e) => {
 									if (e.key === "Enter" && !e.shiftKey) {
@@ -329,7 +329,7 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 										type="submit"
 										size="icon"
 										className="size-9 flex-shrink-0 rounded-full bg-orange-500 text-white hover:bg-orange-600"
-										disabled={!input.trim()}
+										disabled={!((input ?? "").trim())}
 									>
 										{meditationMode ? (
 											<Sparkles className="size-5" />

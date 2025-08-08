@@ -1,88 +1,79 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
-import type { Message } from "ai";
-import { type ReactNode, createContext, useContext, useState } from "react";
+import { useEffect, useState } from "react";
+import { 
+	ChatStateProvider as UnifiedProvider, 
+	useChatState as useUnifiedChatState 
+} from "~/components/chat/shared/unified-provider";
+import type { ExtendedMessage } from "~/components/chat/shared/bot-message";
+import { conversationHistory } from "~/lib/conversation-history";
 
-// --- Drawer Context ---
-interface DrawerContextType {
-	isOpen: boolean;
-	toggleDrawer: () => void;
-	openDrawer: () => void;
-	closeDrawer: () => void;
-}
-const DrawerContext = createContext<DrawerContextType | null>(null);
-export function useDrawer() {
-	const context = useContext(DrawerContext);
-	if (!context)
-		throw new Error("useDrawer must be used within a DrawerProvider");
-	return context;
-}
+// Re-export ExtendedMessage type for backward compatibility
+export type { ExtendedMessage };
 
-// --- Chat Context ---
-export interface ExtendedMessage extends Message {
-	audioUrl?: string;
-}
-
-type ChatContextType = {
-	chat: ReturnType<typeof useChat>;
-	meditationMode: boolean;
-	setMeditationMode: (mode: boolean) => void;
-	customMessages: ExtendedMessage[];
-	addCustomMessage: (message: ExtendedMessage) => void;
-	clearCustomMessages: () => void;
-	isGeneratingMeditation: boolean;
-	setIsGeneratingMeditation: (generating: boolean) => void;
-};
-
-const ChatContext = createContext<ChatContextType | null>(null);
-
+/**
+ * Auth-aware chat provider - wraps the unified provider and passes auth context if available
+ */
 export function ChatStateProvider({ children }: { children: React.ReactNode }) {
-	const chat = useChat();
-	const [meditationMode, setMeditationMode] = useState(false);
-	const [customMessages, setCustomMessages] = useState<ExtendedMessage[]>([]);
-	const [isGeneratingMeditation, setIsGeneratingMeditation] = useState(false);
+	const [userId, setUserId] = useState<string | undefined>(undefined);
 
-	const [isDrawerOpen, setDrawerOpen] = useState(false);
-	const toggleDrawer = () => setDrawerOpen((prev) => !prev);
-	const openDrawer = () => setDrawerOpen(true);
-	const closeDrawer = () => setDrawerOpen(false);
-
-	const addCustomMessage = (message: ExtendedMessage) => {
-		setCustomMessages((prev) => [...prev, message]);
-	};
-
-	const clearCustomMessages = () => {
-		setCustomMessages([]);
-	};
+	useEffect(() => {
+		let mounted = true;
+		const loadUser = async () => {
+			try {
+				const currentUserId = await conversationHistory.getCurrentUserId();
+				if (mounted && currentUserId) {
+					setUserId(currentUserId.toString());
+				}
+			} catch (error) {
+				console.error("Failed to get user ID:", error);
+			}
+		};
+		loadUser();
+		return () => {
+			mounted = false;
+		};
+	}, []);
 
 	return (
-		<DrawerContext.Provider
-			value={{ isOpen: isDrawerOpen, toggleDrawer, openDrawer, closeDrawer }}
-		>
-			<ChatContext.Provider
-				value={{
-					chat,
-					meditationMode,
-					setMeditationMode,
-					customMessages,
-					addCustomMessage,
-					clearCustomMessages,
-					isGeneratingMeditation,
-					setIsGeneratingMeditation,
-				}}
-			>
-				{children}
-			</ChatContext.Provider>
-		</DrawerContext.Provider>
+		<UnifiedProvider isAuthenticated={!!userId} userId={userId}>
+			{children}
+		</UnifiedProvider>
 	);
 }
 
+/**
+ * Auth-aware chat hook - returns the chat state from unified provider
+ */
 export function useChatState() {
-	const state = useContext(ChatContext);
-	if (!state)
-		throw new Error(
-			"Invalid usage of useChatState; wrap it inside ChatStateProvider",
-		);
-	return state;
+	const unifiedState = useUnifiedChatState();
+	
+	// Map the unified state to the expected format for public chat
+	return {
+		chat: unifiedState.chat,
+		customMessages: unifiedState.customMessages,
+		isDrawerOpen: unifiedState.isDrawerOpen,
+		setIsDrawerOpen: unifiedState.setIsDrawerOpen,
+		meditationMode: unifiedState.meditationMode,
+		setMeditationMode: unifiedState.setMeditationMode,
+		addCustomMessage: unifiedState.addCustomMessage,
+		clearCustomMessages: unifiedState.clearCustomMessages,
+		isGeneratingMeditation: unifiedState.isGeneratingMeditation,
+		setIsGeneratingMeditation: unifiedState.setIsGeneratingMeditation,
+		isLoadingHistory: unifiedState.isLoadingHistory,
+	};
+}
+
+/**
+ * Drawer hook for backward compatibility
+ */
+export function useDrawer() {
+	const { isDrawerOpen, setIsDrawerOpen } = useUnifiedChatState();
+	
+	return {
+		isOpen: isDrawerOpen,
+		toggleDrawer: () => setIsDrawerOpen(!isDrawerOpen),
+		openDrawer: () => setIsDrawerOpen(true),
+		closeDrawer: () => setIsDrawerOpen(false),
+	};
 }
