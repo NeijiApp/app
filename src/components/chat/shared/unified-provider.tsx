@@ -105,7 +105,7 @@ export function ChatStateProvider({
       console.log("🎯 [PROVIDER] Loading per-message history for user:", userId);
       setIsLoadingHistory(true);
       try {
-        const numericalUserId = Number.parseInt(userId, 10);
+        const numericalUserId = Number.parseInt(userId ?? "0", 10);
         if (Number.isNaN(numericalUserId)) {
           console.warn("🎯 [PROVIDER] Invalid userId for history load");
           return;
