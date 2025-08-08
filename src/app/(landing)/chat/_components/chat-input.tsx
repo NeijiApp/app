@@ -201,25 +201,7 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 					/>
 				</CustomDrawer>
 			</div>
-<<<<<<< HEAD
 
-			{/* Meditation Panel - drawer that slides up from behind input bar */}
-			<div
-				className={cn(
-					"fixed right-1/2 bottom-18 z-5 w-full max-w-xl translate-x-1/2 transition-all duration-300 ease-in-out",
-					meditationMode
-						? isExpanded
-							? "h-[70vh]"
-							: "h-[40vh]"
-						: "h-0",
-=======
-			
-			{/* Meditation drawer overlay */}
-			<div
-				className={cn(
-					"fixed right-1/2 bottom-[92px] z-5 w-full max-w-xl translate-x-1/2 transition-all duration-300 ease-in-out",
-					meditationMode ? (isExpanded ? "h-[min(70dvh,calc(100dvh-140px))]" : "h-[min(45dvh,calc(100dvh-140px))]") : "h-0",
->>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
 				)}
 			>
 				<div className="h-full overflow-hidden">
@@ -233,98 +215,12 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 					</div>
 				</div>
 			</div>
-<<<<<<< HEAD
-			
-			{/* Input Bar - positioned at bottom */}
-			<div className="fixed right-1/2 bottom-0 z-10 w-full max-w-xl translate-x-1/2 self-center">
-				<div className="rounded-t-2xl bg-gradient-to-r from-white/90 to-orange-100/90 p-4 backdrop-blur-md shadow-lg">
-					{" "}
-					<div className="flex items-center gap-3">
-						{/* Bouton de connexion (ancien bouton drawer) */}
-						<Link href="/auth">
-							<Button
-								type="button"
-								size="icon"
-								className="size-11 flex-shrink-0 rounded-full bg-orange-500 p-2 text-white transition-all hover:bg-orange-600"
-							>
-								<User className="size-6" />
-							</Button>
-						</Link>
-						{/* 
-						// Ancien bouton drawer commenté
-						<Button
-							type="button"
-							size="icon"
-							className="size-11 flex-shrink-0 rounded-full p-2 text-white"
-							onClick={toggleDrawer}
-						>
-							<User className="size-6" />
-						</Button>
-						*/}{" "}
-						{/* Bouton Méditation amélioré */}
-=======
 
-			{/* Input bar */}
-			<div className="fixed right-1/2 bottom-0 z-10 w-full max-w-xl translate-x-1/2 self-center">
-				<div className="rounded-t-2xl bg-white/85 p-3 pb-[calc(12px+env(safe-area-inset-bottom))] shadow-lg backdrop-blur-md md:p-4">
-					<div className="flex items-center gap-3">
-						<Link href="/auth">
-							<Button type="button" size="icon" variant="orange" className="size-11 rounded-full">
-								<User className="size-6" />
-							</Button>
-						</Link>
-
->>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
 						<div className="group relative">
 							<Button
 								onClick={() => { setMeditationMode(!meditationMode); if (meditationMode) setIsExpanded(false); }}
 								size="icon"
-<<<<<<< HEAD
-								className={cn(
-									"size-12 flex-shrink-0 rounded-full border-2 shadow-lg transition-all duration-300",
-									meditationMode
-										? "border-orange-200 bg-gradient-to-br from-orange-300 to-orange-500 text-white shadow-orange-100 hover:scale-105 hover:from-orange-400 hover:to-orange-600 hover:shadow-xl"
-										: "border-orange-200 bg-gradient-to-br from-white to-orange-50 text-orange-500 shadow-orange-100 hover:scale-105 hover:border-orange-300 hover:from-orange-50 hover:to-orange-100 hover:shadow-xl",
-								)}
-							>
-								<Brain
-									className={cn(
-										"transition-all duration-300",
-										meditationMode ? "size-7" : "size-6",
-									)}
-								/>
-							</Button>
 
-							{/* Indicateur de statut élégant */}
-							{meditationMode && (
-								<div className="-top-1 -right-1 absolute size-4 rounded-full border-2 border-white bg-gradient-to-br from-orange-200 to-orange-400 shadow-sm">
-									<div className="size-full animate-pulse rounded-full bg-gradient-to-br from-orange-100 to-orange-300 opacity-75"></div>
-								</div>
-							)}
-
-							{/* Tooltip personnalisé qui apparaît au hover */}
-							<div
-								className={cn(
-									"-top-12 -translate-x-1/2 absolute left-1/2 whitespace-nowrap rounded-lg bg-gray-700 px-3 py-1.5 text-sm text-white shadow-lg transition-all duration-200",
-									"before:-translate-x-1/2 before:absolute before:top-full before:left-1/2 before:border-4 before:border-transparent before:border-t-gray-700",
-									"group-hover:-translate-y-1 pointer-events-none transform opacity-0 group-hover:pointer-events-auto group-hover:opacity-100",
-								)}
-							>
-								{meditationMode ? "Mode Chat" : "Mode Méditation"}
-							</div>
-=======
-								variant={meditationMode ? "orange" : "orangeOutline"}
-								className="size-12 rounded-full"
-							>
-								<Brain className={cn("transition-all duration-300", meditationMode ? "size-7" : "size-6")} />
-							</Button>
-
-							{meditationMode && (
-								<div className="absolute -right-1 -top-1 size-4 rounded-full border-2 border-white bg-orange-400">
-									<div className="size-full animate-pulse rounded-full bg-orange-300/70" />
-								</div>
-							)}
->>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
 						</div>
 						<form onSubmit={finalHandleSubmit} className="relative flex-1">
 							<Input
@@ -363,14 +259,7 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 									<Button
 										type="submit"
 										size="icon"
-<<<<<<< HEAD
-										className="size-9 flex-shrink-0 rounded-full bg-orange-500 text-white hover:bg-orange-600"
-										disabled={!((input ?? "").trim())}
-=======
-										variant="orange"
-										className="size-9 rounded-full"
-										disabled={!input.trim()}
->>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
+
 									>
 										{meditationMode ? (
 											<Sparkles className="size-5" />

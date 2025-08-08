@@ -558,13 +558,7 @@ function AuthLogic() {
 							width={96}
 							height={96}
 						/>
-<<<<<<< HEAD
-						<p className="mx-auto max-w-md px-4 text-lg text-muted-foreground">
-							Sign in to your personal Neiji space
-=======
-						<p className="mx-auto max-w-md px-4 text-base text-muted-foreground">
-							Connexion à votre espace personnel Neiji
->>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
+
 						</p>
 					</div>
 				) : (
