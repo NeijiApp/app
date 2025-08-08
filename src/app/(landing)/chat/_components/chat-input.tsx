@@ -200,12 +200,17 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 						onClose={() => useDrawer().closeDrawer()}
 					/>
 				</CustomDrawer>
-			</div>
+            </div>
 
-				)}
-			>
-				<div className="h-full overflow-hidden">
-					<div className="h-full overflow-y-auto px-4 py-4">
+            {/* Meditation drawer overlay */}
+            <div
+                className={cn(
+                    "fixed right-1/2 bottom-[92px] z-5 w-full max-w-xl translate-x-1/2 transition-all duration-300 ease-in-out",
+                    meditationMode ? (isExpanded ? "h-[min(70dvh,calc(100dvh-140px))]" : "h-[min(45dvh,calc(100dvh-140px))]") : "h-0",
+                )}
+            >
+                <div className="h-full overflow-hidden">
+                    <div className="h-full overflow-y-auto px-4 py-4">
 						<MeditationPanel
 							onGenerate={handleMeditationGenerate}
 							isGenerating={isGeneratingMeditation}
@@ -214,14 +219,14 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 						/>
 					</div>
 				</div>
-			</div>
+            </div>
 
-						<div className="group relative">
-							<Button
-								onClick={() => { setMeditationMode(!meditationMode); if (meditationMode) setIsExpanded(false); }}
-								size="icon"
+                    <div className="group relative">
+                        <Button
+                            onClick={() => { setMeditationMode(!meditationMode); if (meditationMode) setIsExpanded(false); }}
+                            size="icon"
 
-						</div>
+                    </div>
 						<form onSubmit={finalHandleSubmit} className="relative flex-1">
 							<Input
 								disabled={isLoading}
