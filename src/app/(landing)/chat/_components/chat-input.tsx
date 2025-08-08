@@ -230,7 +230,15 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
                         </Link>
 
                         <div className="group relative">
-                            <Button onClick={() => { setMeditationMode(!meditationMode); if (meditationMode) setIsExpanded(false); }} size="icon" className="size-12 rounded-full">
+                            <Button
+                                onClick={() => {
+                                    const next = meditationMode === "meditation" ? "chat" : "meditation";
+                                    setMeditationMode(next as any);
+                                    if (next === "chat") setIsExpanded(false);
+                                }}
+                                size="icon"
+                                className="size-12 rounded-full"
+                            >
                                 <Brain className={cn("transition-all duration-300", meditationMode ? "size-7" : "size-6")} />
                             </Button>
                         </div>
