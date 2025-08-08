@@ -194,12 +194,10 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 
 	return (
 		<>
-			<div className="mb-16">
-				<CustomDrawer isOpen={isOpen}>
-					<AskRegistrationDrawerContent
-						onClose={() => useDrawer().closeDrawer()}
-					/>
-				</CustomDrawer>
+            <div className="mb-16">
+                <CustomDrawer isOpen={isOpen}>
+                    <AskRegistrationDrawerContent onClose={() => {}} />
+                </CustomDrawer>
             </div>
 
             {/* Meditation drawer overlay */}
@@ -221,12 +219,21 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 				</div>
             </div>
 
-                    <div className="group relative">
-                        <Button
-                            onClick={() => { setMeditationMode(!meditationMode); if (meditationMode) setIsExpanded(false); }}
-                            size="icon"
+            {/* Input bar */}
+            <div className="fixed right-1/2 bottom-0 z-10 w-full max-w-xl translate-x-1/2 self-center">
+                <div className="rounded-t-2xl bg-white/85 p-3 pb-[calc(12px+env(safe-area-inset-bottom))] shadow-lg backdrop-blur-md md:p-4">
+                    <div className="flex items-center gap-3">
+                        <Link href="/auth">
+                            <Button type="button" size="icon" variant="orange" className="size-11 rounded-full">
+                                <User className="size-6" />
+                            </Button>
+                        </Link>
 
-                    </div>
+                        <div className="group relative">
+                            <Button onClick={() => { setMeditationMode(!meditationMode); if (meditationMode) setIsExpanded(false); }} size="icon" className="size-12 rounded-full">
+                                <Brain className={cn("transition-all duration-300", meditationMode ? "size-7" : "size-6")} />
+                            </Button>
+                        </div>
 						<form onSubmit={finalHandleSubmit} className="relative flex-1">
 							<Input
 								disabled={isLoading}
@@ -234,11 +241,9 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 								value={input ?? ""}
 								onChange={handleInputChange}
 								onKeyDown={(e) => {
-									if (e.key === "Enter" && !e.shiftKey) {
+                                    if (e.key === "Enter" && !e.shiftKey) {
 										e.preventDefault();
-										finalHandleSubmit(
-											e as unknown as React.FormEvent<HTMLFormElement>,
-										);
+                                        finalHandleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
 									}
 								}}
 								onFocus={onChatFocus}
@@ -261,11 +266,7 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 										<Ban className="size-5 animate-spin" />
 									</Button>
 								) : (
-									<Button
-										type="submit"
-										size="icon"
-
-									>
+                                    <Button type="submit" size="icon" variant="orange" className="size-9 rounded-full" disabled={!((input ?? "").trim())}>
 										{meditationMode ? (
 											<Sparkles className="size-5" />
 										) : (
