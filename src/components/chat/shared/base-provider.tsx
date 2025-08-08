@@ -3,7 +3,7 @@
 import { nanoid } from "nanoid";
 import type * as React from "react";
 import { createContext, useContext, useState } from "react";
-import type { UIMessage } from "~/lib/types";
+type UIMessage = { id: string; role: "user" | "assistant" | "system"; content: string };
 import type { ExtendedMessage } from "./bot-message";
 
 // Base chat state that's shared between authenticated and unauthenticated
