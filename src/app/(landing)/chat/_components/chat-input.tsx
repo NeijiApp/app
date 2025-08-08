@@ -201,6 +201,7 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 					/>
 				</CustomDrawer>
 			</div>
+<<<<<<< HEAD
 
 			{/* Meditation Panel - drawer that slides up from behind input bar */}
 			<div
@@ -211,6 +212,14 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 							? "h-[70vh]"
 							: "h-[40vh]"
 						: "h-0",
+=======
+			
+			{/* Meditation drawer overlay */}
+			<div
+				className={cn(
+					"fixed right-1/2 bottom-[92px] z-5 w-full max-w-xl translate-x-1/2 transition-all duration-300 ease-in-out",
+					meditationMode ? (isExpanded ? "h-[min(70dvh,calc(100dvh-140px))]" : "h-[min(45dvh,calc(100dvh-140px))]") : "h-0",
+>>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
 				)}
 			>
 				<div className="h-full overflow-hidden">
@@ -224,6 +233,7 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 					</div>
 				</div>
 			</div>
+<<<<<<< HEAD
 			
 			{/* Input Bar - positioned at bottom */}
 			<div className="fixed right-1/2 bottom-0 z-10 w-full max-w-xl translate-x-1/2 self-center">
@@ -252,13 +262,24 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 						</Button>
 						*/}{" "}
 						{/* Bouton Méditation amélioré */}
+=======
+
+			{/* Input bar */}
+			<div className="fixed right-1/2 bottom-0 z-10 w-full max-w-xl translate-x-1/2 self-center">
+				<div className="rounded-t-2xl bg-white/85 p-3 pb-[calc(12px+env(safe-area-inset-bottom))] shadow-lg backdrop-blur-md md:p-4">
+					<div className="flex items-center gap-3">
+						<Link href="/auth">
+							<Button type="button" size="icon" variant="orange" className="size-11 rounded-full">
+								<User className="size-6" />
+							</Button>
+						</Link>
+
+>>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
 						<div className="group relative">
 							<Button
-								onClick={() => {
-									setMeditationMode(!meditationMode);
-									if (meditationMode) setIsExpanded(false);
-								}}
+								onClick={() => { setMeditationMode(!meditationMode); if (meditationMode) setIsExpanded(false); }}
 								size="icon"
+<<<<<<< HEAD
 								className={cn(
 									"size-12 flex-shrink-0 rounded-full border-2 shadow-lg transition-all duration-300",
 									meditationMode
@@ -291,6 +312,19 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 							>
 								{meditationMode ? "Mode Chat" : "Mode Méditation"}
 							</div>
+=======
+								variant={meditationMode ? "orange" : "orangeOutline"}
+								className="size-12 rounded-full"
+							>
+								<Brain className={cn("transition-all duration-300", meditationMode ? "size-7" : "size-6")} />
+							</Button>
+
+							{meditationMode && (
+								<div className="absolute -right-1 -top-1 size-4 rounded-full border-2 border-white bg-orange-400">
+									<div className="size-full animate-pulse rounded-full bg-orange-300/70" />
+								</div>
+							)}
+>>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
 						</div>
 						<form onSubmit={finalHandleSubmit} className="relative flex-1">
 							<Input
@@ -319,8 +353,9 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 									<Button
 										type="button"
 										size="icon"
-										className="size-9 flex-shrink-0 rounded-full bg-orange-200 text-orange-500"
+										variant="orangeOutline"
 										onClick={stop}
+										className="size-9 rounded-full"
 									>
 										<Ban className="size-5 animate-spin" />
 									</Button>
@@ -328,8 +363,14 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 									<Button
 										type="submit"
 										size="icon"
+<<<<<<< HEAD
 										className="size-9 flex-shrink-0 rounded-full bg-orange-500 text-white hover:bg-orange-600"
 										disabled={!((input ?? "").trim())}
+=======
+										variant="orange"
+										className="size-9 rounded-full"
+										disabled={!input.trim()}
+>>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
 									>
 										{meditationMode ? (
 											<Sparkles className="size-5" />

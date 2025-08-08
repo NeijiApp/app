@@ -9,11 +9,12 @@ export function UserMessage({ children }: { children?: React.ReactNode }) {
 		setVisible(true);
 	}, []);
 
+<<<<<<< HEAD
 	return (
 		<div className="flex justify-end">
 			<div
 				className={cn(
-					"max-w-xs break-all rounded-tl-xl rounded-tr-xl rounded-br-none rounded-bl-xl bg-white px-4 py-2 text-gray-800 shadow transition-opacity duration-500 lg:max-w-md",
+					"max-w-xs break-words rounded-tl-xl rounded-tr-xl rounded-br-none rounded-bl-xl bg-white px-4 py-2 text-gray-800 shadow lg:max-w-md transition-opacity duration-500",
 					visible ? "opacity-100" : "opacity-0",
 				)}
 			>
@@ -21,4 +22,16 @@ export function UserMessage({ children }: { children?: React.ReactNode }) {
 			</div>
 		</div>
 	);
+=======
+		return (
+				<div className="flex justify-end">
+						<div className={cn(
+								"max-w-xs break-words rounded-tl-xl rounded-tr-xl rounded-br-none rounded-bl-xl bg-white px-4 py-2 text-gray-800 shadow lg:max-w-md transition-opacity duration-500",
+								visible ? "opacity-100" : "opacity-0",
+						)}>
+								{children}
+						</div>
+				</div>
+		);
+>>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
 }

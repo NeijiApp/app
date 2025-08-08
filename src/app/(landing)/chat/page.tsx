@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { BotMessage } from "~/components/chat/shared/bot-message";
 import { Chat } from "~/components/chat/shared/chat";
@@ -26,44 +26,26 @@ function ChatLogic() {
 		return aTime - bTime;
 	});
 
-	// Auto-scroll interval effect
+	// Bottom sentinel for smooth auto-scroll
+	const bottomRef = useRef<HTMLDivElement | null>(null);
+
 	useEffect(() => {
-		let intervalId: NodeJS.Timeout | null = null;
+		bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+	}, [allMessages.length, status]);
 
-		const scrollToBottom = () => {
-			window.scrollTo({
-				top: document.documentElement.scrollHeight,
-				behavior: "smooth",
-			});
-		};
-
-		// Start auto-scrolling when status is "submitted" or "streaming"
-		if (status === "submitted" || status === "streaming") {
-			// Initial scroll
-			scrollToBottom();
-			// Set up interval for continuous scrolling
-			intervalId = setInterval(scrollToBottom, 100);
-		}
-
-		// Cleanup function
-		return () => {
-			if (intervalId) {
-				clearInterval(intervalId);
-			}
-		};
-	}, [status]);
+	}, [allMessages.length, status]);
 	return (
 		<Chat>
-			<div className="container relative z-0 mx-auto space-y-4 px-4 pt-8 pb-30 sm:px-6">
+			<div className="container relative z-0 mx-auto space-y-4 px-4 pt-6 sm:px-6">
 				{allMessages.length === 0 ? (
-					<div className="flex h-full flex-col items-center justify-center gap-4 pt-40 text-center">
+					<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
 						<Image
 							src="/logo-neiji-full.png"
 							alt="Neiji Logo"
-							width={120}
-							height={120}
+							width={96}
+							height={96}
 						/>
-						<p className="mx-auto max-w-md px-4 text-lg text-muted-foreground">
+						<p className="mx-auto max-w-md px-4 text-base text-muted-foreground">
 							I'm your coach for self development, Soonly sharing tailored
 							mindfulness.
 						</p>
@@ -87,6 +69,7 @@ function ChatLogic() {
 						return <BotMessage key={message.id} message={message} />;
 					})
 				)}
+				<div ref={bottomRef} />
 			</div>
 			<ChatInput
 				onChatFocus={() => {

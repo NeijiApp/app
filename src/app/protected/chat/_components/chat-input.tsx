@@ -1,6 +1,10 @@
 "use client";
 
+<<<<<<< HEAD
 import { Ban, Brain, SendHorizonal, Sparkles } from "lucide-react";
+=======
+import { Ban, SendHorizonal, Brain, Sparkles, User } from "lucide-react";
+>>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
 import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -201,6 +205,7 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 					/>
 				</CustomDrawer>
 			</div>
+<<<<<<< HEAD
 
 			{/* Meditation Panel - drawer that slides up from behind input bar */}
 			<div
@@ -211,11 +216,23 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 							? "h-[70vh]"
 							: "h-[40vh]"
 						: "h-0",
+=======
+			
+			{/* Meditation drawer overlay */}
+			<div
+				className={cn(
+					"fixed right-1/2 bottom-[92px] z-5 w-full max-w-xl translate-x-1/2 transition-all duration-300 ease-in-out",
+					meditationMode ? (isExpanded ? "h-[min(70dvh,calc(100dvh-140px))]" : "h-[min(45dvh,calc(100dvh-140px))]") : "h-0",
+>>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
 				)}
 			>
 				<div className="h-full overflow-hidden">
 					<div className="h-full overflow-y-auto px-4 py-4">
+<<<<<<< HEAD
 						<MeditationPanel
+=======
+						<MeditationPanel 
+>>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
 							onGenerate={handleMeditationGenerate}
 							isGenerating={isGeneratingMeditation}
 							isExpanded={isExpanded}
@@ -224,6 +241,7 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 					</div>
 				</div>
 			</div>
+<<<<<<< HEAD
 			
 			{/* Input Bar - positioned at bottom */}
 			<div className="fixed right-1/2 bottom-0 z-10 w-full max-w-xl translate-x-1/2 self-center">
@@ -271,6 +289,30 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 								{meditationMode ? "Mode Chat" : "Mode Méditation"}
 							</div>
 						</div>
+=======
+
+			{/* Input bar */}
+			<div className="fixed right-1/2 bottom-0 z-10 w-full max-w-xl translate-x-1/2 self-center">
+				<div className="rounded-t-2xl bg-white/85 p-3 pb-[calc(12px+env(safe-area-inset-bottom))] shadow-lg backdrop-blur-md md:p-4">
+					<div className="flex items-center gap-3">
+						<Button
+							onClick={() => { setMeditationMode(!meditationMode); if (meditationMode) setIsExpanded(false); }}
+							size="icon"
+							variant={meditationMode ? "orange" : "orangeOutline"}
+							className="size-12 rounded-full"
+						>
+							<Brain className={cn("transition-all duration-300", meditationMode ? "size-7" : "size-6")} />
+						</Button>
+
+						{meditationMode && (
+							<div className="relative -ml-2 mr-1 inline-block align-middle">
+								<div className="absolute -right-1 -top-1 size-4 rounded-full border-2 border-white bg-orange-400">
+									<div className="size-full animate-pulse rounded-full bg-orange-300/70" />
+								</div>
+							</div>
+						)}
+
+>>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
 						<form onSubmit={finalHandleSubmit} className="relative flex-1">
 							<Input
 								disabled={isLoading}
@@ -291,9 +333,10 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 											? "Ask Neiji"
 											: "Message"
 								}
-								className="h-14 w-full rounded-full border-none bg-white pr-14 pl-5 text-base focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-primary/50 md:text-md"
+								className="h-12 w-full rounded-full border-orange-200 bg-white/80 pl-6 pr-14 text-base transition-all focus:bg-white focus:ring-2 focus:ring-orange-300"
 							/>
 
+<<<<<<< HEAD
 							<Button
 								disabled={isLoading || (!meditationMode && input.length === 0)}
 								type="submit"
@@ -303,14 +346,19 @@ export function ChatInput({ onChatFocus }: ChatInputProps) {
 									backgroundColor: meditationMode ? "#f97316" : "#3b82f6",
 								}}
 							>
+=======
+							<div className="absolute right-3 top-1/2 -translate-y-1/2">
+>>>>>>> origin/cursor/refactor-chat-ui-for-consistency-and-responsiveness-b6f1
 								{isLoading ? (
-									<Ban className="size-6 animate-spin" />
-								) : meditationMode ? (
-									<Sparkles className="size-6" />
+									<Button type="button" size="icon" variant="orangeOutline" onClick={stop} className="size-9 rounded-full">
+										<Ban className="size-5 animate-spin" />
+									</Button>
 								) : (
-									<SendHorizonal className="size-6" />
+									<Button type="submit" size="icon" variant="orange" className="size-9 rounded-full" disabled={!input.trim()}>
+										{meditationMode ? <Sparkles className="size-5" /> : <SendHorizonal className="size-5" />}
+									</Button>
 								)}
-							</Button>
+							</div>
 						</form>
 					</div>
 				</div>

@@ -144,38 +144,26 @@ export function EnhancedAudioPlayer({
 		return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 	};
 
-	const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
+    const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-	if (isLoading) {
-		return (
-			<div
-				className={cn(
-					"rounded-xl border border-orange-300 bg-gradient-to-r from-orange-100 to-orange-200 p-4",
-					className,
-				)}
-			>
-				<div className="flex items-center justify-center gap-2 text-orange-700">
-					<div className="h-4 w-4 animate-spin rounded-full border-orange-600 border-b-2" />
-					<span className="text-sm">Loading audio...</span>
-				</div>
-			</div>
-		);
-	}
+    if (isLoading) {
+        return (
+            <div className={cn("w-full bg-gradient-to-r from-orange-100 to-orange-200 rounded-xl p-4 border border-orange-300", className)}>
+                <div className="flex items-center justify-center gap-2 text-orange-700">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600" />
+                    <span className="text-sm">Loading audio...</span>
+                </div>
+            </div>
+        );
+    }
 
 	return (
-		<div
-			className={cn(
-				"rounded-xl border border-orange-300 bg-gradient-to-r from-orange-100 to-orange-200 p-4 shadow-lg",
-				className,
-			)}
-		>
+        <div className={cn("w-full bg-gradient-to-r from-orange-100 to-orange-200 rounded-xl p-4 border border-orange-300 shadow-lg", className)}>
 			{/* Title */}
-			<div className="mb-4 text-center">
-				<h3 className="font-semibold text-lg text-orange-800">{title}</h3>
-				<p className="text-orange-600 text-sm">
-					{formatTime(currentTime)} / {formatTime(duration)}
-				</p>
-			</div>
+            <div className="text-center mb-4">
+                <h3 className="font-semibold text-orange-800 text-lg">{title}</h3>
+                <p className="text-orange-600 text-sm">{formatTime(currentTime)} / {formatTime(duration)}</p>
+            </div>
 
 			{/* Progress Bar */}
 			<div className="mb-4">
