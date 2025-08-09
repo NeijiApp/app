@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-type UIMessage = { id: string; role: "user" | "assistant" | "system"; content: string };
+import type { Message } from "ai";
 import { createClient } from "~/utils/supabase/client";
 import { BaseChatProvider, useBaseChatState } from "./base-provider";
 import type { ExtendedMessage } from "./bot-message";
@@ -43,7 +43,7 @@ export function useAuthenticatedChat() {
 					setConversationId(conversation.id);
 					
 					// Parse messages from JSON
-					const messages = conversation.messages as UIMessage[];
+					const messages = conversation.messages as Message[];
 					if (messages && messages.length > 0) {
 						baseChatState.setMessages(messages);
 					}
@@ -59,7 +59,7 @@ export function useAuthenticatedChat() {
 	}, [userId]);
 
 	// Persist message to database
-	const persistMessage = async (message: UIMessage) => {
+	const persistMessage = async (message: Message) => {
 		if (!userId || !conversationId) return;
 
 		const supabase = createClient();
@@ -73,7 +73,7 @@ export function useAuthenticatedChat() {
 				.single();
 
 			if (conversation) {
-				const currentMessages = (conversation.messages as UIMessage[]) || [];
+				const currentMessages = (conversation.messages as Message[]) || [];
 				const updatedMessages = [...currentMessages, message];
 
 				// Update conversation with new message

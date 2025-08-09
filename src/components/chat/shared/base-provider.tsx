@@ -3,14 +3,14 @@
 import { nanoid } from "nanoid";
 import type * as React from "react";
 import { createContext, useContext, useState } from "react";
-type UIMessage = { id: string; role: "user" | "assistant" | "system"; content: string };
+import type { Message } from "ai";
 import type { ExtendedMessage } from "./bot-message";
 
 // Base chat state that's shared between authenticated and unauthenticated
 export interface BaseChatState {
-	messages: UIMessage[];
+	messages: Message[];
 	status: "idle" | "submitted" | "streaming" | "awaiting" | "error";
-	setMessages: React.Dispatch<React.SetStateAction<UIMessage[]>>;
+	setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 	setStatus: React.Dispatch<React.SetStateAction<"idle" | "submitted" | "streaming" | "awaiting" | "error">>;
 	customMessages: ExtendedMessage[];
 	setCustomMessages: React.Dispatch<React.SetStateAction<ExtendedMessage[]>>;
@@ -24,7 +24,7 @@ export interface AuthenticatedChatState extends BaseChatState {
 	userId?: string;
 	conversationId?: string;
 	isLoadingHistory: boolean;
-	persistMessage?: (message: UIMessage) => Promise<void>;
+	persistMessage?: (message: Message) => Promise<void>;
 }
 
 const BaseChatContext = createContext<BaseChatState | undefined>(undefined);
@@ -39,7 +39,7 @@ export const useBaseChatState = () => {
 
 interface BaseChatProviderProps {
 	children: React.ReactNode;
-	initialMessages?: UIMessage[];
+	initialMessages?: Message[];
 }
 
 /**
@@ -50,7 +50,7 @@ export function BaseChatProvider({
 	children, 
 	initialMessages = [] 
 }: BaseChatProviderProps) {
-	const [messages, setMessages] = useState<UIMessage[]>(initialMessages);
+	const [messages, setMessages] = useState<Message[]>(initialMessages);
 	const [status, setStatus] = useState<"idle" | "submitted" | "streaming" | "awaiting" | "error">("idle");
 	const [customMessages, setCustomMessages] = useState<ExtendedMessage[]>([]);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);

@@ -4,7 +4,7 @@ import { nanoid } from "nanoid";
 import type * as React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { Message } from "ai";
-type UIMessage = Message;
+export type UIMessage = Message;
 import { createClient } from "~/utils/supabase/client";
 import type { ExtendedMessage } from "./bot-message";
 import { conversationHistory } from "~/lib/conversation-history";
@@ -66,7 +66,7 @@ interface ChatStateProviderProps {
 	children: React.ReactNode;
 	isAuthenticated?: boolean;
 	userId?: string;
-  initialMessages?: UIMessage[];
+  initialMessages?: Message[];
 }
 
 /**
@@ -102,10 +102,10 @@ export function ChatStateProvider({
     }
 
     async function loadHistory() {
-      console.log("🎯 [PROVIDER] Loading per-message history for user:", userId);
+      console.log("🎯 [PROVIDER] Loading per-message history for user:", userId ?? "<none>");
       setIsLoadingHistory(true);
       try {
-        const numericalUserId = Number.parseInt(userId ?? "0", 10);
+        const numericalUserId = Number.parseInt(userId as string, 10);
         if (Number.isNaN(numericalUserId)) {
           console.warn("🎯 [PROVIDER] Invalid userId for history load");
           return;

@@ -552,7 +552,15 @@ function AuthLogic() {
 			<div className="container relative z-0 mx-auto space-y-4 px-4 pt-6 sm:px-6">
 				{authMessages.length === 0 ? (
 					<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
-					<Image src="/logo-neiji-full.png" alt="Neiji Logo" width={96} height={96} />
+						<Image
+							src="/logo-neiji-full.png"
+							alt="Neiji Logo"
+							width={96}
+							height={96}
+						/>
+						<p className="mx-auto max-w-md px-4 text-lg text-muted-foreground">
+							Sign in to your personal Neiji space
+						</p>
 					</div>
 				) : (
 					authMessages.map((message, index) => {

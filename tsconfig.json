@@ -54,6 +54,7 @@
 		"test-supabase-connection.js",
 		"test-conversation-history.js",
 		"test-db.js",
-		"*.sql"
+		"*.sql",
+		"**/*.test.ts"
 	]
 }
